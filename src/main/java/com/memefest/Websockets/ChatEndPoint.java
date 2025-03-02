@@ -34,12 +34,14 @@ import jakarta.jms.MessageListener;
 import jakarta.jms.ObjectMessage;
 import jakarta.jms.Topic;
 import jakarta.websocket.CloseReason;
-/* 
+
+
 @JMSDestinationDefinition(
-    name = "java:app/jms/TopicPhysicalDestination",
+    name = "jms/TopicPhysicalDestination",
     interfaceName = "jakarta.jms.Topic",
     destinationName = "PhysicalAppTopic"
 )
+/*  
 @JMSConnectionFactoryDefinition(
     name = "java:app/jms/PostDestinationFactory"
 )
@@ -52,11 +54,11 @@ public class ChatEndPoint extends Endpoint implements MessageListener{
     private Destination destination;
     private JMSConsumer consumer;
     
-    @Resource(lookup = "java:app/jms/TopicPhysicalDestination")
-    private static Topic topic;
+    @Resource(lookup = "jms/TopicPhysicalDestination")
+    private Topic topic;
 
     @Resource(lookup = "jms/PostDestinationFactory")
-    private static ConnectionFactory connectionFactory;
+    private ConnectionFactory connectionFactory;
 
     @Inject
     @JMSConnectionFactory("jms/PostDestinationFactory")

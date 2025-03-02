@@ -9,6 +9,13 @@ import jakarta.security.enterprise.credential.Credential;
 import jakarta.security.enterprise.identitystore.CredentialValidationResult;
 import jakarta.security.enterprise.identitystore.IdentityStore;
 import jakarta.security.enterprise.identitystore.IdentityStoreHandler;
+/*
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.INVALID_RESULT;
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.NOT_VALIDATED_RESULT;
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.Status.INVALID;
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.Status.NOT_VALIDATED;
+import static jakarta.security.enterprise.identitystore.CredentialValidationResult.Status.VALID; 
+*/
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -43,12 +50,11 @@ public class JwtStoreHandler implements IdentityStoreHandler {
     for (IdentityStore authorizingStore : this.validatingIdentityStrore) {
       CredentialValidationResult temp = authorizingStore.validate(credential);
       switch (temp.getStatus()) {
-        case 1:
-          break;
-        case 2:
+        case INVALID:
+        case NOT_VALIDATED:
           result = temp;
           break;
-        case 3:
+        case VALID:
           result = temp;
           identityStore = authorizingStore;
           break;

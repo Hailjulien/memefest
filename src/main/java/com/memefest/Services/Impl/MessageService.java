@@ -18,7 +18,10 @@ import com.memefest.DataAccess.TopicCategoryId;
 import com.memefest.DataAccess.TopicFollower;
 import com.memefest.DataAccess.TopicFollowerId;
 import com.memefest.DataAccess.User;
+import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
+
+import jakarta.annotation.sql.DataSourceDefinition;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateful;
 import jakarta.persistence.EntityManager;
@@ -35,8 +38,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@DataSourceDefinition(
+  name = "java:app/jndi/memefest/dataSourcessde",
+  url = "jdbc:sqlserver://;servername=CHHUMBUCKET;DatabaseName=MemeFest;trustServerCertificate=true",
+  className = "com.microsoft.sqlserver.jdbc.SQLServerDataSource",
+  user = "Neutron",
+  password = "scoobyDoo24"
+)
 @Stateful
-public class MessageService {
+public class MessageService implements TopicOperations{
   @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
   private EntityManager entityManager;
   

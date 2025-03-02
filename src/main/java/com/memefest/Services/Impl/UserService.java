@@ -24,7 +24,17 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
-
+/*  
+@DataSourceDefinition(
+  name = "java:app/jndi/memefest/dataSource",
+  portNumber = 1433,
+  serverName = "localhost",
+  user = "Neutron",
+  databaseName = "MemeFest",
+  password = "scoobyDoo24",
+  className = "com.microsoft.sqlserver.jdbc.SQLServerDataSource"
+)
+*/
 //add role based security
 @Stateless(name = "userservice")
 public class UserService implements UserSecurityService, UserOperations{
