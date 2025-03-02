@@ -41,11 +41,9 @@ import jakarta.websocket.CloseReason;
     interfaceName = "jakarta.jms.Topic",
     destinationName = "PhysicalAppTopic"
 )
-/*  
 @JMSConnectionFactoryDefinition(
-    name = "java:app/jms/PostDestinationFactory"
+    name = "jms/PostDestinationFactory"
 )
-*/
 @Stateful(name = "chatendpoint")
 public class ChatEndPoint extends Endpoint implements MessageListener{
     
