@@ -20,7 +20,6 @@ import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
@@ -39,11 +38,12 @@ import jakarta.persistence.Table;
             @EntityResult(
                 entityClass = MainCategory.class,
                 fields = {
-                    @FieldResult(name = "postId", column = "Cat_Id"),
-                    @FieldResult(name = "comment", column = "Comment"),
-                    @FieldResult(name = "created", column = "Created"),
-                    @FieldResult(name = "upvotes", column = "Upvotes"),
-                    @FieldResult(name = "downvotes", column = "Downvotes")
+                    @FieldResult(name = "postId", column = "postId"),
+                    @FieldResult(name = "comment", column = "comment"),
+                    @FieldResult(name = "created", column = "created"),
+                    @FieldResult(name = "upvotes", column = "upvotes"),
+                    @FieldResult(name = "downvotes", column = "downvotes"),
+                    @FieldResult(name = "userId", column = "userId"),
                 }
             )
         }
@@ -87,16 +87,35 @@ public class Post {
     @Column(name = "Downvotes")
     private int downvotes;
 
+    @Column(name = "Event_Id")
+    private int eventId;
+
+    @Column(name = "Video_Id")
+    private int videoId;
+
+    @Column(name = "Image_Id")
+    private int imageId;
+
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "UserId")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "Topic_Id", referencedColumnName = "Topic_Id")
-    private Topic topic;
+    @JoinColumn(name = "Event_Id", referencedColumnName = "Event_Id")
+    private Event event;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "Video_Id", referencedColumnName = "Video_Id")
+    private Set<Video> videos;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "Image_Id", referencedColumnName = "Video_Id")
+    private Set<Image> images;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
     private Set<PostReply> postWithReplys;
+
+
 
     public int getPost_Id(){
         return postId;
@@ -128,14 +147,6 @@ public class Post {
 
     public void setUserId(int userId){
         this.userId = userId;
-    }
-
-    public Topic getTopic(){
-        return topic;
-    }
-     
-    public void setTopic(Topic topic){
-        this.topic = topic;
     }
 
     public Set<PostReply> postReplys(){
@@ -189,4 +200,30 @@ public class Post {
     public int getReplyCount() {
         return postWithReplys.size();
     } 
+
+    public Event getEvent() {
+        return event;    
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public Set<Video> getVideos() {
+        return videos;
+    }
+
+    public void setVideos(Set<Video> videos) {
+        this.videos = videos;
+    }
+
+    public Set<Image> getImages() {
+        return images;
+    }
+
+    public void setImages(Set<Image> images) {
+        this.images = images;
+    }
+
+
 }

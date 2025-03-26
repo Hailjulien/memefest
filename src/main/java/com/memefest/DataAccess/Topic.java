@@ -1,9 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.MainCategory;
-import com.memefest.DataAccess.Post;
-import com.memefest.DataAccess.TopicCategory;
-import com.memefest.DataAccess.TopicFollower;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,9 +19,38 @@ import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Set;
 
-@NamedNativeQueries({@NamedNativeQuery(name = "Topic.getTopicByTitle", query = "SELECT TOP(1) T.Topic_Id as topicId, T.Title as topicName, T.Created as created FROM TOPIC T WHERE T.title LIKE CONCAT('%', :title, '%')", resultSetMapping = "TopicEntityMapping")})
-@SqlResultSetMappings({@SqlResultSetMapping(name = "TopicEntityMapping", entities = {@EntityResult(entityClass = MainCategory.class, fields = {@FieldResult(name = "topicId", column = "Topic_Id"), @FieldResult(name = "topicName", column = "Title"), @FieldResult(name = "created", column = "Created")})})})
-@NamedQueries({@NamedQuery(name = "Post.findByTopicId", query = "SELECT p FROM PostEntity p WHERE p.topic.topicId = :topicId")})
+@NamedNativeQueries({
+  @NamedNativeQuery(
+    name = "Topic.getTopicByTitle",
+    query = "SELECT TOP(1) T.Topic_Id as topicId, T.Title as topicName, T.Created as created FROM TOPIC T" 
+      + " WHERE T.title LIKE CONCAT('%', :title, '%')",
+    resultSetMapping = "TopicEntityMapping"),
+    @NamedNativeQuery(
+      name = "Topic.searchTopic",
+      query = "SELECT T.Topic_Id as topicId, T.Title as topicName, T.Created as created FROM TOPIC T" 
+        + " WHERE T.title LIKE CONCAT('%', :title, '%')",
+      resultSetMapping = "TopicEntityMapping")
+})
+@SqlResultSetMappings({
+  @SqlResultSetMapping(
+    name = "TopicEntityMapping",
+    entities = {
+      @EntityResult(
+        entityClass = MainCategory.class, 
+        fields = {
+          @FieldResult(name = "topicId", column = "Topic_Id"), 
+          @FieldResult(name = "topicName", column = "Title"), 
+          @FieldResult(name = "created", column = "Created")
+        }
+      )
+    }
+  )
+})
+@NamedQueries({
+  @NamedQuery(
+    name = "Post.findByTopicId", 
+    query = "SELECT p FROM PostEntity p WHERE p.topic.topicId = :topicId")
+})
 @Entity(name = "TopicEntity")
 @Table(name = "TOPIC")
 public class Topic {
@@ -41,7 +66,7 @@ public class Topic {
   private Date created;
   
   @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy = "topic")
-  private Set<Post> posts;
+  private Set<TopicPost> posts;
   
   @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy = "topic")
   public Set<TopicFollower> followedBy;
@@ -77,11 +102,11 @@ public class Topic {
     return this.categories;
   }
   
-  public void setPosts(Set<Post> posts) {
+  public void setPosts(Set<TopicPost> posts) {
     this.posts = posts;
   }
   
-  public Set<Post> getPosts() {
+  public Set<TopicPost> getPosts() {
     return this.posts;
   }
   

@@ -12,12 +12,14 @@ import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 import com.memefest.DataAccess.JSON.UserJSON;
+
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @JsonRootName("Topic")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "TopicId")
-public class TopicJSON {
+public class TopicJSON implements Serializable{
   @JsonProperty("TopicId")
   private int topicId;
   
@@ -33,7 +35,7 @@ public class TopicJSON {
   private Set<CategoryJSON> categories;
   
   @JsonProperty("Posts")
-  private Set<PostJSON> posts;
+  private Set<TopicPostJSON> posts;
   
   @JsonProperty("FollowedBy")
   private Set<UserJSON> followedBy;
@@ -48,7 +50,12 @@ public class TopicJSON {
   private boolean canceled;
   
   @JsonCreator
-  public TopicJSON(@JsonProperty("TopicId") int topicId, @JsonProperty("Title") String title, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Categories") Set<CategoryJSON> categories, @JsonProperty("Posts") Set<PostJSON> posts, @JsonProperty("FollowedBy") Set<UserJSON> followedBy) {
+  public TopicJSON(@JsonProperty("TopicId") int topicId,
+                    @JsonProperty("Title") String title, 
+                      @JsonProperty("Created") LocalDateTime created, 
+                        @JsonProperty("Categories") Set<CategoryJSON> categories, 
+                          @JsonProperty("Posts") Set<TopicPostJSON> posts, 
+                            @JsonProperty("FollowedBy") Set<UserJSON> followedBy) {
     this.topicId = topicId;
     this.title = title;
     this.created = created;
@@ -79,7 +86,7 @@ public class TopicJSON {
   }
   
   @JsonProperty("Posts")
-  public Set<PostJSON> getPosts() {
+  public Set<TopicPostJSON> getPosts() {
     return this.posts;
   }
   
@@ -119,7 +126,7 @@ public class TopicJSON {
   }
   
   @JsonProperty("Posts")
-  public void setPosts(Set<PostJSON> posts) {
+  public void setPosts(Set<TopicPostJSON> posts) {
     this.posts = posts;
   }
   

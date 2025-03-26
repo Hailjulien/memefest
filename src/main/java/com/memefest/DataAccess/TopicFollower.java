@@ -1,8 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.Topic;
-import com.memefest.DataAccess.TopicFollowerId;
-import com.memefest.DataAccess.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -12,7 +9,14 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
-@NamedQueries({@NamedQuery(name = "TopicFollower.findByTopicId", query = "SELECT u FROM TopicFollowerEntity u WHERE u.id.topicId = :topicId"), @NamedQuery(name = "TopicFollower.findByUserId", query = "SELECT u FROM TopicFollowerEntity u WHERE u.id.userId = :userId")})
+@NamedQueries({
+  @NamedQuery(
+    name = "TopicFollower.findByTopicId",
+    query = "SELECT u FROM TopicFollowerEntity u WHERE u.id.topicId = :topicId"),
+  @NamedQuery(
+    name = "TopicFollower.findByUserId",
+    query = "SELECT u FROM TopicFollowerEntity u WHERE u.id.userId = :userId")
+})
 @Entity(name = "TopicFollowerEntity")
 @Table(name = "TOPIC_FOLLOWS")
 public class TopicFollower {

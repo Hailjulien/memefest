@@ -1,8 +1,6 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.Category;
 import com.memefest.DataAccess.MainCategory;
-import com.memefest.DataAccess.SubCategory;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityResult;
 import jakarta.persistence.FieldResult;
@@ -14,8 +12,24 @@ import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 import java.util.Set;
 
-@NamedNativeQueries({@NamedNativeQuery(name = "MainCategory.getCategoryByTitle", query = "SELECT TOP(1) M.Cat_Id as categoryId, C.Cat_Name as catName FROM MAINCATEGORY M JOIN CATEGORY C ON M.Cat_Id = C.Cat_Id WHERE C.Cat_Name LIKE CONCAT('%', :title, '%')", resultSetMapping = "MainCategoryEntityMapping")})
-@SqlResultSetMappings({@SqlResultSetMapping(name = "MainCategoryEntityMapping", entities = {@EntityResult(entityClass = MainCategory.class, fields = {@FieldResult(name = "categoryId", column = "Cat_Id"), @FieldResult(name = "categoryName", column = "Cat_Name")})})})
+@NamedNativeQueries({
+  @NamedNativeQuery(name = "MainCategory.getCategoryByTitle",
+    query = "SELECT TOP(1) M.Cat_Id as categoryId, C.Cat_Name as catName FROM MAINCATEGORY M JOIN CATEGORY C ON "
+      + "M.Cat_Id = C.Cat_Id WHERE C.Cat_Name LIKE CONCAT('%', :title, '%')", 
+    resultSetMapping = "MainCategoryEntityMapping")})
+@SqlResultSetMappings({
+  @SqlResultSetMapping(
+    name = "MainCategoryEntityMapping",
+    entities = {
+      @EntityResult(
+        entityClass = MainCategory.class, 
+        fields = {
+          @FieldResult(name = "categoryId", column = "Cat_Id"), 
+          @FieldResult(name = "categoryName", column = "Cat_Name")}
+        )
+      }
+  )
+})
 @Entity(name = "MainCategoryEntity")
 @Table(name = "MAINCATEGORY")
 public class MainCategory extends Category {

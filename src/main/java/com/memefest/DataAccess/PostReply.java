@@ -1,6 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.Post;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,7 +9,8 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
-@NamedQueries({@NamedQuery(name = "PostReplyEntity.getRepliesOfPostId", query = "SELECT pr FROM PostReplyEntity pr WHERE pr.postId = :postId")})
+@NamedQueries({@NamedQuery(name = "PostReplyEntity.getRepliesOfPostId", 
+  query = "SELECT pr FROM PostReplyEntity pr WHERE pr.postId = :postId")})
 @Entity(name = "PostReplyEntity")
 @Table(name = "REPLY")
 public class PostReply extends Post {

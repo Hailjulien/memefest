@@ -10,6 +10,7 @@ import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.TopicFollower;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.UserAdmin;
+import com.memefest.DataAccess.UserFollower;
 import com.memefest.DataAccess.UserSecurity;
 import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
@@ -318,7 +319,7 @@ public class UserService implements UserSecurityService, UserOperations{
         Set<Post> userPosts = getUserPostEntities(user);
         Set<PostJSON> postJSONs = new HashSet<PostJSON>();
         for(Post p : userPosts){
-            postJSONs.add(new PostJSON(p.getPost_Id(), null, null, 0,0,null, null));
+            postJSONs.add(new PostJSON(p.getPost_Id(), null, null, 0,0,null));
         }
         return postJSONs;
     }
@@ -390,6 +391,21 @@ public class UserService implements UserSecurityService, UserOperations{
         return userEntity;
     }
 
+    public Set<UserJSON> searchByUsername(UserJSON userJSON){
+        if(userJSON  != null &&  userJSON.getUsername() != null ){
+            Query query = entityManager.createNamedQuery("User.searchByUsername");
+            query.setParameter("username", "%" + userJSON.getUsername() + "%");
+            List<User> users = (List<User>) query.getResultList();
+            return users.stream().map(user ->{ 
+                                UserJSON userInst  = new UserJSON(user.getUserId(), user.getUsername());
+                                    return userInst;
+                    }).collect(Collectors.toSet());
+            }
+        else{
+            return null;
+        }
+    }
+
     public void deleteUser(UserJSON user){
         User userEntity = getUserEntity(user);
         if(userEntity == null)
@@ -397,6 +413,36 @@ public class UserService implements UserSecurityService, UserOperations{
         entityManager.remove(userEntity);
         entityManager.remove(userEntity.getSecurityDetails());
         entityManager.flush();
+    }
+
+    public Set<UserJSON> getFollowers(UserJSON user){
+        try{
+            User userEntity = getUserEntity(user);
+            Set<UserJSON>  following = userEntity.getUserFollowedBy().stream().map(userEntityInst -> {
+                                            UserJSON userInst = new UserJSON(userEntityInst.getFollower().getUsername());
+                                            return userInst;
+                        
+            }).collect(Collectors.toSet());
+            return following;
+        }
+        catch(NoResultException ex){
+            return null;
+        }
+    }
+
+    public Set<UserJSON> getFollowing(UserJSON user){
+        try{
+            User userEntity = getUserEntity(user);
+            Set<UserJSON>  following = userEntity.getUserFollowing().stream().map(userEntityInst -> {
+                                            UserJSON userInst = new UserJSON(userEntityInst.getUser().getUsername());
+                                            return userInst;
+                        
+            }).collect(Collectors.toSet());
+            return following;
+        }
+        catch(NoResultException ex){
+            return null;
+        }
     }
 
 }

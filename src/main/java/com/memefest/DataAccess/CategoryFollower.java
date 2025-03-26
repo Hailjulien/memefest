@@ -1,8 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.CategoryFollowerId;
-import com.memefest.DataAccess.Topic;
-import com.memefest.DataAccess.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;

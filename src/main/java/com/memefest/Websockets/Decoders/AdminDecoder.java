@@ -3,7 +3,10 @@ package com.memefest.Websockets.Decoders;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.memefest.DataAccess.JSON.AdminJSON;
+import com.memefest.Websockets.JSON.InteractNotificationJSON;
+
 import jakarta.websocket.DecodeException;
 import jakarta.websocket.Decoder;
 import jakarta.websocket.EndpointConfig;
@@ -21,10 +24,7 @@ public class AdminDecoder implements Decoder.Text<AdminJSON> {
   }
   
   public boolean willDecode(String text) {
-    AdminJSON result = decode(text);
-    if (result != null)
-      return true; 
-    return false;
+  return this.mapper.canDeserialize(TypeFactory.defaultInstance().constructType(AdminJSON.class));
   }
   
   public void init(EndpointConfig config) {

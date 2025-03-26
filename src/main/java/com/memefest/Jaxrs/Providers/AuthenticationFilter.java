@@ -37,13 +37,13 @@ public class AuthenticationFilter implements ContainerRequestFilter {
   
   public void filter(ContainerRequestContext requestContext) throws IOException {
     Method method = this.resourceInfo.getResourceMethod();
-    if (method.isAnnotationPresent((Class)DenyAll.class))
+    if (method.isAnnotationPresent(DenyAll.class))
       throw new AuthenticationDenied("Not enough permission to access resource"); 
     RolesAllowed allowed = method.<RolesAllowed>getAnnotation(RolesAllowed.class);
     if (allowed != null)
       performAuthorization(allowed.value()); 
-    if (this.resourceInfo.getResourceClass().isAnnotationPresent((Class)PermitAll.class) || method
-      .isAnnotationPresent((Class)PermitAll.class))
+    if (this.resourceInfo.getResourceClass().isAnnotationPresent(PermitAll.class) || method
+      .isAnnotationPresent(PermitAll.class))
       return; 
     if (!isAuthenticated(requestContext))
       throw new AuthenticationDenied("Authentication required"); 

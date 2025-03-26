@@ -1,8 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.Category;
-import com.memefest.DataAccess.Topic;
-import com.memefest.DataAccess.TopicCategoryId;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
@@ -12,7 +9,14 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
-@NamedQueries({@NamedQuery(name = "TopicCategory.getByTopicId", query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topic.topicId = :topicId"), @NamedQuery(name = "TopicCategory.getByCategoryId", query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.category.categoryId = :categoryId")})
+@NamedQueries({
+  @NamedQuery(
+    name = "TopicCategory.getByTopicId", 
+    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topic.topicId = :topicId"),
+  @NamedQuery(
+    name = "TopicCategory.getByCategoryId",
+    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.category.categoryId = :categoryId")
+})
 @Entity(name = "TopicCategoryEntity")
 @Table(name = "TOPIC_CATEGORY")
 public class TopicCategory {

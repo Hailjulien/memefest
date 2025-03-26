@@ -1,10 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.CategoryFollower;
-import com.memefest.DataAccess.Post;
-import com.memefest.DataAccess.TopicFollower;
-import com.memefest.DataAccess.UserFollower;
-import com.memefest.DataAccess.UserSecurity;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.CascadeType;
@@ -23,11 +18,31 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.Set;
 
+@NamedQueries({
+  @NamedQuery(
+    name = "User.findUsersByUsername",
+    query = "SELECT u FROM UserEntity u Where u.username  = :username"), 
+  @NamedQuery(
+    name = "User.findUsersByEmail",
+    query = "SELECT u FROM UserEntity u Where u.email  = :email"),
+  @NamedQuery(
+    name = "User.findUsersById", 
+    query = "SELECT u FROM UserEntity u Where u.userId  = :userId"), 
+  @NamedQuery(
+    name = "User.getUserSecurityDetails",
+    query = "SELECT uSec FROM UserEntity u JOIN FETCH u.securityDetails uSec WHERE u.userId = :userId"),
+  @NamedQuery(
+    name = "User.emailExists", 
+    query = "SELECT COUNT(u) FROM UserEntity u WHERE u.email = :email"), 
+  @NamedQuery(
+    name = "User.getEmailFromUsername", 
+    query = "SELECT u.email FROM UserEntity u WHERE u.username = :username")
+})
 @Entity(name = "UserEntity")
 @Table(name = "USERS")
 @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@NamedQueries({@NamedQuery(name = "User.findUsersByUsername", query = "SELECT u FROM UserEntity u Where u.username  = :username"), @NamedQuery(name = "User.findUsersByEmail", query = "SELECT u FROM UserEntity u Where u.email  = :email"), @NamedQuery(name = "User.findUsersById", query = "SELECT u FROM UserEntity u Where u.userId  = :userId"), @NamedQuery(name = "User.getUserSecurityDetails", query = "SELECT uSec FROM UserEntity u JOIN FETCH u.securityDetails uSec WHERE u.userId = :userId"), @NamedQuery(name = "User.emailExists", query = "SELECT COUNT(u) FROM UserEntity u WHERE u.email = :email"), @NamedQuery(name = "User.getEmailFromUsername", query = "SELECT u.email FROM UserEntity u WHERE u.username = :username")})
+
 public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,6 +84,15 @@ public class User {
   
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
   private Set<CategoryFollower> categoriesFollowing;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
+  private Set<Video> videos;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
+  private Set<Repost> reposts;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.PERSIST}, mappedBy = "user")
+  private Set<Event> events;
   
   public Set<TopicFollower> getTopicFollowing() {
     return this.topicFollowing;
@@ -172,5 +196,25 @@ public class User {
   
   public void setCategoriesFollowing(Set<CategoryFollower> categoriesFollowers) {
     this.categoriesFollowing = categoriesFollowers;
+  }
+
+  public Set<Video> getVideos() {
+    return this.videos;
+  }
+
+  public void setVideos(Set<Video> videos) {
+    this.videos = videos;
+  }
+
+  public Set<Repost> getReposts() {
+    return this.reposts;
+  }
+
+  public void setReposts(Set<Repost> reposts) {
+    this.reposts = reposts;
+  }
+
+  public Set<Event> getEvents(){
+    return this.events;
   }
 }

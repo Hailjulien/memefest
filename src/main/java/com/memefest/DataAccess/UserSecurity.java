@@ -1,6 +1,5 @@
 package com.memefest.DataAccess;
 
-import com.memefest.DataAccess.User;
 import jakarta.persistence.Access;
 import jakarta.persistence.AccessType;
 import jakarta.persistence.CascadeType;
@@ -16,10 +15,44 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 
+@NamedQueries({
+  @NamedQuery(
+    name = "UserSecurity.findByUsername", 
+    query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s"
+      + " WHERE s.username = :username"),
+  @NamedQuery(
+    name = "UserSecurity.findByEmail",
+    query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s"
+      + " WHERE s.email = :email"),
+  @NamedQuery(
+    name = "UserSecurity.findByUserId", 
+    query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s"
+      + " WHERE s.userId = :userId"), 
+  @NamedQuery(
+    name = "UserSecurity.updateJsonTkns",
+    query = "UPDATE SecurityEntity se SET se.accessTkn = :accessTkn, se.refreshTkn = :refreshTkn WHERE EXISTS" 
+      + " (SELECT se FROM SecurityEntity se INNER JOIN se.user s WHERE s.userId = :userId)"), 
+  @NamedQuery(
+    name = "UserSecurity.updatePasswordFromUsername", 
+    query = "UPDATE SecurityEntity se SET se.password = :password WHERE EXISTS (SELECT se.password FROM SecurityEntity se"
+      + " INNER JOIN se.user s WHERE s.username = :username)"), 
+  @NamedQuery(
+    name = "UserSecurity.updatePasswordFromUserId",
+    query = "UPDATE SecurityEntity se SET se.password = :password WHERE EXISTS (SELECT se FROM SecurityEntity se"
+      + " INNER JOIN se.user s WHERE s.userId = :userId)"), 
+  @NamedQuery(
+    name = "UserSecurity.getUserPasswordFromUserId", 
+    query = "SELECT se.password , s.userId, s.username FROM SecurityEntity se INNER JOIN se.user s"
+      + " WHERE s.userId = :userId"),
+  @NamedQuery(
+    name = "UserSecurity.getUserPasswordFromUsername",
+    query = "SELECT se.password, s.userId, s.username FROM SecurityEntity se INNER JOIN se.user s"
+    + " WHERE s.username = :username")
+})
 @Entity(name = "SecurityEntity")
 @Table(name = "USER_SECURITY")
 @Access(AccessType.FIELD)
-@NamedQueries({@NamedQuery(name = "UserSecurity.findByUsername", query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s WHERE s.username = :username"), @NamedQuery(name = "UserSecurity.findByEmail", query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s WHERE s.email = :email"), @NamedQuery(name = "UserSecurity.findByUserId", query = "SELECT s.userId, s.username, s.email, se.accessTkn, se.refreshTkn FROM SecurityEntity se JOIN FETCH se.user s WHERE s.userId = :userId"), @NamedQuery(name = "UserSecurity.updateJsonTkns", query = "UPDATE SecurityEntity se SET se.accessTkn = :accessTkn, se.refreshTkn = :refreshTkn WHERE EXISTS (SELECT se FROM SecurityEntity se INNER JOIN se.user s WHERE s.userId = :userId)"), @NamedQuery(name = "UserSecurity.updatePasswordFromUsername", query = "UPDATE SecurityEntity se SET se.password = :password WHERE EXISTS (SELECT se.password FROM SecurityEntity se INNER JOIN se.user s WHERE s.username = :username)"), @NamedQuery(name = "UserSecurity.updatePasswordFromUserId", query = "UPDATE SecurityEntity se SET se.password = :password WHERE EXISTS (SELECT se FROM SecurityEntity se INNER JOIN se.user s WHERE s.userId = :userId)"), @NamedQuery(name = "UserSecurity.getUserPasswordFromUserId", query = "SELECT se.password , s.userId, s.username FROM SecurityEntity se INNER JOIN se.user s WHERE s.userId = :userId"), @NamedQuery(name = "UserSecurity.getUserPasswordFromUsername", query = "SELECT se.password, s.userId, s.username FROM SecurityEntity se INNER JOIN se.user s WHERE s.username = :username")})
+
 public class UserSecurity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -24,7 +24,7 @@ public class PostJSON {
   
   @JsonProperty("Created")
   @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-  @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+   @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
   private LocalDateTime created;
   
   @JsonProperty("Upvotes")
@@ -32,24 +32,20 @@ public class PostJSON {
   
   @JsonProperty("Downvotes")
   private int downvotes;
-  
+
   @JsonProperty("User")
   private UserJSON user;
-  
-  @JsonProperty("Topic")
-  private TopicJSON topic;
   
   @JsonProperty("Cancel")
   private boolean canceled;
   
   @JsonCreator
-  public PostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes, @JsonProperty("User") UserJSON user, @JsonProperty("Topic") TopicJSON topic) {
+  public PostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes, @JsonProperty("User") UserJSON user) {
     this.postId = postId;
     this.comment = comment;
     this.created = created;
     this.upvotes = upvotes;
     this.user = user;
-    this.topic = topic;
   }
   
   @JsonProperty("PostId")
@@ -82,10 +78,7 @@ public class PostJSON {
     return this.user;
   }
   
-  @JsonProperty("Topic")
-  public TopicJSON getTopic() {
-    return this.topic;
-  }
+
   
   @JsonProperty("PostId")
   public void setPostId(int postId) {
@@ -127,8 +120,5 @@ public class PostJSON {
     this.user = user;
   }
   
-  @JsonProperty("Topic")
-  public void setTopic(TopicJSON topic) {
-    this.topic = topic;
-  }
+
 }

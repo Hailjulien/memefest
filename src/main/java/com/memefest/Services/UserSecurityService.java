@@ -21,4 +21,6 @@ public interface UserSecurityService {
   UserJSON getUserDetails(UserJSON paramUserJSON);
   
   boolean isAdmin(UserJSON paramUserJSON);
+
+  
 }

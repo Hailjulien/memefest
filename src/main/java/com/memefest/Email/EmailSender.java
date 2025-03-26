@@ -5,6 +5,7 @@ import jakarta.mail.Authenticator;
 import jakarta.mail.BodyPart;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
+import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
@@ -34,8 +35,12 @@ public class EmailSender {
   }
   
   public static void sendPlainTextEmail(String from, String to, String subject, String message, boolean debug) {
-    Object object = new Object();
-    Session session = Session.getInstance(PROPERTIES, (Authenticator)object);
+    Authenticator authenticator = new Authenticator() {
+        protected PasswordAuthentication getPasswordAuthentication() {
+          return new PasswordAuthentication(USERNAME, PASSWORD);
+        }
+      };
+    Session session = Session.getInstance(PROPERTIES, (Authenticator)authenticator);
     session.setDebug(debug);
     try {
       MimeMessage msg = new MimeMessage(session);
