@@ -20,6 +20,7 @@ import jakarta.persistence.Table;
 @Entity(name = "TopicCategoryEntity")
 @Table(name = "TOPIC_CATEGORY")
 public class TopicCategory {
+  
   @EmbeddedId
   private TopicCategoryId topicId;
   

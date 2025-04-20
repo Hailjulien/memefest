@@ -4,6 +4,7 @@ import com.memefest.Services.Impl.EventService;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateful;
+import jakarta.websocket.CloseReason;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.EndpointConfig;
 import jakarta.websocket.Session;
@@ -21,7 +22,6 @@ public class EventsEndpoint extends Endpoint{
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        System
     }
     
 }

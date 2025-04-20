@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.PostJSON;
-import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
+import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("TopicPostNotification")
 public class TopicPostNotificationJSON extends PostNotificationJSON{
@@ -18,8 +18,8 @@ public class TopicPostNotificationJSON extends PostNotificationJSON{
     @JsonCreator
     public TopicPostNotificationJSON(@JsonProperty("NotificationID") int notId, 
                                         @JsonProperty("TopicPost") TopicPostJSON topicPost,
-                                            @JsonProperty("TimeStamp") LocalDateTime time){
-        super(notId, (PostJSON)topicPost,time);
+                                            @JsonProperty("TimeStamp") LocalDateTime time, UserJSON user){
+        super(notId, (PostJSON)topicPost,time, user);
         this.topicPost = topicPost;
     }
 

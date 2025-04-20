@@ -1,4 +1,4 @@
-package com.memefest.DataAccess;
+    package com.memefest.DataAccess;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -63,7 +63,7 @@ public class Video {
     private Event event;
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "Vid_Id")
+    @JoinColumn(name = "Vid_Id",nullable = false, insertable = false, updatable = false)
     private Post post;
 
     @Column(name = "Vid_Path")

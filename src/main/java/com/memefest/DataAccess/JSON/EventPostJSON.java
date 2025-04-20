@@ -30,7 +30,9 @@ public EventJSON getEvent() {
   public void setEvent(EventJSON event) {
     this.event = event;
   }
-    
+  
+  
+  
 
 
 }

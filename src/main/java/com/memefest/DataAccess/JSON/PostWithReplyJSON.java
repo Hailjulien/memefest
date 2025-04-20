@@ -3,9 +3,6 @@ package com.memefest.DataAccess.JSON;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.memefest.DataAccess.JSON.PostJSON;
-import com.memefest.DataAccess.JSON.TopicJSON;
-import com.memefest.DataAccess.JSON.UserJSON;
 import java.time.LocalDateTime;
 import java.util.Set;
 

@@ -1,10 +1,7 @@
 package com.memefest.Services;
 
-import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
-
 import java.util.Set;
-
 import com.memefest.DataAccess.User;
 import jakarta.ejb.Local;
 
@@ -21,5 +18,7 @@ public interface UserOperations {
 
   public User getUserEntity(UserJSON user);
 
-  public Set<UserJSON> searchByUsername(UserJSON user);  
+  public Set<UserJSON> searchByUsername(UserJSON user);
+  
+  public Set<User> getUserEntities();
 }

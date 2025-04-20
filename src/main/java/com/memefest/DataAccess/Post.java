@@ -115,6 +115,8 @@ public class Post {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
     private Set<PostReply> postWithReplys;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    private Set<PostNotification> notifications;
 
 
     public int getPost_Id(){
@@ -147,7 +149,7 @@ public class Post {
 
     public void setUserId(int userId){
         this.userId = userId;
-    }
+    }   
 
     public Set<PostReply> postReplys(){
         return postWithReplys;
@@ -155,6 +157,14 @@ public class Post {
 
     public void setPostReplys(Set<PostReply> postReplys){
         this.postWithReplys = postReplys;
+    }
+
+    public Set<PostNotification> getNotifications(){
+        return this.notifications;
+    }
+
+    public void setNotifications(Set<PostNotification> notifications) {
+        this.notifications = notifications;
     }
 
     public String getComment() {

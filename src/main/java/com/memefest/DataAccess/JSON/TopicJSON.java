@@ -7,11 +7,8 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
-import com.memefest.DataAccess.JSON.UserJSON;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

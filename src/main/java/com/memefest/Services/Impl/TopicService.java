@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.memefest.DataAccess.Category;
-import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.TopicCategory;
 import com.memefest.DataAccess.TopicCategoryId;
@@ -26,8 +25,6 @@ import com.memefest.Services.CategoryOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
-import com.memefest.Websockets.JSON.FollowNotificationJSON;
-import com.memefest.Websockets.JSON.InteractNotificationJSON;
 
 import jakarta.annotation.Resource;
 import jakarta.annotation.sql.DataSourceDefinition;
@@ -69,10 +66,6 @@ public class TopicService implements TopicOperations{
     @EJB
     private PostOperations postOperations;
 
-    private void createPostEntity(Post post) {
-    this.entityManager.persist(post);
-    }
-
     public void createScheduledTopic(TopicJSON topic, LocalDateTime postDate){
         ScheduleExpression schedule = new ScheduleExpression()
                                         .year(postDate.getYear())
@@ -104,12 +97,9 @@ public class TopicService implements TopicOperations{
     }
 
 
-    public Set<TopicJSON> searchTopic(TopicJSON topic){
-        if (topic == null)
-            return null; 
-        Query query = this.entityManager.createNamedQuery("Topic.searchTopic");
-        query.setParameter("title", topic.getTitle());
-        List<Topic> results = query.getResultList();
+    public Set<TopicJSON> searchTopic(TopicJSON topic) throws NoResultException{
+        List<Topic> results  = this.entityManager.createNamedQuery("Topic.searchTopic", Topic.class)
+                        .setParameter("title","%" + topic.getTitle() + "%").getResultList();
         Set<TopicJSON> topicSet = results.stream().map(topicEntity ->{
                                     TopicJSON topicJSON = new TopicJSON(topicEntity.getTopic_Id(), null, null, null, null, null);
                                     return getTopicInfo(topicJSON);
@@ -128,7 +118,7 @@ public class TopicService implements TopicOperations{
         removeTopicCategories(topic);
     }
   
-    public Set<CategoryJSON> getTopicCategories(TopicJSON topic) {
+    public Set<CategoryJSON> getTopicCategories(TopicJSON topic) throws NoResultException{
         Topic topicEntity = getTopicEntity(topic);
         if (topicEntity == null)
             return null; 
@@ -142,39 +132,46 @@ public class TopicService implements TopicOperations{
     }
   
     public void createTopicCategories(TopicJSON topic) {
-        Topic foundTopic = getTopicEntity(topic);
-        if (foundTopic != null)
-            createTopic(topic); 
-        Set<CategoryJSON> categories = topic.getCategories();
-        for (CategoryJSON category : categories) {
-            Category catEntity = catOps.getCategoryEntity(category);
-            TopicCategory topicCategory = getTopicCategory(foundTopic, catEntity);
-            if (topicCategory == null) {
-                topicCategory = new TopicCategory();
-                topicCategory.setTopic(foundTopic);
-                topicCategory.setCategory(catEntity);
-                this.entityManager.persist(topicCategory);
-            }    
-        } 
+        Topic foundTopic = null;
+        try{
+            foundTopic = getTopicEntity(topic);
+        }
+        catch(NoResultException ex){
+            foundTopic = new Topic();
+            Set<CategoryJSON> categories = topic.getCategories();
+            for (CategoryJSON category : categories) {
+                Category catEntity = catOps.getCategoryEntity(category);
+                TopicCategory topicCategory = getTopicCategory(foundTopic, catEntity);
+                if (topicCategory == null) {
+                    topicCategory = new TopicCategory();
+                    topicCategory.setTopic(foundTopic);
+                    topicCategory.setCategory(catEntity);
+                    this.entityManager.persist(topicCategory);
+                }    
+            }     
+        }
     }
   
     public void removeTopicCategories(TopicJSON topic) {
-        Topic foundTopic = getTopicEntity(topic);
-        if (foundTopic == null)
-            return; 
-        Set<CategoryJSON> categories = topic.getCancelCategories();
-        for (CategoryJSON cat : categories) {
-            Category catEntity = catOps.getCategoryEntity(cat);
-            TopicCategory topicCategory = getTopicCategory(foundTopic, catEntity);
-            if (topicCategory != null)
+        try{
+            Topic foundTopic = getTopicEntity(topic);
+            Set<CategoryJSON> categories = topic.getCancelCategories();
+            for (CategoryJSON cat : categories) {
+                Category catEntity = catOps.getCategoryEntity(cat);
+                TopicCategory topicCategory = getTopicCategory(foundTopic, catEntity);
+                if (topicCategory != null)
                 this.entityManager.remove(topicCategory); 
-        } 
+            } 
+        }
+        catch(NoResultException ex){
+            return;
+        }
     }
 
   
-    private TopicCategory getTopicCategory(Topic topic, Category category) {
+    private TopicCategory getTopicCategory(Topic topic, Category category){
         if (category == null || category == null)
-            return null; 
+            return null;
         TopicCategoryId topicCatId = new TopicCategoryId();
         topicCatId.setTopic_Id(topic.getTopic_Id());
         topicCatId.setCat_Id(category.getCat_Id());
@@ -189,16 +186,26 @@ public class TopicService implements TopicOperations{
             return foundTopic;
         } 
         Query query = this.entityManager.createNamedQuery("Topic.getTopicByTitle");
-        query.setParameter("title", topic.getTitle());
+        query.setParameter("title","%" + topic.getTitle() + "%");
         foundTopic = (Topic)query.getSingleResult();
         return foundTopic;
     }
   
     public void createTopicFollowers(TopicJSON topic) {
-        Topic foundTopic = getTopicEntity(topic);
-        if (foundTopic == null)
-            return; 
-        for (UserJSON user : topic.getFollowedBy()) {
+        Topic foundTopic = null;
+        try{
+            foundTopic = getTopicEntity(topic);
+        }
+        catch(NoResultException ex){
+           createTopic(topic);
+           try{
+                foundTopic = getTopicEntity(topic);
+           }
+           catch(NoResultException exp){
+            return;
+           } 
+        }
+        for(UserJSON user : topic.getFollowedBy()) {
             User newFollower = this.userOperations.getUserEntity(user);
             if (newFollower == null)
                 return; 
@@ -209,7 +216,6 @@ public class TopicService implements TopicOperations{
                 newTopicFollower.setFollower(newFollower);
                 this.entityManager.persist(newTopicFollower);
             }
-            FollowNotificationJSON followNot = new FollowNotificationJSON(0, null, null); 
         }
     }
   
@@ -224,7 +230,12 @@ public class TopicService implements TopicOperations{
         } 
         if (user != null && topic != null) {
             Topic topicEntity = getTopicEntity(topic);
-            User userEntity = this.userOperations.getUserEntity(user);
+            User userEntity = null;
+            try{
+                userEntity = this.userOperations.getUserEntity(user);
+            }catch(NoResultException ex){
+                return null;
+            }
             if (topicEntity == null || userEntity == null)
                 return null;
             user.setUserId(user.getUserId());
@@ -239,19 +250,20 @@ public class TopicService implements TopicOperations{
         Set<UserJSON> canceledFollowers = (Set<UserJSON>)followers.stream().filter(candidate -> candidate.isCancelled()).collect(Collectors.toSet());
         if (canceledFollowers != null && canceledFollowers.size() > 0)
         for (UserJSON user : canceledFollowers) {
-            Topic topicEntity = getTopicEntity(topic);
-            if (topicEntity != null) {
-                TopicFollower follower = getTopicFollower(user, topic);
+            TopicFollower follower = getTopicFollower(user, topic);
             if (follower != null)
                 this.entityManager.remove(follower); 
             } 
-        }  
     }
   
-    public void editTopicFollowers(TopicJSON topic) {
-        Topic topicEntity = getTopicEntity(topic);
-        if (topicEntity != null)
-            return; 
+    public void editTopicFollowers(TopicJSON topic){
+     
+        try{
+            getTopicEntity(topic);
+        }
+        catch(NoResultException ex){
+            return;
+        } 
         Set<UserJSON> followers = topic.getFollowedBy();
         Set<UserJSON> updatedFollowers = (Set<UserJSON>)followers.stream().filter(candidate -> !candidate.isCancelled()).collect(Collectors.toSet());
         Set<UserJSON> deletedFollowers = (Set<UserJSON>)followers.stream().filter(candidate -> candidate.isCancelled()).collect(Collectors.toSet());
@@ -270,7 +282,12 @@ public class TopicService implements TopicOperations{
     }
 
     public void editTopic(TopicJSON topic) {
-        Topic foundTopic = getTopicEntity(topic);
+        Topic foundTopic = null;
+        try {
+            foundTopic = getTopicEntity(topic);
+        } catch (NoResultException e) {
+            return;
+        }        
         if (foundTopic == null)
             return; 
         if (topic.getTitle() != null && topic.getTitle().equalsIgnoreCase(foundTopic.getTitle()))
@@ -290,7 +307,13 @@ public class TopicService implements TopicOperations{
   
     public void removeTopic(TopicJSON topic) {
         if (topic.isCancelled()) {
-            Topic foundTopic = getTopicEntity(topic);
+            Topic foundTopic = null;
+            try{
+                foundTopic = getTopicEntity(topic);
+            }
+            catch(NoResultException ex){
+                return;
+            }
             if (foundTopic != null) {
                 for (PostJSON post : topic.getPosts())
                     postOperations.removePost(post); 
@@ -300,10 +323,11 @@ public class TopicService implements TopicOperations{
         } 
     }
 
-    public TopicJSON getTopicInfo(TopicJSON topic) {
+    public TopicJSON getTopicInfo(TopicJSON topic) throws NoResultException{
         Topic topicEntity = getTopicEntity(topic);
         if (topicEntity == null)
-            return null; 
+            return null;
+        TopicJSON topicJSON = null;  
         Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
         Set<CategoryJSON> categories = (Set<CategoryJSON>)topicEntity.getCategories().stream().map(catInst -> 
                                         new CategoryJSON(catInst.getCategory().getCat_Id(),
@@ -320,11 +344,10 @@ public class TopicService implements TopicOperations{
                                     LocalDateTime.ofInstant(topicPost.getTopic().getCreated().toInstant(), ZoneId.systemDefault()),
                                    null, null, null))).collect(Collectors.toSet());
         if (topicEntity != null) {
-            TopicJSON topicJSON = new TopicJSON(topic.getTopicId(), topic.getTitle(), 
+           topicJSON = new TopicJSON(topic.getTopicId(), topic.getTitle(), 
                                     LocalDateTime.ofInstant(topicEntity.getCreated().toInstant(), ZoneId.systemDefault()),
                                     categories, posts, users);
-        return topicJSON;
         } 
-        return null;
+        return topicJSON;
     }
 }

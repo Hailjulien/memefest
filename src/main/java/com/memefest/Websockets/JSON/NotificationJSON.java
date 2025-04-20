@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 
@@ -26,13 +27,18 @@ public class NotificationJSON {
 
     @JsonProperty("NotificationID")
     private int notId;
+
+    @JsonProperty("User")
+    private UserJSON user;
+
     
     @JsonCreator
     public NotificationJSON(@JsonProperty("NotificationID") int notId, 
                                 @JsonProperty("Timestamp") LocalDateTime date,
-                                     @JsonProperty("NotificationType") Notification notification){
+                                     @JsonProperty("NotificationType") Notification notification, UserJSON user){
         this.date = date;
         this.notification = notification;
+        this.user = user;
     }
 
     public LocalDateTime getDate(){
@@ -53,6 +59,14 @@ public class NotificationJSON {
 
     public int getNotificationId(){
         return notId;
+    }
+
+    public UserJSON getUser(){
+        return this.user;
+    }
+
+    public void setUser(UserJSON user){
+        this.user = user;
     }
 
 }

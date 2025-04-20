@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.memefest.DataAccess.CategoryFollower;
 import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.TopicFollower;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.UserAdmin;
-import com.memefest.DataAccess.UserFollower;
 import com.memefest.DataAccess.UserSecurity;
 import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
@@ -114,6 +114,16 @@ public class UserService implements UserSecurityService, UserOperations{
         if(result == 0){
             throw new RuntimeException("Unable to update password.");
         }
+    }
+
+    public Set<User> getUserEntities(){
+       try{
+        Stream<User> query = entityManager.createNamedQuery("UserEntity.findAllUsers", User.class) .getResultStream();
+        return query.collect(Collectors.toSet());
+       } 
+       catch(NoResultException ex){
+        return null;
+       }
     }
 
     //return a no result exception if user does not exist
@@ -307,9 +317,8 @@ public class UserService implements UserSecurityService, UserOperations{
         Set<TopicFollower> topicsFollowed = null;
         topicsFollowed = user.getTopicFollowing();
         if(topicsFollowed == null){    
-            Query query = entityManager.createNamedQuery("TopicFollower.findByUserId");
-            query.setParameter("userId", user.getUserId());
-            List<TopicFollower> topics = (List<TopicFollower>) query.getResultList();
+            List<TopicFollower> topics = entityManager.createNamedQuery("TopicFollower.findByUserId", TopicFollower.class)
+                            .setParameter("userId", user.getUserId()).getResultList();
             return topics.stream().collect(Collectors.toSet());
         }
         return topicsFollowed;
@@ -330,9 +339,8 @@ public class UserService implements UserSecurityService, UserOperations{
         Set<Post> userPosts = null;
         userPosts = user.getPosts();
         if(userPosts == null){    
-            Query query = entityManager.createNamedQuery("Post.findByUserId");
-            query.setParameter("userId", user.getUserId());
-            List<Post> posts = (List<Post>) query.getResultList();
+            List<Post> posts = entityManager.createNamedQuery("Post.findByUserId", Post.class)
+                            .setParameter("userId", user.getUserId()).getResultList();
             return posts.stream().collect(Collectors.toSet());
         }
         return userPosts;
@@ -354,9 +362,8 @@ public class UserService implements UserSecurityService, UserOperations{
         Set<CategoryFollower> categoryFollowers = null;
         categoryFollowers = user.getCategoriesFollowing();
         if(categoryFollowers == null){    
-            Query query = entityManager.createNamedQuery("TopicFollower.findByUserId");
-            query.setParameter("userId", user.getUserId());
-            List<CategoryFollower> topics = (List<CategoryFollower>) query.getResultList();
+            List<CategoryFollower> topics  = entityManager.createNamedQuery("TopicFollower.findByUserId", CategoryFollower.class)
+                .setParameter("userId", user.getUserId()).getResultList();
             return topics.stream().collect(Collectors.toSet());
         }
         return categoryFollowers;
@@ -393,9 +400,8 @@ public class UserService implements UserSecurityService, UserOperations{
 
     public Set<UserJSON> searchByUsername(UserJSON userJSON){
         if(userJSON  != null &&  userJSON.getUsername() != null ){
-            Query query = entityManager.createNamedQuery("User.searchByUsername");
-            query.setParameter("username", "%" + userJSON.getUsername() + "%");
-            List<User> users = (List<User>) query.getResultList();
+            List<User> users = entityManager.createNamedQuery("User.searchByUsername", User.class)
+                                .setParameter("username", "%" + userJSON.getUsername() + "%").getResultList();
             return users.stream().map(user ->{ 
                                 UserJSON userInst  = new UserJSON(user.getUserId(), user.getUsername());
                                     return userInst;

@@ -1,25 +1,15 @@
 package com.memefest.Websockets;
 
-import java.util.HashSet;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.Services.PostOperations;
-import com.memefest.Services.Impl.EventService;
 import com.memefest.Services.Impl.FeedsEndPointService;
 import com.memefest.Websockets.MessageHandlers.EditPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditTopicMessageHandler;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
 import jakarta.ejb.PostActivate;
 import jakarta.ejb.Stateful;
-import jakarta.ejb.Stateless;
 import jakarta.websocket.CloseReason;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.EndpointConfig;
-import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 
 @Stateful(name = "feedsEndpoint")

@@ -1,14 +1,8 @@
 package com.memefest.Websockets.MessageHandlers;
 
-import java.util.HashSet;
 import java.util.Set;
-
-import com.memefest.DataAccess.Topic;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.Services.TopicOperations;
-import com.memefest.Services.Impl.FeedsEndPointService;
-import com.memefest.Websockets.JSON.EditPostJSON;
 import com.memefest.Websockets.JSON.EditResultTopicJSON;
 import com.memefest.Websockets.JSON.EditTopicJSON;
 

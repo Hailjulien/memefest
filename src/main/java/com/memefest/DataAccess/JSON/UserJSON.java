@@ -5,10 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.memefest.DataAccess.JSON.CategoryJSON;
-import com.memefest.DataAccess.JSON.PostJSON;
-import com.memefest.DataAccess.JSON.TopicJSON;
-import com.memefest.DataAccess.JSON.UserSecurityJSON;
 import java.util.Set;
 
 @JsonRootName("User")

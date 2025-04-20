@@ -63,7 +63,7 @@ public class ImageService {
         }
         catch(NoResultException ex){
             Query query = entityManager.createNamedQuery("Image.getImgeByTitle", Image.class);
-            query.setParameter("title", image.getImgTitle());
+            query.setParameter("title", "%" + image.getImgTitle() + "%");
             imageEntity = (Image) query.getSingleResult();
             return imageEntity;
         }

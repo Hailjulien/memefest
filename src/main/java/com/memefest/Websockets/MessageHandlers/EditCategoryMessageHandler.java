@@ -3,15 +3,9 @@ package com.memefest.Websockets.MessageHandlers;
 import java.util.Set;
 
 import com.memefest.DataAccess.JSON.CategoryJSON;
-import com.memefest.DataAccess.JSON.EventJSON;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.Services.CategoryOperations;
-import com.memefest.Services.Impl.FeedsEndPointService;
 import com.memefest.Websockets.JSON.EditCategoryJSON;
-import com.memefest.Websockets.JSON.EditEventJSON;
-import com.memefest.Websockets.JSON.EditPostJSON;
 import com.memefest.Websockets.JSON.EditResultCategoryJSON;
-import com.memefest.Websockets.JSON.EditResultEventJSON;
 
 import jakarta.websocket.Session;
 import jakarta.websocket.MessageHandler;
@@ -27,8 +21,8 @@ public class EditCategoryMessageHandler implements MessageHandler.Whole<EditCate
    }
 
    //add customisation filter according to users tastes here
-      @Override
-   public  void onMessage(EditCategoryJSON eventEdit){
+    @Override
+    public  void onMessage(EditCategoryJSON eventEdit){
         Set<CategoryJSON> categories = eventEdit.getCategories();
         EditResultCategoryJSON successEdits = new EditResultCategoryJSON(null, 200, "Success");
         EditResultCategoryJSON failureEdits = new EditResultCategoryJSON(null, 203, "Could not edit");

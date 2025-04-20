@@ -1,6 +1,5 @@
 package com.memefest.Jaxrs.Providers;
 
-import com.memefest.Jaxrs.Providers.AuthenticationDenied;
 import jakarta.annotation.Priority;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;

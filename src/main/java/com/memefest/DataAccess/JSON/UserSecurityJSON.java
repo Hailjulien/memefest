@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("UserSecurity")
 public class UserSecurityJSON {

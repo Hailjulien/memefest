@@ -1,44 +1,30 @@
 package com.memefest.Services.Impl;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.concurrent.Future;
 
-import org.bouncycastle.jcajce.provider.asymmetric.ec.GMSignatureSpi.sha256WithSM2;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
-import com.memefest.DataAccess.JSON.TopicJSON;
+import com.memefest.DataAccess.JSON.UserJSON;
+import com.memefest.Services.EventOperations;
 import com.memefest.Services.FeedsOperations;
+import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.TopicOperations;
-import com.memefest.Websockets.JSON.NotificationJSON;
-import com.memefest.Websockets.JSON.SearchJSON;
-import jakarta.websocket.Endpoint;
-import jakarta.websocket.EndpointConfig;
+import com.memefest.Services.UserOperations;
+import com.memefest.Websockets.JSON.EventPostNotificationJSON;
+import com.memefest.Websockets.JSON.PostNotificationJSON;
+
 import jakarta.websocket.Session;
-import jakarta.websocket.server.PathParam;
-import jakarta.websocket.MessageHandler;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import jakarta.annotation.Resource;
 import jakarta.ejb.Asynchronous;
 import jakarta.ejb.ConcurrencyManagement;
 import jakarta.ejb.ConcurrencyManagementType;
 import jakarta.ejb.EJB;
 import jakarta.ejb.PostActivate;
 import jakarta.ejb.PrePassivate;
-import jakarta.ejb.ScheduleExpression;
 import jakarta.ejb.Singleton;
 import jakarta.ejb.Startup;
-import jakarta.ejb.Timer;
-import jakarta.ejb.TimerConfig;
-import jakarta.ejb.TimerService;
-import jakarta.jms.Destination;
-import jakarta.jms.JMSConsumer;
-import jakarta.jms.Message;
 
 /* 
 @JMSDestinationDefinition(
@@ -77,6 +63,15 @@ public class FeedsEndPointService  implements FeedsOperations   {
 
     @EJB
     private TopicOperations topicOps;
+
+    @EJB
+    private UserOperations userOps;
+
+    @EJB
+    private EventOperations eventOps;
+
+    @EJB
+    private NotificationOperations notOps;
 
     @PostActivate
     @PostConstruct
@@ -171,6 +166,26 @@ public class FeedsEndPointService  implements FeedsOperations   {
     public void sendToUsers(Object message){
         for(Session session : this.clientPeers){
             sendToSession(session, message);
+        }
+    }
+
+    @Asynchronous
+    public void sendToSubscribers(Object message, EventJSON event){
+        if(message instanceof EventPostNotificationJSON){
+            for(User user : userOps.getUserEntities()){
+                EventPostNotificationJSON postNot = (EventPostNotificationJSON) message;
+                postNot.setUser(new UserJSON(user.getUserId(),user.getUsername()));
+                notOps.createEventPostNotification(postNot);
+                clientPeers.stream().filter(candidate ->{
+                    return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
+                }).forEach(candidate ->{
+                    sendToSession(candidate, postNot);
+                }
+                );    
+            }
+            
+            //add logic to send message to event followers
+            sendToAll(message);
         }
     }
 

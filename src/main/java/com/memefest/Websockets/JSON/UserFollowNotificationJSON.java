@@ -10,23 +10,13 @@ import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("UserFollowNotification")
 public class UserFollowNotificationJSON extends FollowNotificationJSON{
-    
-    @JsonProperty("User")
-    private UserJSON user;
 
     @JsonCreator
     public UserFollowNotificationJSON(@JsonProperty("NotificationID") int notID, 
                                         @JsonProperty("User") UserJSON user,
                                             @JsonProperty("TimeStamp") LocalDateTime time,
                                                 @JsonProperty("Followers") Set<String> followers){
-        super(notID, time, followers);
+        super(notID, time, followers, user);
     }
 
-    public UserJSON getUser() {
-        return user;
-    }
-
-    public void setUser(UserJSON user) {
-        this.user = user;
-    }
 }

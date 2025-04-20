@@ -94,12 +94,25 @@ public class Event {
     private Set<EventImage> images;
 
     @OneToMany(mappedBy = "event")
-    @JoinColumn(name = "Post_Id")
+    @JoinColumn(name = "Event_Id")
     private Set<EventPost> posts;
 
     @ManyToOne
     @JoinColumn(name = "UserId")
     private User user;
+
+    @OneToMany(mappedBy = "event")
+    @JoinColumn(name = "Event_Id")
+    private Set<EventPostNotification> eventNotifications;
+
+    public Set<EventPostNotification> getEventPostNotifications(){
+        return this.eventNotifications;
+    }
+
+    public void setEventPostNotifications(Set<EventPostNotification> eventPostNotifications){
+        this.eventNotifications = eventPostNotifications;
+    }
+
 
     public int getEvent_Id() {
         return this.eventId;

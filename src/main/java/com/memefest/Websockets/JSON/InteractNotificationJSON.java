@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.PostJSON;
+import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("InteractNotification")
 public class InteractNotificationJSON extends NotificationJSON{
@@ -19,8 +20,8 @@ public class InteractNotificationJSON extends NotificationJSON{
     public InteractNotificationJSON(@JsonProperty("NotificationID") int notId,
                                         @JsonProperty("Post") PostJSON postJSON, 
                                             @JsonProperty("TimeStamp") LocalDateTime time, 
-                                                @JsonProperty("InteractionType") InteractionType interactionType){
-        super(notId, time, Notification.INTERACT);
+                                                @JsonProperty("InteractionType") InteractionType interactionType, UserJSON user){
+        super(notId, time, Notification.INTERACT,user);
         this.interaction = interactionType;
 
     }

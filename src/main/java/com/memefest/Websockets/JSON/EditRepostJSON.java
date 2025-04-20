@@ -1,5 +1,4 @@
 package com.memefest.Websockets.JSON;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.RepostJSON;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

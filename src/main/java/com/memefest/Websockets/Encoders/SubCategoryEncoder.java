@@ -2,7 +2,6 @@ package com.memefest.Websockets.Encoders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memefest.DataAccess.JSON.SubCategoryJSON;
-import jakarta.websocket.EncodeException;
 import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
 

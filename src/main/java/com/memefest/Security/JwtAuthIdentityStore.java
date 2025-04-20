@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.memefest.CacheHelper.CacheHelper;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.UserSecurityJSON;
-import com.memefest.Security.CustomKeyLocator;
-import com.memefest.Security.JwtCredential;
 import com.memefest.Services.UserSecurityService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;

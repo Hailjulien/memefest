@@ -1,6 +1,5 @@
 package com.memefest.Jaxrs.Providers;
 
-import com.memefest.Jaxrs.Providers.AuthenticationDenied;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;

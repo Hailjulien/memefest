@@ -1,6 +1,5 @@
 package com.memefest.Services;
 
-import jakarta.websocket.Session;
 
 public interface FeedsOperations {
 

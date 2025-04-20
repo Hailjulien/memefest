@@ -7,14 +7,12 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+import java.util.stream.Stream;
 import com.memefest.DataAccess.Event;
-import com.memefest.DataAccess.EventImage;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.EventPostJSON;
 import com.memefest.DataAccess.JSON.ImageJSON;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.VideoJSON;
 import com.memefest.Services.EventOperations;
@@ -22,10 +20,6 @@ import com.memefest.Services.ImageOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Services.VideoOperations;
-import com.memefest.Websockets.JSON.EventNotificationJSON;
-import com.memefest.Websockets.JSON.Notification;
-import com.memefest.Websockets.JSON.NotificationJSON;
-
 import jakarta.annotation.Resource;
 import jakarta.ejb.EJB;
 import jakarta.ejb.ScheduleExpression;
@@ -81,14 +75,6 @@ public class EventService implements EventOperations{
     public void sendEvent(Timer timer) {
         if(timer.getInfo() instanceof  EventJSON){
             EventJSON eventInfo = (EventJSON) timer.getInfo();
-
-            ScheduleExpression schedule = (ScheduleExpression) timer.getSchedule();
-            LocalDateTime dateTime = LocalDateTime.of(Integer.valueOf(schedule.getYear()), 
-                                        Integer.valueOf(schedule.getMonth()),
-                                            Integer.valueOf(schedule.getDayOfMonth()), 
-                                                Integer.valueOf(schedule.getHour()), 
-                                                    Integer.valueOf(schedule.getMinute()), 
-                                                        Integer.valueOf(schedule.getSecond()));
             createEvent(eventInfo);                                            
         }
     }
@@ -99,7 +85,7 @@ public class EventService implements EventOperations{
         timerService.getTimers().stream().filter(timer ->{
             if(timer.getInfo() instanceof EventJSON){
                 EventJSON timerInfo = (EventJSON) timer.getInfo();
-                if(timerInfo.getEventID() == eventInfo.getEventID()){
+                if(timerInfo.getEventID() == eventInfo.getEventID() || timerInfo.getEventTitle().equalsIgnoreCase(eventInfo.getEventTitle())){
                     return true;
                 }
                 return false;
@@ -112,10 +98,9 @@ public class EventService implements EventOperations{
         Set<EventJSON> events = new HashSet<EventJSON>();
 
         if(event != null && event.getEventTitle() != null){
-            Query query = entityManager.createNamedQuery("Event.searchEventsByTitle");
-            query.setParameter("title", "%" + event.getEventTitle() + "%");
-            Set<Event> queryResults = (Set<Event>)query.getResultList();
-            events.addAll(queryResults.stream().map(eventEntity ->{
+            Stream<Event> queryResults = entityManager.createNamedQuery("Event.searchEventsByTitle", Event.class)
+                            .setParameter("title", "%" + event.getEventTitle() + "%").getResultStream();
+            events.addAll(queryResults.map(eventEntity ->{
                     return getEventInfo(new EventJSON(eventEntity.getEvent_Id(),null, null,null,null,null,null,null,null,null,null,null));
                 }).collect(Collectors.toSet()));
         }
@@ -214,7 +199,7 @@ public class EventService implements EventOperations{
         }
         else{
             Query query = entityManager.createNamedQuery("Event.getEventByTitle");
-            query.setParameter("title", event.getEventTitle());
+            query.setParameter("title", "%" + event.getEventTitle() + "%");
             return (Event) query.getSingleResult();
         }
     }
@@ -222,31 +207,18 @@ public class EventService implements EventOperations{
     public void createEvent (EventJSON event){    
         try{
             Event eventEntity = getEventEntity(event);
-            if(event != null){
-                return;
-            }
+            eventEntity.setEvent_Title(event.getEventTitle());
+            eventEntity.setEvent_Description(event.getEventDescription());
+            eventEntity.setEvent_Date(Date.from(event.getEventDate().atZone(ZoneId.systemDefault()).toInstant()));
+            eventEntity.setEvent_Venue(event.getEventVenue());
+            eventEntity.setDate_Posted(Date.from(Instant.now()));
+            eventEntity.setEvent_Pin(event.getEventPin());
+            User postedBy = userOperations.getUserEntity(event.getPostedBy());
+            eventEntity.setPostedBy(postedBy);
+            entityManager.merge(eventEntity);
         }   
         catch(NoResultException ex){
-   
-        Event eventEntity = getEventEntity(event);
-        eventEntity.setEvent_Title(event.getEventTitle());
-        eventEntity.setEvent_Description(event.getEventDescription());
-        eventEntity.setEvent_Date(Date.from(event.getEventDate().atZone(ZoneId.systemDefault()).toInstant()));
-        eventEntity.setEvent_Venue(event.getEventVenue());
-        eventEntity.setDate_Posted(Date.from(Instant.now()));
-        eventEntity.setEvent_Pin(event.getEventPin());
-
-        entityManager.merge(eventEntity);
-
-        User postedBy = userOperations.getUserEntity(event.getPostedBy());
-        eventEntity.setPostedBy(postedBy);
-
-
-        Set<EventImage> eventImages = new HashSet<EventImage>();
-
-
-        EventNotificationJSON notificationJSON = new EventNotificationJSON(1, LocalDateTime.now(), event);
-        feedEndPointService.sendToAll(notificationJSON);
+            return;
         }
     }
 
@@ -261,8 +233,6 @@ public class EventService implements EventOperations{
             return;
         }
     }
-
-    
 
     /*
     LocalDateTime.ofInstant(topicEntity.getCreated().toInstant(), ZoneId.systemDefault()) 

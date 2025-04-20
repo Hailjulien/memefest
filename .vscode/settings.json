@@ -1,0 +1,10 @@
+{
+    "java.compile.nullAnalysis.nonnullbydefault": [
+
+        "javax.annotation.ParametersAreNonnullByDefault",
+        "org.eclipse.jdt.annotation.NonNullByDefault",
+        "org.springframework.lang.NonNullApi"
+    ],
+    "java.jdt.ls.java.home": "C:\\Program Files\\Java\\jdk-18.0.2.1",
+    "java.jdt.ls.vmargs": "-Xms100m -Xmx8G",
+}

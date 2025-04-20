@@ -1,12 +1,12 @@
 package com.memefest.Websockets.JSON;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("FollowNotification")
 public class FollowNotificationJSON extends NotificationJSON{
@@ -17,8 +17,8 @@ public class FollowNotificationJSON extends NotificationJSON{
     @JsonCreator
     public FollowNotificationJSON(@JsonProperty("NotificationID") int notId,
                                     @JsonProperty("Timestamp") LocalDateTime timestamp, 
-                                        Set<String> usernames) {
-        super(notId, timestamp, Notification.FOLLOW);
+                                        Set<String> usernames, UserJSON user) {
+        super(notId, timestamp, Notification.FOLLOW, user);
         this.usernames = usernames;
     }
 

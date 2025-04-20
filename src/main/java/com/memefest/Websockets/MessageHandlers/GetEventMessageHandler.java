@@ -1,10 +1,11 @@
 package com.memefest.Websockets.MessageHandlers;
 
+import java.util.Set;
+
 import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.Services.EventOperations;
 import com.memefest.Websockets.JSON.GetEventJSON;
 import com.memefest.Websockets.JSON.GetEventResultJSON;
-
 import jakarta.websocket.MessageHandler;
 import jakarta.websocket.Session;
 
@@ -26,11 +27,14 @@ public class GetEventMessageHandler implements MessageHandler.Whole<GetEventJSON
         for(EventJSON event : getEvent.getEvents()){
             event = eventOps.getEventInfo(event);
             if(event != null){
-                Set<EventJSON> events = found.);
-                found.setEventResults(null);
+                Set<EventJSON> events = found.getEventResults();
+                events.add(event);
+                found.setEventResults(events);
             }
             else{
-                notFound.getCategories().add(category);
+                Set<EventJSON> events = notFound.getEventResults();
+                events.add(event);
+                notFound.setEventResults(events);
             }
         }
         session.getAsyncRemote().sendObject(found);

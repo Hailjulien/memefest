@@ -2,8 +2,6 @@ package com.memefest.Websockets.MessageHandlers;
 
 import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.Services.CategoryOperations;
-import com.memefest.Services.TopicOperations;
-import com.memefest.Websockets.JSON.EditTopicJSON;
 import com.memefest.Websockets.JSON.GetCategoryJSON;
 import com.memefest.Websockets.JSON.GetCategoryResultJSON;
 

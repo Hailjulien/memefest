@@ -7,7 +7,6 @@ import com.memefest.CacheHelper.CacheHelper;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.UserSecurityJSON;
 import com.memefest.Email.EmailSender;
-import com.memefest.Jaxrs.UserInput;
 import com.memefest.Security.JwtAuthIdentityStore;
 import com.memefest.Services.UserSecurityService;
 import io.jsonwebtoken.JwtException;

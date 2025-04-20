@@ -2,16 +2,9 @@ package com.memefest.Websockets.MessageHandlers;
 import java.util.Set;
 
 import com.memefest.DataAccess.JSON.EventJSON;
-import com.memefest.DataAccess.JSON.PostJSON;
-import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.Services.EventOperations;
-import com.memefest.Services.Impl.FeedsEndPointService;
-import com.memefest.Websockets.JSON.EditPostJSON;
 import com.memefest.Websockets.JSON.SearchEventJSON;
 import com.memefest.Websockets.JSON.SearchResultEventJSON;
-import com.memefest.Websockets.JSON.SearchResultUserJSON;
-import com.memefest.Websockets.JSON.SearchUserJSON;
-
 import jakarta.websocket.Session;
 import jakarta.websocket.MessageHandler;
 

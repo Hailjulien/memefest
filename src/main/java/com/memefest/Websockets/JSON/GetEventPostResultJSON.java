@@ -21,11 +21,11 @@ public class GetEventPostResultJSON extends GetPostResultJSON{
                                         }).collect(Collectors.toSet()));
         this.eventPosts = eventPosts;
     }
-    public void setTopicPosts(Set<EventPostJSON> eventPosts) {
+    public void setEventPosts(Set<EventPostJSON> eventPosts) {
         this.eventPosts = eventPosts;
     }
     
-    public Set<EventPostJSON> getTopicPosts() {
+    public Set<EventPostJSON> getEventPosts() {
         return eventPosts;
     }
 }

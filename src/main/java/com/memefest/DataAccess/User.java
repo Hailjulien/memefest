@@ -21,7 +21,10 @@ import java.util.Set;
 @NamedQueries({
   @NamedQuery(
     name = "User.findUsersByUsername",
-    query = "SELECT u FROM UserEntity u Where u.username  = :username"), 
+    query = "SELECT u FROM UserEntity u Where u.username  = :username"),
+  @NamedQuery(
+      name = "User.findAllUsers",
+      query = "SELECT u FROM UserEntity u"),    
   @NamedQuery(
     name = "User.findUsersByEmail",
     query = "SELECT u FROM UserEntity u Where u.email  = :email"),
@@ -93,6 +96,12 @@ public class User {
 
   @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.PERSIST}, mappedBy = "user")
   private Set<Event> events;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "user")
+  private Set<FollowNotification> followNotifications;
+
+  @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "user")
+  private Set<PostNotification> postNotifications;
   
   public Set<TopicFollower> getTopicFollowing() {
     return this.topicFollowing;
@@ -216,5 +225,21 @@ public class User {
 
   public Set<Event> getEvents(){
     return this.events;
+  }
+
+  public Set<PostNotification> getPostNotifications(){
+    return this.postNotifications;
+  }
+
+  public void setPostNotifications(Set<PostNotification> postNotifications){
+    this.postNotifications = postNotifications;
+  }
+
+  public void setFollowNotifications(Set<FollowNotification> followNotifications){
+    this.followNotifications = followNotifications;
+  }
+
+  public Set<FollowNotification> getFollowNotifications(){
+    return this.followNotifications;
   }
 }

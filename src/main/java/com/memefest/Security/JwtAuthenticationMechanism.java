@@ -1,6 +1,5 @@
 package com.memefest.Security;
 
-import com.memefest.Security.JwtCredential;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.security.enterprise.AuthenticationException;

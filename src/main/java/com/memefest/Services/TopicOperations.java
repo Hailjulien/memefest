@@ -1,12 +1,8 @@
 package com.memefest.Services;
 import java.time.LocalDateTime;
 import java.util.Set;
-import java.util.Locale.Category;
-
 import com.memefest.DataAccess.Topic;
-import com.memefest.DataAccess.TopicCategory;
 import com.memefest.DataAccess.JSON.CategoryJSON;
-import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicJSON;
 
 import jakarta.ejb.Local;

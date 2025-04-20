@@ -1,17 +1,10 @@
 package com.memefest.Websockets.Decoders;
 
-import java.nio.charset.MalformedInputException;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.memefest.DataAccess.JSON.CategoryJSON;
-import com.memefest.Websockets.JSON.InteractNotificationJSON;
 import com.memefest.Websockets.JSON.NotificationJSON;
-
-import jakarta.websocket.DecodeException;
 import jakarta.websocket.Decoder;
 import jakarta.websocket.EndpointConfig;
 

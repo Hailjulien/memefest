@@ -2,8 +2,6 @@ package com.memefest.DataAccess.JSON;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.memefest.DataAccess.JSON.CategoryJSON;
-import com.memefest.DataAccess.JSON.TopicJSON;
 import java.util.Set;
 
 @JsonRootName("SubCategory")

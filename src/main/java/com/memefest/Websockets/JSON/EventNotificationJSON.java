@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.EventJSON;
+import com.memefest.DataAccess.JSON.UserJSON;
 
 @JsonRootName("EventNotification")
 public class EventNotificationJSON extends NotificationJSON {
@@ -17,8 +17,8 @@ public class EventNotificationJSON extends NotificationJSON {
     @JsonCreator
     public EventNotificationJSON(@JsonProperty("NotificationID") int notId, 
                                 @JsonProperty("Timestamp") LocalDateTime date, 
-                                    @JsonProperty("Event")EventJSON event) {
-        super(notId, date, Notification.EVENT);
+                                    @JsonProperty("Event")EventJSON event, UserJSON user) {
+        super(notId, date, Notification.EVENT, user);
         this.event = event;
     }
 

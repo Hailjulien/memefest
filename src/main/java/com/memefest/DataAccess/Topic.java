@@ -73,6 +73,9 @@ public class Topic {
   
   @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy = "topic")
   private Set<TopicCategory> categories;
+
+  @OneToMany(cascade ={CascadeType.PERSIST}, mappedBy = "topic")
+  private Set<TopicPostNotification> notifications;
   
   public Set<TopicFollower> getFollowedBy() {
     return this.followedBy;
@@ -120,5 +123,13 @@ public class Topic {
   
   public void setTitle(String topicName) {
     this.topicName = topicName;
+  }
+
+  public Set<TopicPostNotification> geTopictNotifications() {
+    return notifications;
+  }
+
+  public void setTopicNotifications(Set<TopicPostNotification> notifications) {
+    this.notifications = notifications;
   }
 }

@@ -1,11 +1,7 @@
 package com.memefest.Websockets.Encoders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.memefest.DataAccess.JSON.UserSecurityJSON;
-import com.memefest.Websockets.JSON.EditResultPostJSON;
 import com.memefest.Websockets.JSON.SearchResultTopicJSON;
-
-import jakarta.websocket.EncodeException;
 import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
 

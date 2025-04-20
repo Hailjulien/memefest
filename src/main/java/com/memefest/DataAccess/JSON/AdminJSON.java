@@ -3,8 +3,6 @@ package com.memefest.DataAccess.JSON;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import com.memefest.DataAccess.JSON.UserJSON;
-import com.memefest.DataAccess.JSON.UserSecurityJSON;
 
 @JsonRootName("Admin")
 public class AdminJSON extends UserJSON {

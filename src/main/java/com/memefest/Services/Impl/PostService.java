@@ -27,8 +27,7 @@ import com.memefest.Services.EventOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
-import com.memefest.Websockets.JSON.PostNotificationJSON;
-
+import com.memefest.Websockets.JSON.EventPostNotificationJSON;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -62,20 +61,19 @@ public class PostService implements PostOperations{
 
     public void createPost(PostJSON post) {
         User user = null;
-        user = this.userOperations.getUserEntity(post.getUser());
-        if (user == null)
-          return;
-        Post newPost = new Post();
-        newPost.setComment(post.getComment());
-        newPost.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-        newPost.setUser(user);
-        newPost.setUpvotes(post.getUpvotes());
-        newPost.setDownvotes(post.getDownvotes());
-        createPostEntity(newPost);
-        if (post instanceof PostWithReplyJSON)
-            createPostReplies((PostWithReplyJSON)post);
-        PostNotificationJSON postNot = new PostNotificationJSON(3, post, LocalDateTime.now());
-        feedEndPointService.sendToAll(postNot); 
+        try{
+            user = this.userOperations.getUserEntity(post.getUser());
+            Post newPost = new Post();
+            newPost.setComment(post.getComment());
+            newPost.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
+            newPost.setUser(user);
+            newPost.setUpvotes(post.getUpvotes());
+            newPost.setDownvotes(post.getDownvotes());
+            createPostEntity(newPost);
+        }
+        catch(NoResultException ex){
+            return;
+        }
     }
 
     public void createEventPost(EventPostJSON post){
@@ -87,15 +85,13 @@ public class PostService implements PostOperations{
         eventOperations.createEvent(post.getEvent());
         createEventPost(post);      
         }
-        if (event == null) { 
-        return;
-        }
-        createPost(post);
-    
         EventPost  eventPostEntity = new EventPost();
         eventPostEntity.setEvent(event);
         eventPostEntity.setPost(getPostEntity(post));
         entityManager.persist(eventPostEntity);
+
+        EventPostNotificationJSON eventPostNot = new EventPostNotificationJSON(0, post, LocalDateTime.now(),  null);
+        feedEndPointService.sendToSubscribers(eventPostNot, post.getEvent());
     }
 
     public void editEventPost(EventPostJSON eventPost){
@@ -211,28 +207,21 @@ public class PostService implements PostOperations{
 
     public void createPostReplies(PostWithReplyJSON post) {
         for (PostJSON postInst : post.getPosts()) {
-        Post parent = getPostEntity((PostJSON)post);
-        if (parent == null)
-            return; 
-        Post child = getPostEntity(postInst);
-        if (child != null)
-            continue; 
-        PostReply postReply = new PostReply();
-        postReply.setComment(postInst.getComment());
-        postReply.setCreated(Date.from(postInst.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-        postReply.setPost(parent);
-        postReply.setUser(this.userOperations.getUserEntity(postInst.getUser()));
-        postReply.setDownvotes(postInst.getDownvotes());
-        postReply.setUpvotes(postInst.getUpvotes());
-        this.entityManager.persist(postReply);
-
-        PostNotificationJSON postNotificaation = new PostNotificationJSON(1, post, LocalDateTime.now());
-        UserJSON user  = post.getUser();
-        user = userOperations.getUserInfo(user);
-        feedEndPointService.sendToUser(postNotificaation, post.getUser().getUsername());
-        if (postInst instanceof PostWithReplyJSON)
-            createPostReplies((PostWithReplyJSON)postInst); 
-        } 
+            Post parent = getPostEntity((PostJSON)post);
+            if (parent == null)
+                return; 
+            Post child = getPostEntity(postInst);
+            if (child != null)
+                continue; 
+            PostReply postReply = new PostReply();
+            postReply.setComment(postInst.getComment());
+            postReply.setCreated(Date.from(postInst.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
+            postReply.setPost(parent);
+            postReply.setUser(this.userOperations.getUserEntity(postInst.getUser()));
+            postReply.setDownvotes(postInst.getDownvotes());
+            postReply.setUpvotes(postInst.getUpvotes());
+            this.entityManager.persist(postReply);
+        }
     }
 
 
@@ -283,7 +272,6 @@ public class PostService implements PostOperations{
             editPost(post);
             return;
         }
-
         User user = this.userOperations.getUserEntity(post.getUser());
         //check if user is admin then execute create topic
         if (user != null)
@@ -300,11 +288,15 @@ public class PostService implements PostOperations{
         removePost(post);
     }
     public void editPostWithReply(PostWithReplyJSON postWithReply){
-        Post post = getPostEntity((PostJSON)postWithReply);
-        if (post == null){
-      createPost(postWithReply);
-      editPostWithReply(postWithReply);
-        return;
+        
+        
+        try{
+            getPostEntity((PostJSON)postWithReply);
+            editPost(postWithReply);
+        }
+        catch(NoResultException ex){
+            createPost(postWithReply);
+            editPostWithReply(postWithReply);
         }
         createPostReplies(postWithReply);
         editPostReplies(postWithReply);
@@ -314,21 +306,48 @@ public class PostService implements PostOperations{
 
     public void removePostWithReply(PostWithReplyJSON postWithReply){
         if(postWithReply.isCancelled()){
-        Post postEntity = getPostEntity((PostJSON)postWithReply);
-        if (postEntity != null && postEntity.getPost_Id()!= 0) {
-            this.entityManager.remove(postEntity);
-        }
+            try{
+                Post postEntity = getPostEntity((PostJSON)postWithReply);
+                if (postEntity != null && postEntity.getPost_Id()!= 0) {
+                    this.entityManager.remove(postEntity);
+                }
+            }
+            catch(NoResultException ex){
+                return;
+            }
         }
     }
 
     public void createTopicPost(TopicPostJSON topicPost){
-        Topic topic = topicOperations.getTopicEntity(topicPost.getTopic());
-        if (topic == null)
-            topicOperations.createTopic(topicPost.getTopic()); 
+        Topic topic = null;
+        try{
+            topic = topicOperations.getTopicEntity(topicPost.getTopic());
+        }
+        catch(NoResultException ex){
+            topicOperations.createTopic(topicPost.getTopic());
+            try{
+                topic = topicOperations.getTopicEntity(topicPost.getTopic());
+            }
+            catch(NoResultException exp){
+                return;
+            }
+            createTopicPost(topicPost); 
+        }
         createPost((PostJSON) topicPost);
-        Post post = getPostEntity((PostJSON)topicPost);
-        if (post == null)
-            return; 
+        Post post = null;
+        try{
+            post = getPostEntity(topicPost);
+        }
+        catch(NoResultException ex){
+            createPost(topicPost);
+            try{
+                post = getPostEntity(topicPost);
+            }
+            catch(NoResultException exp){
+                return;
+            }
+            createTopicPost(topicPost); 
+        } 
         TopicPost topicPostEntity = new TopicPost();
         topicPostEntity.setPost(post);
         topicPostEntity.setTopic(topic);
@@ -340,7 +359,7 @@ public class PostService implements PostOperations{
             return (TopicPost)this.entityManager.find(TopicPost.class, Integer.valueOf(post.getPostId()));
         if (post.getComment() != null){
             Query query = this.entityManager.createNamedQuery("Post.getPostByComment");
-            query.setParameter("comment", post.getComment());
+            query.setParameter("comment", "%" + post.getComment()  + "%");
             return (TopicPost)query.getSingleResult();
         }
         throw new NoResultException("No TopicPost found for post" + post.getPostId());
@@ -349,9 +368,13 @@ public class PostService implements PostOperations{
     public void removeTopicPost(TopicPostJSON topicPost){
         if(topicPost.isCancelled() == false)
             return;
-        TopicPost topicPostEntity = getTopicPostEntity(topicPost);
-        if (topicPostEntity!= null)
-        this.entityManager.remove(topicPostEntity);
+        try{
+            TopicPost topicPostEntity = getTopicPostEntity(topicPost);
+            this.entityManager.remove(topicPostEntity);
+        }
+        catch(NoResultException ex){
+            return;
+        }
     }
 
     public void editTopicPost(TopicPostJSON topicPost){
@@ -367,38 +390,46 @@ public class PostService implements PostOperations{
         removeTopicPost(topicPost);
     }
   
-    public Post getPostEntity(PostJSON post) {
+    public Post getPostEntity(PostJSON post) throws NoResultException {
+        Post postEntity = null;
         if (post.getPostId() != 0 && post.getPostId() != 1)
-            return (Post)this.entityManager.find(Post.class, Integer.valueOf(post.getPostId())); 
+            postEntity = this.entityManager.find(Post.class, Integer.valueOf(post.getPostId()));
+        if (postEntity != null)
+            return postEntity;
         if (post.getComment() != null) {
             Query query = this.entityManager.createNamedQuery("Post.getPostByComment");
-            query.setParameter("comment", post.getComment());
-            return (Post)query.getSingleResult();
-        } 
-        return null;
+            query.setParameter("comment", "%" + post.getComment() + "%");
+            postEntity =(Post) query.getSingleResult();
+        }
+        return postEntity; 
     }
   
     public void removePost(PostJSON post) {
         if (post.isCancelled()) {
-            Post postEntity = getPostEntity(post);
-            if (postEntity != null) {
-                if (post instanceof PostWithReplyJSON)
-                    removePostReplies((PostWithReplyJSON)post); 
-                this.entityManager.remove(postEntity);
+            try{
+                Post postEntity = getPostEntity(post);
+                if (postEntity != null) {
+                    if (post instanceof PostWithReplyJSON)
+                        removePostReplies((PostWithReplyJSON)post); 
+                    this.entityManager.remove(postEntity);
+                }
+            }
+            catch(NoResultException ex){
+                return;
             } 
         } 
     }
 
-    public Set<PostReply> getPostReplyEntities(PostWithReplyJSON postWithReply) {
+    public Set<PostReply> getPostReplyEntities(PostWithReplyJSON postWithReply) throws NoResultException{
         Set<PostReply> result = new HashSet<>();
-        Query query = this.entityManager.createNamedQuery("PostReplyEntity.getRepliesOfPostId");
-        query.setParameter("postId", Integer.valueOf(postWithReply.getPostId()));
-        List<PostReply> postReplies = query.getResultList();
+        List<PostReply> postReplies = this.entityManager.createNamedQuery("PostReplyEntity.getRepliesOfPostId", PostReply.class)
+                                        .setParameter("postId", Integer.valueOf(postWithReply.getPostId()))
+                                            .getResultList();
         result = (Set<PostReply>)postReplies.stream().collect(Collectors.toSet());
         return result;
     }
   
-    public PostWithReplyJSON getPostWithReplyInfo(PostWithReplyJSON postWithReply) {
+    public PostWithReplyJSON getPostWithReplyInfo(PostWithReplyJSON postWithReply) throws NoResultException{
         Set<PostReply> postReplyEntities = getPostReplyEntities(postWithReply);
         if (postReplyEntities == null)
             return null; 
@@ -420,14 +451,14 @@ public class PostService implements PostOperations{
         return eventPost;
     }
 
-    public PostJSON getPostInfo(PostJSON post) {
+    public PostJSON getPostInfo(PostJSON post) throws NoResultException{
         Post postEntity = getPostEntity(post);
         UserJSON user = this.userOperations.getUserInfo(post.getUser());
+        PostJSON postJSON = null;
         if (post != null) {
-            PostJSON postJSON = new PostJSON(postEntity.getPost_Id(), postEntity.getComment(), LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()), post.getUpvotes(), post.getDownvotes(), new UserJSON(user.getUsername()));
-            return postJSON;
-        } 
-    return null;
+           postJSON = new PostJSON(postEntity.getPost_Id(), postEntity.getComment(), LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()), post.getUpvotes(), post.getDownvotes(), new UserJSON(user.getUsername()));
+        }
+        return postJSON;    
   }
 
 }

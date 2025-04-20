@@ -26,6 +26,10 @@ import jakarta.persistence.Table;
     @NamedNativeQuery(name = "Category.getTopicByTitle",
     query = "SELECT TOP(1) C.Category_Id as categoryId, C.Cat_Name as categoryName FROM TOPIC C "
                 + "WHERE C.title LIKE CONCAT('%', :title, '%')", resultSetMapping = "CategoryEntityMapping"
+    ),
+    @NamedNativeQuery(name = "Category.searchByName",
+    query = "SELECT C.Category_Id as categoryId, C.Cat_Name as categoryName FROM TOPIC C "
+                + "WHERE C.title LIKE CONCAT('%', :title, '%')", resultSetMapping = "CategoryEntityMapping"
     )
 })
 @SqlResultSetMappings(

@@ -9,8 +9,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
-import com.memefest.DataAccess.JSON.TopicJSON;
-import com.memefest.DataAccess.JSON.UserJSON;
 import java.time.LocalDateTime;
 
 @JsonRootName("Post")
@@ -77,8 +75,6 @@ public class PostJSON {
   public UserJSON getUser() {
     return this.user;
   }
-  
-
   
   @JsonProperty("PostId")
   public void setPostId(int postId) {
