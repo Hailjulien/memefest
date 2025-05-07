@@ -17,6 +17,7 @@ public class ImageService implements ImageOperations{
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
     private EntityManager entityManager; 
 
+    //throw a custom exception to show object was not created
     public void createImage(ImageJSON image){  
         Image imageEntity = new Image();
         imageEntity.setImg_Path(image.getImgPath());
@@ -24,6 +25,7 @@ public class ImageService implements ImageOperations{
         entityManager.persist(imageEntity);
     }
 
+    //throw a custom exception to show object was not created
     public void editImage(ImageJSON image){
         try{
             Image imageEntity = getImageEntity(image);

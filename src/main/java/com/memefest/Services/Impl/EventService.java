@@ -18,6 +18,7 @@ import com.memefest.DataAccess.JSON.VideoJSON;
 import com.memefest.Services.EventOperations;
 import com.memefest.Services.FeedsOperations;
 import com.memefest.Services.ImageOperations;
+import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Services.VideoOperations;
@@ -56,12 +57,14 @@ public class EventService implements EventOperations{
     @EJB 
     private PostOperations postOps;
 
+    @EJB
+    private NotificationOperations notOps;
+
     @Resource
     private TimerService timerService;
 
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
     private EntityManager entityManager;
-
 
     
     public void createScheduledEvent(Session session, EventJSON eventInfo, LocalDateTime dueDate){
@@ -118,6 +121,7 @@ public class EventService implements EventOperations{
         return events;
     }
     
+    //throw a custom exception to show object was not created
     //add logic to run as specified principals for changing some properties for events
     public void editEvent(EventJSON event){
         try{
@@ -204,7 +208,8 @@ public class EventService implements EventOperations{
         }
     }
 
-    public void createEvent (EventJSON event){    
+    //throw a custom exception to show object was not created
+    public void createEvent(EventJSON event){    
         try{
             Event eventEntity = getEventEntity(event);
             eventEntity.setEvent_Title(event.getEventTitle());

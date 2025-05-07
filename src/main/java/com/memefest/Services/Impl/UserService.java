@@ -1,5 +1,6 @@
 package com.memefest.Services.Impl;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,20 +12,27 @@ import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.TopicFollower;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.UserAdmin;
+import com.memefest.DataAccess.UserFollower;
+import com.memefest.DataAccess.UserFollowerId;
 import com.memefest.DataAccess.UserSecurity;
 import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.UserSecurityJSON;
+import com.memefest.Services.FeedsOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Services.UserSecurityService;
+import com.memefest.Websockets.JSON.UserFollowNotificationJSON;
+
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
+import jakarta.persistence.RollbackException;
 /*  
 @DataSourceDefinition(
   name = "java:app/jndi/memefest/dataSource",
@@ -42,6 +50,9 @@ public class UserService implements UserSecurityService, UserOperations{
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
     private EntityManager entityManager;
 
+    @EJB
+    private FeedsOperations feedsOps;
+
     public void createUser(User user) {
         entityManager.persist(user);
     }
@@ -57,7 +68,7 @@ public class UserService implements UserSecurityService, UserOperations{
                                 //String middleName
                                 String lastName, 
                                     int contacts, String email, boolean verified, String password, String accessToken,
-                                        String refreshToken){
+                                        String refreshToken)throws RollbackException{
         User newUser = new User();
         //entityManager.joinTransaction();
         //newUser.setUserId(0);
@@ -68,19 +79,22 @@ public class UserService implements UserSecurityService, UserOperations{
         newUser.setPhone_No(contacts);
         newUser.setEmail(email);
         newUser.setVerified(verified);
+        /* 
+        securityDetails.setUser(newUser);
+        */
         entityManager.persist(newUser);
         entityManager.flush();
         UserSecurity securityDetails = new UserSecurity();
-        securityDetails.setUser(newUser);
+        securityDetails.setUserId(newUser.getUserId());
         securityDetails.setPassword(password);
         securityDetails.setAccessTkn(accessToken);
         securityDetails.setRefreshTkn(refreshToken);
         newUser.setSecurityDetails(securityDetails);
         //entityManager.persist(newUser);
-        entityManager.merge(newUser);
+        entityManager.persist(newUser);
     }
     
-    public void createUser(UserJSON userJSON){
+    public void createUser(UserJSON userJSON) throws RollbackException{
         createUser(userJSON.getUsername(), userJSON.getFirstName(), 
                         //userJSON.getMiddleName(),
                         userJSON.getLastName(), userJSON.getContacts(), userJSON.getEmail() , userJSON.isVerified(), 
@@ -281,29 +295,37 @@ public class UserService implements UserSecurityService, UserOperations{
 
     //commit the followings of user from category entity
     public void editUser(UserJSON user){
-        if(user== null)
+        try {
+            User userEntity = getUserEntity(user);
+            userEntity.setEmail(user.getEmail());
+            userEntity.setF_name(user.getFirstName());
+            userEntity.setL_Name(user.getLastName());
+            userEntity.setPhone_No(user.getContacts());
+            userEntity.setUsername(user.getUsername());
+            entityManager.merge(userEntity);
+        } catch (NoResultException e) {
+            createUser(user);
             return;
-        User userEntity = getUserEntity(user);
-        if(userEntity == null)
-            return;
-        userEntity.setEmail(user.getEmail());
-        userEntity.setF_name(user.getFirstName());
-        userEntity.setL_Name(user.getLastName());
-        userEntity.setPhone_No(user.getContacts());
-        userEntity.setUsername(user.getUsername());
-        entityManager.merge(userEntity);
+        }
     }
 
 
 
 
-    public UserJSON getUserInfo(UserJSON user){
+    public UserJSON getUserInfo(UserJSON user) throws NoResultException{
         if(user==null)
-            return null;
+            throw new NoResultException("User Not Found");
         User userEntity = getUserEntity(user);
-        Set<TopicJSON> topicsFollowing  = getTopicFollowers(userEntity);
-        Set<PostJSON> posts = getUserPosts(userEntity);
-        Set<CategoryJSON> categoriesFollowing = getCategoryFollowers(userEntity);
+        Set<TopicJSON> topicsFollowing = null;
+        Set<CategoryJSON> categoriesFollowing = null;
+        Set<PostJSON> posts = null;
+        try {
+            topicsFollowing = getTopicFollowers(userEntity);
+            categoriesFollowing = getCategoryFollowers(userEntity);
+            posts = getUserPosts(userEntity);  
+        } catch (NoResultException ex) {
+        
+        }
         UserJSON userJSON = new UserJSON(userEntity.getUserId(), userEntity.getEmail(), userEntity.getUsername(),
                                 userEntity.getPhone_No(),userEntity.isVerified(), userEntity.getF_name(),
                                     userEntity.getL_Name(), null,posts, 
@@ -327,6 +349,8 @@ public class UserService implements UserSecurityService, UserOperations{
     public Set<PostJSON> getUserPosts(User  user){
         Set<Post> userPosts = getUserPostEntities(user);
         Set<PostJSON> postJSONs = new HashSet<PostJSON>();
+        if(userPosts == null)
+            return null;
         for(Post p : userPosts){
             postJSONs.add(new PostJSON(p.getPost_Id(), null, null, 0,0,null));
         }
@@ -347,9 +371,11 @@ public class UserService implements UserSecurityService, UserOperations{
     }
 
 
-    public Set<TopicJSON> getTopicFollowers(User user){
+    public Set<TopicJSON> getTopicFollowers(User user)throws NoResultException{
         Set<TopicFollower> topicFollowers = getTopicFollowerEntities(user);
         Set<TopicJSON> topicJSONs = new HashSet<TopicJSON>();
+        if(topicFollowers == null)
+            return null;
         for(TopicFollower tf : topicFollowers){
             topicJSONs.add(new TopicJSON(tf.getTopic_Id(), null, null, null, null,null));
         }
@@ -372,30 +398,35 @@ public class UserService implements UserSecurityService, UserOperations{
     public Set<CategoryJSON> getCategoryFollowers(User user){
         Set<CategoryFollower> topicFollowers = getCategoryFollowerEntities(user);
         Set<CategoryJSON> categJSONs = new HashSet<CategoryJSON>();
+        if(topicFollowers == null)
+            return null;
         for(CategoryFollower tf : topicFollowers){
             categJSONs.add(new CategoryJSON(tf.getCat_Id(), null, null, null, null));
         }
         return categJSONs;
     }
 
-    public User getUserEntity(UserJSON user){
+    public User getUserEntity(UserJSON user)throws NoResultException{
         if(user.getUserId() == 0 && user.getUsername() == null)
-            return null;
+            throw new NoResultException("No User Found");
         User userEntity = null;
         if(user.getUserId() != 0){
-            userEntity = entityManager.find(User.class, user.getUserId());
-        }
-        else{
-            try{
+            try {
+                userEntity = entityManager.find(User.class, user.getUserId()); 
+            } catch (NoResultException ex) {
                 Query query = entityManager.createNamedQuery("User.findUsersByUsername");
                 query.setParameter("username", user.getUsername());
                 userEntity = (User) query.getSingleResult();
             }
-            catch(NoResultException ex){
-                return null;
-            }
         }
-        return userEntity;
+        else if(user.getUsername() != null){
+            Query query = entityManager.createNamedQuery("User.findUsersByUsername");
+            query.setParameter("username", user.getUsername());
+            userEntity = (User) query.getSingleResult();
+        }
+        if(userEntity == null)
+            throw new NoResultException("No User Found");
+        return userEntity; 
     }
 
     public Set<UserJSON> searchByUsername(UserJSON userJSON){
@@ -450,6 +481,32 @@ public class UserService implements UserSecurityService, UserOperations{
             return null;
         }
     }
+
+    public void addFollower(UserJSON user, UserJSON follower) throws NoResultException{
+        if(user == null || follower == null)
+            throw new  NoResultException("No User found");
+        
+        User userEntity = getUserEntity(user);
+        User followerEntity = getUserEntity(follower);
+        UserFollower userFollowerEntity = new UserFollower();
+        userFollowerEntity.setFollower_Id(followerEntity.getUserId());
+        userFollowerEntity.setUserId(userEntity.getUserId());
+        entityManager.persist(userFollowerEntity);
+        feedsOps.sendToAll(new UserFollowNotificationJSON(0, user, LocalDateTime.now(), follower));
+    }
+
+    public void removeFollower(UserJSON user, UserJSON follower){
+        if(user == null || follower == null)
+            throw new  NoResultException("No User found");
+        User userEntity = getUserEntity(user);
+        User followerEntity = getUserEntity(follower);
+        UserFollowerId userFollowerId = new UserFollowerId();
+        userFollowerId.setFollowerId(followerEntity.getUserId());
+        userFollowerId.setUserId(userEntity.getUserId());
+        UserFollower userFollower = entityManager.find(UserFollower.class, userFollowerId);
+        entityManager.remove(userFollower);
+    }
+
 
 }
 

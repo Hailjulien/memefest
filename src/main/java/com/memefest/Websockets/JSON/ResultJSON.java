@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "ResultId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "ResultId")
 public abstract class ResultJSON {
     @JsonProperty("ResultId")
     private int resultId;

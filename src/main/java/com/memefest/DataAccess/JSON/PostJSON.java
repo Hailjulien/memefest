@@ -12,7 +12,7 @@ import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 import java.time.LocalDateTime;
 
 @JsonRootName("Post")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "PostId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "PostId")
 public class PostJSON {
   @JsonProperty("PostId")
   private int postId;

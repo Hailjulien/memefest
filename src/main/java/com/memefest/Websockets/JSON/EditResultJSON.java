@@ -2,7 +2,9 @@ package com.memefest.Websockets.JSON;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 
+@JsonRootName("EditResult")
 public abstract class EditResultJSON extends ResultJSON{
     
     @JsonProperty("EditableType")

@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.memefest.DataAccess.Category;
 import com.memefest.DataAccess.MainCategory;
 import com.memefest.DataAccess.SubCategory;
 import com.memefest.DataAccess.Topic;
@@ -23,6 +22,7 @@ import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.Services.CategoryOperations;
+import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
@@ -67,6 +67,9 @@ public class TopicService implements TopicOperations{
     @EJB
     private PostOperations postOperations;
 
+    @EJB
+    private NotificationOperations notOps;
+
     public void createScheduledTopic(TopicJSON topic, LocalDateTime postDate){
         ScheduleExpression schedule = new ScheduleExpression()
                                         .year(postDate.getYear())
@@ -107,7 +110,8 @@ public class TopicService implements TopicOperations{
         }).collect(Collectors.toSet());
         return topicSet;
     }
-  
+    
+    //add custom exception to show object was not created
     public void createTopic(TopicJSON topic) {
         Topic foundTopic = getTopicEntity(topic);
         if (foundTopic != null && foundTopic.getTopic_Id() !=0 && foundTopic.getTopic_Id() !=1)
@@ -132,7 +136,8 @@ public class TopicService implements TopicOperations{
         }).collect(Collectors.toSet());
         return topicCategories;
     }
-  
+    
+    //add custom exception to show object was not created
     public void createTopicCategories(TopicJSON topic) {
         Topic foundTopic = null;
         try{
@@ -202,7 +207,8 @@ public class TopicService implements TopicOperations{
         foundTopic = (Topic)query.getSingleResult();
         return foundTopic;
     }
-  
+    
+    //add custom exception to show object was not created
     public void createTopicFollowers(TopicJSON topic) {
         Topic foundTopic = null;
         try{
@@ -268,8 +274,8 @@ public class TopicService implements TopicOperations{
             } 
     }
   
+    //add custom exception to show object was not created
     public void editTopicFollowers(TopicJSON topic){
-     
         try{
             getTopicEntity(topic);
         }
@@ -293,6 +299,7 @@ public class TopicService implements TopicOperations{
         }  
     }
 
+    //add custom exception to show object was not created
     public void editTopic(TopicJSON topic) {
         Topic foundTopic = null;
         try {

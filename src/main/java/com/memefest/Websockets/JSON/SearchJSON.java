@@ -3,9 +3,11 @@ package com.memefest.Websockets.JSON;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "SearchId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "SearchId")
+@JsonRootName("Search")
 public abstract class SearchJSON {
     
     @JsonProperty("Searchable")

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "VideoID")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "VideoID")
 @JsonRootName("Clip")
 public class VideoJSON {
     

@@ -67,5 +67,9 @@ public interface PostOperations {
     
     public RepostJSON getRepostInfo(RepostJSON repost);
 
+    public TopicPostJSON getTopicPostInfo(TopicPostJSON topicPost);
+
+    public EventPostJSON getEventPostInfo(EventPostJSON eventPost);
+
     //public Set<RepostJSON> getReposts(RepostJSON repost);
 }

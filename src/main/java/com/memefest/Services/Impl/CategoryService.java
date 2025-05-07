@@ -38,18 +38,18 @@ public class CategoryService implements CategoryOperations{
 
   @EJB
   private UserOperations userOperations;
-    
+  
+  //throw a custom exception to show object was not created
   public void createCategory(CategoryJSON category) {
     try{
-        if(getCategoryEntity(category) != null)
-        return; 
+      getCategoryEntity(category); 
       Category newCategory = new Category();
       newCategory.setCat_Name(category.getCategoryName());
       this.entityManager.persist(newCategory);
       createCategoryFollowers(category);
       for (TopicJSON topic : category.getTopics())
         topicOps.createTopic(topic); 
-      }
+    }
     catch(NoResultException ex){
         return;
     }
@@ -65,8 +65,9 @@ public class CategoryService implements CategoryOperations{
     } 
     return null;
   }
-    
-  public void editCategory(CategoryJSON category) {
+
+  //throw a custom exception to show object was not created
+  public void editCategory(CategoryJSON category){
     if (category == null)
       return; 
     if (category.isCancelled()) {
@@ -81,6 +82,7 @@ public class CategoryService implements CategoryOperations{
         foundCategory.setCat_Id(category.getCategoryId());
     } 
     catch(NoResultException ex){
+      createCategory(category);
       return;
     }
     for (TopicJSON topic : category.getTopics())
@@ -88,7 +90,8 @@ public class CategoryService implements CategoryOperations{
     removeCategoryFollowers(category);
     createCategoryFollowers(category);
   }
-      
+    
+  //throw a custom exception to show object was not created
   public void createCategoryFollowers(CategoryJSON category) {
     try{
       Category foundCategory = getCategoryEntity(category);
@@ -159,7 +162,8 @@ public class CategoryService implements CategoryOperations{
     foundCategory = (Category)query.getSingleResult();
     return foundCategory;
   }
-      
+  
+
   public MainCategory getMainCategoryEntity(CategoryJSON category) throws NoResultException {
     MainCategory foundCategory = null;
     if ((category != null) && category.getCategoryId() != 0 && category.getCategoryId() != 1) {
@@ -173,8 +177,7 @@ public class CategoryService implements CategoryOperations{
     return foundCategory;
   }
     
-    
-      
+  //throw a custom exception to show object was not created    
   public void createSubCategory(SubCategoryJSON category) throws IllegalArgumentException {
     if (category == null || (category.getCategoryName() == null && category.getCategoryId() == 0))
       return; 
@@ -224,7 +227,8 @@ public class CategoryService implements CategoryOperations{
       this.entityManager.persist(subCategory);
     } 
   }
-      
+  
+  //throw a custom exception to show object was not created
   public void editSubCategory(CategoryJSON category) {
     if (!(category instanceof SubCategoryJSON))
       return;
@@ -275,6 +279,7 @@ public class CategoryService implements CategoryOperations{
     return foundCategory;
   }
       
+  //throw a custom exception to show object was not created
   public void createMainCategory(CategoryJSON category) {
     if (category == null || (category.getCategoryName() == null && category.getCategoryId() == 0))
       return; 
@@ -294,6 +299,7 @@ public class CategoryService implements CategoryOperations{
     } 
   }
       
+  //throw a custom exception to show object was not created
   public void editMainCategory(CategoryJSON category) {
     if (category instanceof SubCategoryJSON)
       return; 

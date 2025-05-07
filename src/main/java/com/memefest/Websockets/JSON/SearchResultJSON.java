@@ -2,8 +2,9 @@ package com.memefest.Websockets.JSON;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 
-
+@JsonRootName("SearchResult")
 public abstract class SearchResultJSON extends ResultJSON{
     
     @JsonProperty("Searchable")

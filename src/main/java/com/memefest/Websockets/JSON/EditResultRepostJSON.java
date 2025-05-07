@@ -2,6 +2,7 @@ package com.memefest.Websockets.JSON;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.RepostJSON;
@@ -12,7 +13,8 @@ public class EditResultRepostJSON extends EditResultJSON{
     @JsonProperty("Reposts")
     private Set<RepostJSON> reposts;
     
-    public EditResultRepostJSON(Set<RepostJSON> reposts, String resultMessage, int resultCode) {
+    @JsonCreator
+    public EditResultRepostJSON(@JsonProperty("Reposts")Set<RepostJSON> reposts, String resultMessage, int resultCode) {
         super(Editable.REPOST,  resultCode, resultMessage);
         this.reposts = reposts;
     }

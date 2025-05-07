@@ -31,9 +31,7 @@ public interface NotificationOperations {
 
     public EventPostNotification getEventPostNotificationEntity(EventPostNotificationJSON eventNotification) throws NoResultException;
 
-    public TopicFollowNotificationJSON getTopicFollowNotificationInfo(TopicFollowNotificationJSON topicFollowNotification) throws NoResultException;
-
-    public UserFollowNotificationJSON getUserFollowNotificationInfo(UserFollowNotificationJSON userFollowNotification);
+    public Set<TopicFollowNotificationJSON> getTopicFollowNotificationInfo(TopicFollowNotificationJSON topicFollowNotification) throws NoResultException;
 
     public void removePostNotification(PostNotificationJSON postNotification);
 
@@ -47,4 +45,21 @@ public interface NotificationOperations {
 
     public Set<TopicPostNotificationJSON> getTopicPostNotificationInfo(TopicPostNotificationJSON topicPostNotification) throws NoResultException;
     
+    public Set<EventNotificationJSON> getEventNotificationInfo(EventNotificationJSON eventNotification);
+
+    public void editTopicPostNotification(TopicPostNotificationJSON topicPostNot);
+
+    public void editEventNotification(EventNotificationJSON eventNot);
+
+    public void editEventPostNotification(EventPostNotificationJSON eventPostNot);
+
+    public Set<PostNotificationJSON> getPostNotificationInfo(PostNotificationJSON postNot);
+
+    public Set<UserFollowNotificationJSON> getUserFollowNotificationInfo(UserFollowNotificationJSON followNot);
+
+    public void editTopicFollowNotification(TopicFollowNotificationJSON topicFollowNot);
+
+    public void editUserFollowNotification(UserFollowNotificationJSON userFollowNot);
+
+    public void editPostNotification(PostNotificationJSON postNot);
 }

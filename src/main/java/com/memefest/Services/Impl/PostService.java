@@ -16,18 +16,24 @@ import com.memefest.DataAccess.Repost;
 import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.TopicPost;
 import com.memefest.DataAccess.User;
+import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.EventPostJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.PostWithReplyJSON;
 import com.memefest.DataAccess.JSON.RepostJSON;
+import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.Services.EventOperations;
 import com.memefest.Services.FeedsOperations;
+import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Websockets.JSON.EventPostNotificationJSON;
+import com.memefest.Websockets.JSON.PostNotificationJSON;
+import com.memefest.Websockets.JSON.TopicPostNotificationJSON;
+
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
@@ -54,11 +60,14 @@ public class PostService implements PostOperations{
     @EJB
     private TopicOperations topicOperations;
 
+    @EJB
+    private NotificationOperations notOps;
+
     private void createPostEntity(Post post) {
         this.entityManager.persist(post);
     }
     
-
+    //add custom exception to show object was not created
     public void createPost(PostJSON post) {
         User user = null;
         try{
@@ -70,10 +79,16 @@ public class PostService implements PostOperations{
             newPost.setUpvotes(post.getUpvotes());
             newPost.setDownvotes(post.getDownvotes());
             createPostEntity(newPost);
+            userOperations.getFollowing(post.getUser()).stream().map(candidate ->{
+                return new PostNotificationJSON(0, post, LocalDateTime.now(), candidate);
+            }).forEach(candidate ->{
+                feedEndPointService.sendToUser(newPost, candidate.getUser().getUsername());
+            });;
         }
         catch(NoResultException ex){
             return;
         }
+
     }
 
     public void createEventPost(EventPostJSON post){
@@ -88,11 +103,11 @@ public class PostService implements PostOperations{
         EventPost  eventPostEntity = new EventPost();
         eventPostEntity.setEvent(event);
         entityManager.persist(eventPostEntity);
-
         EventPostNotificationJSON eventPostNot = new EventPostNotificationJSON(0, post, LocalDateTime.now(),  null);
-        feedEndPointService.sendToSubscribers(eventPostNot);
+        feedEndPointService.sendToAll(eventPostNot);
     }
 
+    //add custom exception to show object was not created
     public void editEventPost(EventPostJSON eventPost){
         EventPost eventPostEntity = null;
         try{
@@ -117,6 +132,7 @@ public class PostService implements PostOperations{
         this.entityManager.remove(eventPostEntity);
     }
 
+    //add custom exception to show object was not created
     public void createRepost(RepostJSON repost){
         Post post = null;
         User user = null;
@@ -160,6 +176,19 @@ public class PostService implements PostOperations{
         return repostInfo;
     }
 
+    public EventPostJSON getEventPostInfo(EventPostJSON eventPost) throws NoResultException{
+        EventPost eventPostEntity = getEventPostEntity(eventPost);
+        eventPost.setComment(eventPostEntity.getComment());
+        eventPost.setCreated(LocalDateTime.ofInstant(eventPostEntity.getCreated().toInstant(), ZoneId.systemDefault()));
+        eventPost.setDownvotes(eventPostEntity.getDownvotes());
+        eventPost.setUpvotes(eventPostEntity.getUpvotes());
+        eventPost.setPostId(eventPostEntity.getPost_Id());
+        eventPost.setUser(new UserJSON(eventPostEntity.getUser().getUserId(), eventPostEntity.getUser().getUsername()));
+        eventPost.setEvent(new EventJSON(eventPostEntity.getEvent().getEvent_Id(), eventPostEntity.getEvent().getEvent_Title(), null, null, null, null, null, null, null, null, null, null));
+        return eventPost;
+    }
+
+    //add custom exception to show object was not created
     public void editRepost(RepostJSON post){
         Repost repostEntity = null;
         Post postEntity = null;
@@ -203,6 +232,7 @@ public class PostService implements PostOperations{
     }
 
 
+    //add custom exception to show object was not created
     public void createPostReplies(PostWithReplyJSON post) {
         for (PostJSON postInst : post.getPosts()) {
             Post parent = getPostEntity((PostJSON)post);
@@ -222,8 +252,7 @@ public class PostService implements PostOperations{
         }
     }
 
-
-
+    //add custom exception to show object was not created
     public void editPostReplies(PostWithReplyJSON post){
         Set<PostReply> postEntities = null;
         try{
@@ -260,7 +289,8 @@ public class PostService implements PostOperations{
             } 
         } 
     }
-  
+    
+    //add custom exception to show object was not created
     public void editPost(PostJSON post) {
         Post postEntity = null;
         try{
@@ -285,9 +315,9 @@ public class PostService implements PostOperations{
         this.entityManager.merge(postEntity);
         removePost(post);
     }
-    public void editPostWithReply(PostWithReplyJSON postWithReply){
-        
-        
+
+    //add custom exception to show object was not created
+    public void editPostWithReply(PostWithReplyJSON postWithReply){       
         try{
             getPostEntity((PostJSON)postWithReply);
             editPost(postWithReply);
@@ -316,6 +346,7 @@ public class PostService implements PostOperations{
         }
     }
 
+    //add custom exception to show object was not created
     public void createTopicPost(TopicPostJSON topicPost){
         Topic topic = null;
         try{
@@ -349,6 +380,10 @@ public class PostService implements PostOperations{
         TopicPost topicPostEntity = new TopicPost();
         topicPostEntity.setTopic(topic);
         this.entityManager.persist(topicPostEntity);
+        topic.getFollowedBy().stream().forEach(candidate->{
+            notOps.createTopicPostNotification(new TopicPostNotificationJSON(0, topicPost,LocalDateTime.now(), new UserJSON(candidate.getUser().getUsername())));
+        });
+        
     }
 
     public TopicPost getTopicPostEntity(TopicPostJSON post) throws NoResultException{
@@ -360,6 +395,23 @@ public class PostService implements PostOperations{
             return (TopicPost)query.getSingleResult();
         }
         throw new NoResultException("No TopicPost found for post" + post.getPostId());
+    }
+
+    public TopicPostJSON getTopicPostInfo(TopicPostJSON topicPost) throws NoResultException{
+        TopicPost topicPostEntity = getTopicPostEntity(topicPost);
+        return new TopicPostJSON(topicPostEntity.getPost_Id(), 
+                            topicPostEntity.getComment(), 
+                            LocalDateTime.ofInstant(topicPostEntity.getCreated().toInstant(), ZoneId.systemDefault()), 
+                            topicPostEntity.getUpvotes(), 
+                            topicPostEntity.getDownvotes(),
+                            new UserJSON(topicPostEntity.getUserId(), null), new TopicJSON(topicPostEntity.getTopic().getTopic_Id(), null, null, null, null, null));
+    }
+
+    public PostJSON getPostInfo(PostJSON post) throws NoResultException{
+        Post postInfo = getPostEntity(post);
+        return new PostJSON(post.getPostId(), post.getComment(), 
+        LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
+            post.getUpvotes(), post.getDownvotes(), new UserJSON(post.getUser().getUserId(), post.getUser().getUsername()));
     }
  
     public void removeTopicPost(TopicPostJSON topicPost){
@@ -374,6 +426,7 @@ public class PostService implements PostOperations{
         }
     }
 
+    //add custom exception to show object was not created
     public void editTopicPost(TopicPostJSON topicPost){
         TopicPost topicPostEntity = null;
         try{
@@ -444,15 +497,5 @@ public class PostService implements PostOperations{
         EventPost eventPost = this.entityManager.find(EventPost.class,post.getPost_Id()); 
         return eventPost;
     }
-
-    public PostJSON getPostInfo(PostJSON post) throws NoResultException{
-        Post postEntity = getPostEntity(post);
-        UserJSON user = this.userOperations.getUserInfo(post.getUser());
-        PostJSON postJSON = null;
-        if (post != null) {
-           postJSON = new PostJSON(postEntity.getPost_Id(), postEntity.getComment(), LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()), post.getUpvotes(), post.getDownvotes(), new UserJSON(user.getUsername()));
-        }
-        return postJSON;    
-  }
 
 }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonRootName("Repost")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "RepostID")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "RepostID")
 public class RepostJSON {
 
     @JsonProperty("RepostID")

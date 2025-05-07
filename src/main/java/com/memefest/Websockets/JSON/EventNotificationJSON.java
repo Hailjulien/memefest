@@ -13,6 +13,9 @@ public class EventNotificationJSON extends NotificationJSON {
 
     @JsonProperty("Event")
     private EventJSON event;
+
+    @JsonProperty("Canceled")
+    private boolean canceled;
     
     @JsonCreator
     public EventNotificationJSON(@JsonProperty("NotificationID") int notId, 
@@ -20,6 +23,7 @@ public class EventNotificationJSON extends NotificationJSON {
                                     @JsonProperty("Event")EventJSON event, UserJSON user) {
         super(notId, date, Notification.EVENT, user);
         this.event = event;
+        this.canceled = false;
     }
 
     public EventJSON getEvent() {
@@ -31,4 +35,11 @@ public class EventNotificationJSON extends NotificationJSON {
     }
 
 
+    public boolean isCanceled(){
+        return canceled;
+    }
+
+    public void setCanceled(boolean canceled){
+        this.canceled = canceled;
+    }
 }

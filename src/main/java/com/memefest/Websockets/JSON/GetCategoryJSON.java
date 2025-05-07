@@ -10,7 +10,7 @@ import com.memefest.DataAccess.JSON.CategoryJSON;
 @JsonRootName("GetCategory")
 public class GetCategoryJSON {
 
-    @JsonProperty("categories")
+    @JsonProperty("Categories")
     private Set<CategoryJSON> categories;
     
     @JsonCreator

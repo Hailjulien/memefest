@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.memefest.DataAccess.User;
+
 import java.util.Set;
 
 @JsonRootName("User")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "UserId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "UserId")
 public class UserJSON {
   @JsonProperty("UserId")
   private int userId;
@@ -164,6 +166,31 @@ public class UserJSON {
     this.canceled = false;
   }
   
+  @Override
+  public int hashCode(){
+    int result = 40;
+    if(username != null);
+      result = result * this.username.hashCode();
+    if(this.email != null)
+      result = result * this.email.hashCode();
+    if(this.contacts != 0)
+      result = result * this.contacts;
+    if(this.userId != 0)
+      result = result * this.userId;
+    if(this.firstName != null && this.lastName != null)
+      result = result + (this.firstName.hashCode() + this.lastName.hashCode());
+    return result;
+  }
+  
+  @Override
+  public boolean equals(Object o){
+    if(o instanceof UserJSON && this.hashCode() == o.hashCode())
+      return true;
+    else
+      return false;
+  }
+
+
   @JsonProperty("Username")
   public String getUsername() {
     return this.username;

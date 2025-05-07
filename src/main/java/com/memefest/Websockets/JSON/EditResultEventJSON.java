@@ -3,8 +3,10 @@ package com.memefest.Websockets.JSON;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.EventJSON;
 
+@JsonRootName("EditResultEvent")
 public class EditResultEventJSON extends EditResultJSON{
     
     @JsonProperty("Events")

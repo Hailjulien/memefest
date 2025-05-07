@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonRootName("Category")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "CatId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "CatId")
 public class CategoryJSON {
     
     @JsonProperty("CatId")

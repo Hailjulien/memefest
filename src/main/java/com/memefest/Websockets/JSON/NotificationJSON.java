@@ -13,7 +13,7 @@ import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "NotificationID")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "NotificationID")
 @JsonRootName("Notification")
 public class NotificationJSON {
     
@@ -30,6 +30,9 @@ public class NotificationJSON {
 
     @JsonProperty("User")
     private UserJSON user;
+
+    @JsonProperty("Canceled")
+    private boolean canceled;
 
     
     @JsonCreator
@@ -69,4 +72,11 @@ public class NotificationJSON {
         this.user = user;
     }
 
+    public boolean isCanceled(){
+        return this.canceled;
+    }
+
+    public void cancel(boolean canceled){
+        this.canceled = canceled;
+    }
 }

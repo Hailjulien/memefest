@@ -1,4 +1,5 @@
 package com.memefest.Websockets.MessageHandlers;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.memefest.DataAccess.JSON.EventJSON;
@@ -7,6 +8,9 @@ import com.memefest.Websockets.JSON.EditEventJSON;
 import com.memefest.Websockets.JSON.EditResultEventJSON;
 
 import jakarta.websocket.Session;
+import jakarta.ejb.EJBException;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.RollbackException;
 import jakarta.websocket.MessageHandler;
 
 public class EditEventMessageHandler implements MessageHandler.Whole<EditEventJSON>{
@@ -21,27 +25,54 @@ public class EditEventMessageHandler implements MessageHandler.Whole<EditEventJS
 
    //add customisation filter according to users tastes here
       @Override
-   public  void onMessage(EditEventJSON eventEdit){
+   public  void onMessage(EditEventJSON eventEdit){ 
         Set<EventJSON> events = eventEdit.getEvents();
+        
         EditResultEventJSON successEdits = new EditResultEventJSON(null, 200, "Success");
         EditResultEventJSON failureEdits = new EditResultEventJSON(null, 203, "Could not edit");
 
-           for(EventJSON event : events){
-            eventOps.editEvent(event);
-            EventJSON eventEntity = eventOps.getEventInfo(event);
-            if(eventEntity!= null){
-                Set<EventJSON> resEvents = successEdits.getEvents();
-                resEvents.add(eventEntity);
-                successEdits.setEvents(resEvents);
+        for(EventJSON event : events){
+            try{
+                eventOps.editEvent((EventJSON)event);
+                try{
+                    EventJSON eventEntity = eventOps.getEventInfo((EventJSON)event);
+                    Set<EventJSON> resEvent = successEdits.getEvents();
+                    if(resEvent == null)
+                        resEvent = new HashSet<EventJSON>();
+                    resEvent.add(eventEntity);
+                    successEdits.setEvents(resEvent);
+                } 
+                catch (NoResultException e) {
+                        Set<EventJSON> resEvent = failureEdits.getEvents();
+                        if(resEvent == null)
+                            resEvent = new HashSet<EventJSON>();
+                        resEvent.add(event);
+                        failureEdits.setEvents(resEvent);
+                }
+                catch (RollbackException ex) {
+                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
+                    Set<EventJSON> resEvents = failureEdits.getEvents();
+                    if(resEvents == null)
+                        resEvents = new HashSet<EventJSON>();
+                    resEvents.add(event);
+                    failureEdits.setEvents(resEvents);
+                }
             }
-            else{
-                Set<EventJSON> resReposts = failureEdits.getEvents();
-                resReposts.add(event);
-                failureEdits.setEvents(resReposts);
+            catch(EJBException ex){
+                failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
+                Set<EventJSON> resEvents = failureEdits.getEvents();
+                if(resEvents == null)
+                    resEvents= new HashSet<EventJSON>();
+                resEvents.add(event);
+                failureEdits.setEvents(resEvents);
             }
+                    
         }
-        session.getAsyncRemote().sendObject(successEdits);
-        session.getAsyncRemote().sendObject(failureEdits);
-        //send updated post to user who initiated the edit operation        
+        if(successEdits.getEvents() != null)
+            session.getAsyncRemote().sendObject(successEdits);
+        if(failureEdits.getEvents() != null)
+            session.getAsyncRemote().sendObject(failureEdits);
+               
    }
+          
 }

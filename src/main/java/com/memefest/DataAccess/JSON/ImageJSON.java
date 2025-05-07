@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonRootName("Image")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "ImageId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "ImageId")
 public class ImageJSON {
     
     @JsonProperty("ImageId")

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "EditId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "EditId")
 public abstract class EditJSON {
     @JsonProperty("EditableType")
     private Editable editable;
@@ -16,6 +16,7 @@ public abstract class EditJSON {
     @JsonCreator
     public EditJSON(@JsonProperty("EditableType") Editable editable){
         this.editable = editable;
+        editId = 40;
     }
     
     public Editable getEditable(){

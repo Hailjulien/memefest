@@ -1,10 +1,13 @@
-package com.memefest.Websockets.JSON;
+package com.memefest.Websockets.JSON;   
 import com.memefest.DataAccess.JSON.RepostJSON;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+
 import java.util.Set;
 
-public abstract class EditRepostJSON extends EditJSON{
+@JsonRootName("EditRepost")
+public class EditRepostJSON extends EditJSON{
 
     @JsonProperty("Posts")
     private Set<RepostJSON> reposts; 

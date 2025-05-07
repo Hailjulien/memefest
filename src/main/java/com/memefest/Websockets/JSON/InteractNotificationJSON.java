@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 
+//to be sent to user email probably
 @JsonRootName("InteractNotification")
 public class InteractNotificationJSON extends NotificationJSON{
 

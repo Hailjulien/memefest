@@ -15,7 +15,7 @@ import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 
 @JsonRootName("Event")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "EventID")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "EventID")
 public class EventJSON implements Serializable{
     
     @JsonProperty("EventID")

@@ -30,4 +30,6 @@ public class TopicPostNotificationJSON extends PostNotificationJSON{
     public void setTopicPost(TopicPostJSON topicPost) {
         this.topicPost = topicPost;
     }
+
+    
 }

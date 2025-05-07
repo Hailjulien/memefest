@@ -1,7 +1,6 @@
 package com.memefest.Websockets;
 
 import com.memefest.Services.EventOperations;
-import com.memefest.Services.Impl.EventService;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateful;

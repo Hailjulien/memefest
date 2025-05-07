@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 @JsonRootName("Topic")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "TopicId")
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "TopicId")
 public class TopicJSON implements Serializable{
   @JsonProperty("TopicId")
   private int topicId;

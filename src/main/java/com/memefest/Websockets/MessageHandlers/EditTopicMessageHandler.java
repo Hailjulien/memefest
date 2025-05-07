@@ -1,12 +1,17 @@
 package com.memefest.Websockets.MessageHandlers;
 
+import java.util.HashSet;
 import java.util.Set;
+
 import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Websockets.JSON.EditResultTopicJSON;
 import com.memefest.Websockets.JSON.EditTopicJSON;
 
 import jakarta.websocket.Session;
+import jakarta.ejb.EJBException;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.RollbackException;
 import jakarta.websocket.MessageHandler;
 
 public class EditTopicMessageHandler implements MessageHandler.Whole<EditTopicJSON>{
@@ -25,23 +30,48 @@ public class EditTopicMessageHandler implements MessageHandler.Whole<EditTopicJS
         Set<TopicJSON> topics = editTopic.getTopics();
         EditResultTopicJSON resultTopic = new EditResultTopicJSON(null,200, "success");
         EditResultTopicJSON notEditableTopic = new EditResultTopicJSON(null,203, "Could not edit");
-
         for(TopicJSON topic : topics){
-            topicOps.editTopic(topic);
-            TopicJSON topicEntity = topicOps.getTopicInfo(topic);
-            if(topicEntity!= null){
-                Set<TopicJSON> resTopics = resultTopic.getTopics();
-                resTopics.add(topicEntity);
-                resultTopic.setTopics(resTopics);
+            try{
+                try{
+                    topicOps.editTopic(topic);
+                    TopicJSON topicEntity = topicOps.getTopicInfo(topic);
+                    Set<TopicJSON> resCats = resultTopic.getTopics();
+                    if(resCats == null)
+                        resCats = new HashSet<TopicJSON>();
+                    resCats.add(topicEntity);
+                    resultTopic.setTopics(resCats);
+                } 
+                catch (NoResultException e) {
+                    notEditableTopic.setResultMessage(resultTopic.getResultMessage() + "," + e.getMessage());
+                    Set<TopicJSON> resCats = resultTopic.getTopics();
+                    if(resCats == null)
+                        resCats = new HashSet<TopicJSON>();
+                    resCats.add(topic);
+                    notEditableTopic.setTopics(resCats);
+                }
+                catch (RollbackException ex) {
+                    notEditableTopic.setResultMessage(notEditableTopic.getResultMessage() + "," + ex.getMessage());
+                    Set<TopicJSON> resCats = notEditableTopic.getTopics();
+                    if(resCats == null)
+                        resCats = new HashSet<TopicJSON>();
+                    resCats.add(topic);
+                    notEditableTopic.setTopics(resCats);
+                }
             }
-            else{
-                Set<TopicJSON> resTopics = notEditableTopic.getTopics();
-                resTopics.add(topicEntity);
-                notEditableTopic.setTopics(resTopics);
+            catch(EJBException ex){                    
+                notEditableTopic.setResultMessage(notEditableTopic.getResultMessage() + "," + ex.getMessage());
+                Set<TopicJSON> resCats = notEditableTopic.getTopics();
+                if(resCats == null)
+                    resCats = new HashSet<TopicJSON>();
+                resCats.add(topic);
+                notEditableTopic.setTopics(resCats);
             }
+                    
         }
-        session.getAsyncRemote().sendObject(resultTopic);
-        session.getAsyncRemote().sendObject(notEditableTopic);
+        if(resultTopic.getTopics() != null)
+            session.getAsyncRemote().sendObject(resultTopic);
+        if(notEditableTopic.getTopics() != null)
+            session.getAsyncRemote().sendObject(notEditableTopic);                   
    }
 }   
 

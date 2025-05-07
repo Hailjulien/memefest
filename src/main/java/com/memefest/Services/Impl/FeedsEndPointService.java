@@ -3,7 +3,6 @@ package com.memefest.Services.Impl;
 import java.util.HashSet;
 
 import com.memefest.DataAccess.User;
-import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.Services.EventOperations;
@@ -12,7 +11,6 @@ import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Websockets.JSON.EventPostNotificationJSON;
-import com.memefest.Websockets.JSON.PostNotificationJSON;
 
 import jakarta.websocket.Session;
 import jakarta.annotation.PostConstruct;
