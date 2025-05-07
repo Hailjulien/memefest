@@ -1,0 +1,65 @@
+package com.memefest.DataAccess;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
+import jakarta.persistence.Table;
+
+@NamedQueries({
+  @NamedQuery(
+    name = "UserFollower.findByFollowerId",
+    query = "SELECT u FROM UserFollowerEntity u WHERE u.id.followerId = :followerId"), 
+  @NamedQuery(
+    name = "UserFollower.findByUserId", 
+    query = "SELECT u FROM UserFollowerEntity u WHERE u.id.userId = :userId")
+})
+@Entity(name = "UserFollowerEntity")
+@Table(name = "USER_FOLLOWS")
+public class UserFollower {
+  @EmbeddedId
+  private UserFollowerId id;
+  
+  @ManyToOne(cascade = {CascadeType.PERSIST})
+  @JoinColumn(name = "UserId")
+  private User user;
+  
+  @ManyToOne(cascade = {CascadeType.PERSIST})
+  @JoinColumn(name = "Follower_Id")
+  private User follower;
+  
+  public User getUser() {
+    return this.user;
+  }
+  
+  public void setUser(User user) {
+    this.user = user;
+  }
+  
+  public void setFollower(User follower) {
+    this.follower = follower;
+  }
+  
+  public User getFollower() {
+    return this.follower;
+  }
+  
+  public void setFollower_Id(int followerId) {
+    this.id.setFollowerId(followerId);
+  }
+  
+  public void setUserId(int userId) {
+    this.id.setUserId(userId);
+  }
+  
+  public int getFollower_Id() {
+    return this.id.getFollowerId();
+  }
+  
+  public int getUserId() {
+    return this.id.getUserId();
+  }
+}
