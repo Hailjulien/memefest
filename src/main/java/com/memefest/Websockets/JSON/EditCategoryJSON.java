@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 @JsonRootName("EditCategory")
 public class EditCategoryJSON extends EditJSON{
     
-    @JsonProperty("Catrgories")
+    @JsonProperty("Categories")
     private Set<CategoryJSON> categories; 
     
     @JsonCreator

@@ -1,6 +1,8 @@
 package com.memefest.Services.Impl;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Set;
 
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.JSON.PostJSON;
@@ -11,6 +13,8 @@ import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
 import com.memefest.Websockets.JSON.EventPostNotificationJSON;
+import com.memefest.Websockets.JSON.PostNotificationJSON;
+import com.memefest.Websockets.JSON.TopicPostNotificationJSON;
 
 import jakarta.websocket.Session;
 import jakarta.annotation.PostConstruct;
@@ -187,20 +191,45 @@ public class FeedsEndPointService  implements FeedsOperations   {
     @Asynchronous
     public void sendToSubscribers(Object message){
         if(message instanceof EventPostNotificationJSON){
-            for(User user : userOps.getUserEntities()){
-                EventPostNotificationJSON postNot = (EventPostNotificationJSON) message;
-                postNot.setUser(new UserJSON(user.getUserId(),user.getUsername()));
-                notOps.createEventPostNotification(postNot);
+            EventPostNotificationJSON postNot = (EventPostNotificationJSON) message;
+            Set<UserJSON> users = new  HashSet<UserJSON>();
+            users.addAll(userOps.getFollowers(postNot.getUser()));
+            for(UserJSON user : users){ 
+                EventPostNotificationJSON postNotInst = new EventPostNotificationJSON(0, postNot.getEventPost(), LocalDateTime.now(), user);
+                notOps.editEventPostNotification(postNotInst);
                 clientPeers.stream().filter(candidate ->{
                     return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
                 }).forEach(candidate ->{
                     sendToSession(candidate, postNot);
-                }
-                );    
+                });    
             }
-            
-            //add logic to send message to event followers
-            sendToAll(message);
+        }
+        else if(message instanceof TopicPostNotificationJSON){
+            TopicPostNotificationJSON postNot = (TopicPostNotificationJSON) message;
+             Set<UserJSON> users = new  HashSet<UserJSON>();
+            users.addAll(userOps.getFollowers(postNot.getUser()));
+            users.addAll(topicOps.getTopicInfo(postNot.getTopicPost().getTopic()).getFollowedBy());
+            for(UserJSON user : users){
+                TopicPostNotificationJSON postNotInst = new TopicPostNotificationJSON(0, postNot.getTopicPost(), LocalDateTime.now(), user);
+                notOps.editTopicPostNotification(postNotInst);
+                clientPeers.stream().filter(candidate ->{
+                    return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
+                }).forEach(candidate ->{
+                    sendToSession(candidate, postNot);
+                });    
+            }
+        }
+        else if(message instanceof PostNotificationJSON){
+            PostNotificationJSON postNot = (PostNotificationJSON) message;
+            for(UserJSON user : userOps.getFollowers(postNot.getUser())){
+                PostNotificationJSON postNotInst = new PostNotificationJSON(0,postNot.getPost(), LocalDateTime.now(), user);
+                notOps.editPostNotification(postNotInst);
+                clientPeers.stream().filter(candidate ->{
+                    return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
+                }).forEach(candidate ->{
+                    sendToSession(candidate, postNot);
+                });    
+            }
         }
     }
 

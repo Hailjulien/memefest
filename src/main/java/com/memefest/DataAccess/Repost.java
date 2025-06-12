@@ -1,6 +1,7 @@
 package com.memefest.DataAccess;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,20 +13,12 @@ import jakarta.persistence.Table;
 @Entity(name = "RepostEntity")
 @Table(name = "REPOST")
 public class Repost {
-    
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Repost_Id")
-    private int repostId;
-
-    @Column(name = "Post_Id", nullable = false, insertable = false, updatable= false)
-    private int postId;
-
-    @Column(name = "UserId", nullable = false, insertable = false, updatable= false)
-    private int userId;
+    @EmbeddedId
+    private RepostId repostId = new RepostId();
 
     @ManyToOne
-    @JoinColumn(name = "User_Id")
+    @JoinColumn(name = "UserId")
     private User user;
 
     @ManyToOne
@@ -36,20 +29,20 @@ public class Repost {
         this.user = user;
     }
 
-    public void setPost_Id(Post post) {
-        this.post = post;
+    public void setPost_Id(int postId) {
+        this.repostId.setPost_Id(postId);
     }
 
-    public int getRepostId() {
-        return repostId;
-    }
-
-    public int getPost_Id() {
-        return postId;
+    public int getPost_Id(){
+        return this.repostId.getPost_Id();
     }
 
     public int getUserId() {
-        return userId;
+        return this.repostId.getUserId();
+    }
+
+    public void setUserId(int userId){
+        this.repostId.setUserId(userId);
     }
 
     public User getUser() {

@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 @JsonRootName("EditEventNotifications")
 public class EditEventNotificationJSON extends EditJSON{
     
-    @JsonProperty
+    @JsonProperty("EventNotifications")
     private Set<EventNotificationJSON> eventNotifications;
 
     @JsonCreator

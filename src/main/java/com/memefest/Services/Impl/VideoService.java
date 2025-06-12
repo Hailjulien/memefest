@@ -20,7 +20,6 @@ public class VideoService implements VideoOperations{
     public void createVideo(VideoJSON video){
         Video videoEntity = new Video();
         videoEntity.setVid_Path(video.getVidPath());
-        videoEntity.setVid_Title(video.getTitle());
         entityManager.persist(videoEntity);    
     }
 
@@ -32,8 +31,6 @@ public class VideoService implements VideoOperations{
             if(video.getVidId() != 0 || video.getVidId() != 1){
                 videoEntity.setVid_Id(video.getVidId());
             }
-            if(video.getTitle()!= null && !video.getTitle().equalsIgnoreCase(videoEntity.getVid_Title()))
-                videoEntity.setVid_Title(video.getTitle());
             entityManager.merge(videoEntity);
             removeVideo(video);
         }
@@ -74,7 +71,7 @@ public class VideoService implements VideoOperations{
     public VideoJSON getVideoInfo(VideoJSON video){
         try{
             Video videoEntity = getVideoEntity(video);
-            VideoJSON videoJSON = new VideoJSON(videoEntity.getVid_Id(), videoEntity.getVid_Path(), videoEntity.getVid_Title());
+            VideoJSON videoJSON = new VideoJSON(videoEntity.getVid_Id(), videoEntity.getVid_Path(), null);
             return videoJSON;
         }
         catch(NoResultException ex){

@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedNativeQueries;
 import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
@@ -59,6 +60,17 @@ public class Image {
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "UserId")
     private User user;
+
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "image", optional =  true)
+    private TopicImage topic;
+
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "image", optional =  true)
+    private PostImage post;
+    
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "image", optional =  true)
+    @JoinColumn(name = "Img_Id")
+    private EventImage event;
+
 
     public int getImg_Id() {
         return this.imageId;

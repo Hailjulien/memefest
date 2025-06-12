@@ -72,7 +72,7 @@ public class User {
   @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "user", optional = false)
   private UserSecurity securityDetails;
   
-  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
+  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}, mappedBy = "user")
   private Set<Post> posts;
   
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
@@ -93,7 +93,7 @@ public class User {
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
   private Set<Repost> reposts;
 
-  @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.PERSIST}, mappedBy = "user")
+  @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.MERGE}, mappedBy = "user")
   private Set<Event> events;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "follower")

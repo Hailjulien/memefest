@@ -7,41 +7,59 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @NamedQueries({
   @NamedQuery(
     name = "TopicVideo.getByTopicId", 
-    query = "SELECT tc FROM TopicVideoEntity tc WHERE tc.topicId = :topicId"),
+    query = "SELECT tc FROM TopicVideoEntity tc WHERE tc.topicVidId.topicId = :topicId"),
   @NamedQuery(
     name = "TopicVideo.getByVideoId",
-    query = "SELECT tc FROM TopicVideoEntity tc WHERE tc.vidId = :videoId")
+    query = "SELECT tc FROM TopicVideoEntity tc WHERE tc.topicVidId.vidId = :videoId")
 })
 @Entity(name = "TopicVideoEntity")
 @Table(name = "TOPIC_VIDEO")
-public class TopicVideo  extends Video{    
+public class TopicVideo{    
+  
+  @EmbeddedId
+  private TopicVideoId topicVidId = new TopicVideoId();
 
-  @Column(name = "Topic_Id", nullable = false, insertable = false, updatable = false)
-  private int topicId;
-
-  @ManyToOne
+  @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "Topic_Id", referencedColumnName = "Topic_Id")
   private Topic topic;
 
-  public void setTopic(Topic topic){
-      this.topic = topic;
+  @OneToOne(cascade = {CascadeType.MERGE})
+  @JoinColumn(name= "Vid_Id", referencedColumnName ="Vid_Id")
+  private Video video;
+  
+  public int getTopic_Id() {
+    return this.topicVidId.getTopic_Id();
   }
 
+  public void setTopic_Id(int topicId){
+    this.topicVidId.setTopic_Id(topicId);
+  }
+  
+  public void setVid_Id(int vidId) {
+    this.topicVidId.setVid_Id(vidId);
+  }
+
+  public void setTopic(Topic topic) {
+    this.topic = topic;
+    this.setTopic_Id(topic.getTopic_Id());
+  }
+  
   public Topic getTopic() {
-      return topic;
+    return this.topic;
   }
-
-  public void setTopicId(int topicId) {
-      this.topicId = topicId;
+  
+  public Video getVideo(){
+    return this.video;
   }
-
-  public int getTopicId() {
-      return topicId;
+  public void setVideo(Video video){
+    this.video = video;
+    this.topicVidId.setVid_Id(video.getVid_Id());
   }
 }
 

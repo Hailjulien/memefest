@@ -20,15 +20,16 @@ import jakarta.persistence.NamedNativeQuery;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 
 @NamedNativeQueries({
     @NamedNativeQuery(name = "Post.getPostByComment",
-    query = "SELECT TOP(1) * FROM POST P.Post_Id as postId, P.Comment as comment, P.Created as created," 
-                   + "P.Upvotes as upvotes, P.downvotes as downvotes "
-                + "WHERE P.Comment LIKE CONCAT('%', :comment, '%')", resultSetMapping = "PostEntityMapping"
+    query = "SELECT TOP(1) P.Post_Id as postId, P.Comment as comment, P.Created as created," 
+                   + "P.Upvotes as upvotes, P.downvotes as downvotes, P.UserId as userId FROM POST P "
+                + "WHERE P.Comment LIKE CONCAT(CONCAT( '%',?),'%')", resultSetMapping = "PostEntityMapping"
     )
 })
 @SqlResultSetMappings(
@@ -36,7 +37,7 @@ import jakarta.persistence.Table;
         name = "PostEntityMapping",
         entities = {
             @EntityResult(
-                entityClass = MainCategory.class,
+                entityClass = Post.class,
                 fields = {
                     @FieldResult(name = "postId", column = "postId"),
                     @FieldResult(name = "comment", column = "comment"),
@@ -80,23 +81,35 @@ public class Post {
     @Column(name = "Downvotes")
     private int downvotes;
 
+    
+    /* 
     @Column(name = "Video_Id",nullable = true, insertable = true, updatable = true)
     private int videoId;
 
     @Column(name = "Img_Id", nullable = true, insertable = true, updatable = true)
     private int imageId;
+    */
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "UserId")
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "post", optional = true)
+    private PostReply parent;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "post", optional = true)
+    private TopicPost topic;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "UserId", referencedColumnName = "UserId")
     private User user;   
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
     private Set<PostVideo> videos;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
-    private Set<PostImage> images;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    private Set<EventPost> eventPosts;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    private Set<PostImage> images;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "parent")
     private Set<PostReply> postWithReplys;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
@@ -209,5 +222,7 @@ public class Post {
         return this.reposts;
     }
 
-
+    public Set<EventPost> getEventPosts(){
+        return this.eventPosts;
+    }
 }

@@ -11,7 +11,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
 
-@Stateless(name =  "ImageServide")
+@Stateless(name =  "ImageService")
 public class ImageService implements ImageOperations{
     
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)

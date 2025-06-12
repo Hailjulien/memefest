@@ -50,7 +50,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
   
   private void performAuthorization(String[] roles) {
     AuthenticationStatus status = this.secContext.authenticate(this.request, this.response, null);
-    if (status != AuthenticationStatus.SUCCESS)
+    if(status != AuthenticationStatus.SUCCESS)
       throw new AuthenticationDenied("Authentication failed"); 
     for (int i = 0; i < roles.length; i++) {
       if (this.request.isUserInRole(roles[i]))

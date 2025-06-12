@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityResult;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.FieldResult;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -12,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedNativeQueries;
 import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
@@ -46,26 +48,27 @@ public class Video {
     @Column(name = "Vid_Id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int vidId;
-
-    @Column(name = "Vid_Title")
-    private String vidTitle;
     /* 
     @Column(name = "Vid_Description")
     private String vidDescription;
     */
 
+    
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "UserId")
     private User user;
 
-    @ManyToOne(cascade =  {CascadeType.PERSIST})
-    @JoinColumn(name = "Img_Id")
-    private Event event;
+    /* 
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "video", optional =  true)
+    private TopicVideo topic;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST})
-    @JoinColumn(name = "Vid_Id",nullable = false, insertable = false, updatable = false)
-    private Post post;
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "video", optional =  true)
+    private PostVideo post;
+    */
+    @OneToOne(fetch =FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "video", optional =  true)
+    private EventVideo event;
 
+    
     @Column(name = "Vid_Path")
     private String vidUrl;
 
@@ -77,13 +80,7 @@ public class Video {
         this.vidId = vidId;
     }
 
-    public String getVid_Title() {
-        return this.vidTitle;
-    }
 
-    public void setVid_Title(String vidTitle) {
-        this.vidTitle = vidTitle;
-    }
 
     public User getUser(){
         return this.user;
@@ -91,15 +88,6 @@ public class Video {
 
     public void setUser(User user){
         this.user = user;
-    }
-
-
-    public Post getPost(){
-        return this.post;
-    }
-
-    public void setPost(Post post){
-        this.post = post;
     }
 
     public String getVid_Path() {

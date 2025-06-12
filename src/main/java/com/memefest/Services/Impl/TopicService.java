@@ -4,19 +4,26 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.memefest.DataAccess.MainCategory;
+import com.memefest.DataAccess.Category;
+import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.SubCategory;
+import com.memefest.DataAccess.SubCategoryId;
 import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.TopicCategory;
+import com.memefest.DataAccess.TopicCategoryId;
 import com.memefest.DataAccess.TopicFollower;
 import com.memefest.DataAccess.TopicFollowerId;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.JSON.CategoryJSON;
+import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
@@ -91,6 +98,26 @@ public class TopicService implements TopicOperations{
         }
     }
 
+    public Map<TopicJSON, LocalDateTime> getScheduledTopics(TopicJSON topic){
+        Map<TopicJSON, LocalDateTime> events = new HashMap<TopicJSON, LocalDateTime>(); 
+        for(Timer timer : timerService.getAllTimers()){
+            if(timer.getInfo() instanceof TopicJSON){
+                TopicJSON timerInfo = (TopicJSON) timer.getInfo();
+                if(timerInfo.getTopicId() == topic.getTopicId() || timerInfo.getTitle().equalsIgnoreCase(topic.getTitle())){
+                    ScheduleExpression schedule = timer.getSchedule();
+                    LocalDateTime dateTime = LocalDateTime.of(Integer.parseInt(schedule.getYear()), 
+                                            Integer.parseInt(schedule.getMonth()), 
+                                            Integer.parseInt(schedule.getDayOfMonth()),
+                                            Integer.parseInt(schedule.getHour()),
+                                            Integer.parseInt(schedule.getMinute()), 
+                                            Integer.parseInt(schedule.getSecond()));
+                    events.put(timerInfo, dateTime);   
+                }
+            }
+        }
+        return events;
+    } 
+
     @Timeout
     public void sendTopic(Timer timer) {
         if(timer.getInfo() instanceof TopicJSON){
@@ -100,6 +127,17 @@ public class TopicService implements TopicOperations{
         }
     }
 
+    public void editScheduledTopic(Map<TopicJSON, LocalDateTime> scheduledTopics){
+        scheduledTopics.entrySet().forEach(candidate -> {
+            TopicJSON topic = candidate.getKey();
+            if(topic.isCancelled()){
+                cancelScheduledTopic(topic);
+            }
+            else{
+                createScheduledTopic(topic, candidate.getValue());
+            }
+        });
+    }
 
     public Set<TopicJSON> searchTopic(TopicJSON topic) throws NoResultException{
         List<Topic> results  = this.entityManager.createNamedQuery("Topic.searchTopic", Topic.class)
@@ -113,49 +151,42 @@ public class TopicService implements TopicOperations{
     
     //add custom exception to show object was not created
     public void createTopic(TopicJSON topic) {
-        Topic foundTopic = getTopicEntity(topic);
-        if (foundTopic != null && foundTopic.getTopic_Id() !=0 && foundTopic.getTopic_Id() !=1)
-            return;
-        foundTopic.setTitle(topic.getTitle());
-        foundTopic.setCreated(Date.from(topic.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-        this.entityManager.persist(foundTopic);
-        createTopicCategories(topic);
-        removeTopicCategories(topic);
-    }
-  
-    public Set<CategoryJSON> getTopicCategories(TopicJSON topic) throws NoResultException{
-        Topic topicEntity = getTopicEntity(topic);
-        if (topicEntity == null)
-            return null; 
-        Set<CategoryJSON> topicCategories = new HashSet<>();
-        TopicCategory topicCatEntity = getTopicCategory(topicEntity);
-        topicCategories = topicCatEntity.getCategories().stream().map(topicCatEntityInst ->{
-        CategoryJSON catJson = new CategoryJSON(topicCatEntityInst.getCat_Id(), 
-                                topicCatEntityInst.getCat_Name(), null, null, null);
-            return catJson;
-        }).collect(Collectors.toSet());
-        return topicCategories;
-    }
-    
-    //add custom exception to show object was not created
-    public void createTopicCategories(TopicJSON topic) {
-        Topic foundTopic = null;
         try{
-            foundTopic = getTopicEntity(topic);
+             getTopicEntity(topic);
         }
         catch(NoResultException ex){
-            foundTopic = new Topic();
-            Set<CategoryJSON> categories = topic.getCategories();
-            Set<SubCategory> subCategories  = categories.stream().map(candidate ->
-            {
-                try{
-                    return catOps.getSubCategoryEntity(candidate);
-                }
-                catch(NoResultException exp){
+            Topic foundTopic = new Topic();
+            foundTopic.setTitle(topic.getTitle());
+            //foundTopic.setCreated(Date.from(topic.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
+            this.entityManager.persist(foundTopic);
+        }
+    }
+    //add custom exception to show object was not created
+    public void createTopicCategories(TopicJSON topic) throws NoResultException{
+        Topic foundTopic = getTopicEntity(topic);
+        Set<CategoryJSON> categories = topic.getCategories();
+        if(categories == null) 
+            return;    
+        for(CategoryJSON category : categories){
+            if(category == null)
+                continue;
+            Category categoryEntity = null;
+            try{
+                categoryEntity = catOps.getCategoryEntity(category);
+            }
+            catch(NoResultException ex){    
+                catOps.editCategory(category);
+            }
+            categoryEntity = catOps.getCategoryEntity(category);
+            if (categoryEntity == null)
+                continue;
+            TopicCategory topicCategory = new TopicCategory();
+            topicCategory.setCategory(categoryEntity);
+            topicCategory.setTopic(foundTopic);
+            entityManager.persist(topicCategory);
 
-                }
-                return null;
-            }).collect(Collectors.toSet());
+        }
+            /* 
             foundTopic.setSubCategories(subCategories);
             MainCategory mainCat = null;
             for (CategoryJSON candidate : categories){
@@ -169,18 +200,27 @@ public class TopicService implements TopicOperations{
                 catch(NoResultException exp){
                     continue;
                 }
-            }            
-        }
+            }
+            */            
     }   
   
     public void removeTopicCategories(TopicJSON topic) {
+        if(topic.getCategories() == null)
+            return;
         try{
             Topic foundTopic = getTopicEntity(topic);
+            if(topic.getCancelCategories() == null)
+                return;
             Set<CategoryJSON> categories = topic.getCancelCategories();
             for (CategoryJSON cat : categories) {
-                TopicCategory topicCategory = getTopicCategory(foundTopic);
-                if (topicCategory != null)
-                this.entityManager.remove(topicCategory); 
+                try{
+                    TopicCategory topicCategory = getTopicCategory(foundTopic, catOps.getCategoryEntity(cat));
+                    if (topicCategory != null)
+                        this.entityManager.remove(topicCategory);
+                }
+                catch(NoResultException ex){
+                    continue;
+                }       
             } 
         }
         catch(NoResultException ex){
@@ -188,23 +228,37 @@ public class TopicService implements TopicOperations{
         }
     }
 
+    private TopicCategory getTopicCategory(Topic topic, Category category){
+        TopicCategoryId topicCategoryId = new TopicCategoryId();
+        topicCategoryId.setCat_Id(category.getCat_Id());
+        topicCategoryId.setTopic_Id(topic.getTopic_Id());
+        return entityManager.find(TopicCategory.class, topicCategoryId);
+    }
+
   
-    private TopicCategory getTopicCategory(Topic topic){
-        if (topic == null)
-            return null;
-        TopicCategory foundTopicCategory = (TopicCategory)this.entityManager.find(TopicCategory.class, topic.getTopic_Id());
-        return foundTopicCategory;
+    private Set<CategoryJSON> getTopicCategories(TopicJSON topic){
+        Topic topicEntity = getTopicEntity(topic);
+        Set<CategoryJSON> topics = new HashSet<CategoryJSON>();
+        Stream<TopicCategory> topicCats = entityManager.createNamedQuery("TopicCategory.getByTopicId", TopicCategory.class)
+              .setParameter("topicId", topicEntity.getTopic_Id()).getResultStream();
+        topics = topicCats.map(candidate ->{
+        return new CategoryJSON(candidate.getCat_Id(),null,null,null,null);
+        }).collect(Collectors.toSet());
+    return topics;
     }
   
     public Topic getTopicEntity(TopicJSON topic) throws NoResultException {
         Topic foundTopic = null;
-        if ((topic != null) && topic.getTopicId() != 0 && topic.getTopicId() != 1) {
-            foundTopic = (Topic)this.entityManager.find(Topic.class, Integer.valueOf(topic.getTopicId()));
-            return foundTopic;
+        if ((topic != null) && topic.getTopicId() != 0) {
+            foundTopic = (Topic)this.entityManager.find(Topic.class, topic.getTopicId());
+            if(foundTopic == null)
+                throw new NoResultException("Topic with topic Id not found");
         } 
-        Query query = this.entityManager.createNamedQuery("Topic.getTopicByTitle");
-        query.setParameter("title","%" + topic.getTitle() + "%");
-        foundTopic = (Topic)query.getSingleResult();
+        else if(topic.getTitle() != null && topic !=null){
+            foundTopic = this.entityManager.createNamedQuery("Topic.getTopicByTitle", Topic.class)
+                            .setParameter(1, topic.getTitle()).getSingleResult();
+        }
+        else throw new NoResultException();
         return foundTopic;
     }
     
@@ -302,26 +356,37 @@ public class TopicService implements TopicOperations{
     //add custom exception to show object was not created
     public void editTopic(TopicJSON topic) {
         Topic foundTopic = null;
+        if(topic.isCancelled())
+            removeTopic(topic);
+        if (topic.getCategories() != null && topic.getCategories().size() > 0)
+                for (CategoryJSON category : topic.getCategories())
+                    catOps.editCategory(category);
         try {
             foundTopic = getTopicEntity(topic);
+            if (foundTopic == null)
+                return; 
+            if (topic.getTitle() != null && topic.getTitle().equalsIgnoreCase(foundTopic.getTitle()))
+                foundTopic.setTitle(topic.getTitle()); 
+            if (topic.getCreated() != null )
+                foundTopic.setCreated(Date.from(topic.getCreated().atZone(ZoneId.systemDefault()).toInstant() ));      
         } catch (NoResultException e) {
+            createTopic(topic);
+            editTopic(topic);
             return;
         }        
-        if (foundTopic == null)
-            return; 
-        if (topic.getTitle() != null && topic.getTitle().equalsIgnoreCase(foundTopic.getTitle()))
-            foundTopic.setTitle(topic.getTitle()); 
-        if (topic.getCreated() != null )
-            foundTopic.setCreated(Date.from(topic.getCreated().atZone(ZoneId.systemDefault()).toInstant() )); 
-        if (topic.getPosts() != null && topic.getPosts().size() > 0)
-        for (PostJSON post : topic.getPosts())
-            postOperations.editPost(post);  
-        if (topic.getCategories() != null && topic.getCategories().size() > 0)
-        for (CategoryJSON category : topic.getCategories())
-            catOps.editCategory(category);  
-        if (topic.getFollowedBy() != null && topic.getFollowedBy().size() > 0)
-            editTopicFollowers(topic); 
         this.entityManager.merge(foundTopic);
+        if (topic.getPosts() != null && topic.getPosts().size() > 0)
+                for (PostJSON post : topic.getPosts())
+                    postOperations.editPost(post);
+        if (topic.getFollowedBy() != null && topic.getFollowedBy().size() > 0)
+                editTopicFollowers(topic);
+        createTopicCategories(topic);
+        try{
+            removeTopicCategories(topic);
+        }
+        catch(NoResultException ex){
+            ex.printStackTrace();
+        }
     }
   
     public void removeTopic(TopicJSON topic) {
@@ -335,7 +400,7 @@ public class TopicService implements TopicOperations{
             }
             if (foundTopic != null) {
                 for (PostJSON post : topic.getPosts())
-                    postOperations.removePost(post); 
+                    postOperations.editPost(post); 
                 removeTopicFollowers(topic);
                 this.entityManager.remove(foundTopic);
             } 
@@ -343,26 +408,27 @@ public class TopicService implements TopicOperations{
     }
 
     public TopicJSON getTopicInfo(TopicJSON topic) throws NoResultException{
+        if(topic == null)
+            throw new NoResultException("topic is null yo");
         Topic topicEntity = getTopicEntity(topic);
         if (topicEntity == null)
             return null;
         TopicJSON topicJSON = null; 
 
         Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
-        Set<CategoryJSON> categories = (Set<CategoryJSON>)topicEntity.getSubCategories().stream().map(catInst -> 
-                                        new CategoryJSON(catInst.getCat_Id(),
-                                            catInst.getCat_Name(), null, null, null))
-                                        .collect(Collectors.toSet());
+        Set<CategoryJSON> categories = getTopicCategories(topic);
         Set<UserJSON> users = (Set<UserJSON>)topicFollowers.stream().map(topicFollower -> new UserJSON(topicFollower.getUser()
                                 .getUsername())).collect(Collectors.toSet());
-        Set<TopicPostJSON> posts = (Set<TopicPostJSON>)topicEntity.getPosts().stream().map(topicPost -> 
-                                    new TopicPostJSON(topicPost.getPost_Id(), topicPost.getComment(), 
-                                    LocalDateTime.ofInstant(topicPost.getCreated().toInstant(), ZoneId.systemDefault()),
-                                    topicPost.getUpvotes(), topicPost.getDownvotes(), 
-                                    new UserJSON(topicPost.getUser().getUsername()), 
+        Set<TopicPostJSON> posts = (Set<TopicPostJSON>)topicEntity.getPosts().stream().map(topicPost ->{
+                                    Post postInfo = topicPost.getPost();
+                                    return new TopicPostJSON(topicPost.getPost_Id(), postInfo.getComment(), 
+                                    LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()),
+                                    postInfo.getUpvotes(), postInfo.getDownvotes(), 
+                                    new UserJSON(postInfo.getUser().getUsername()), 
                                     new TopicJSON(topicPost.getTopic().getTopic_Id(), topicPost.getTopic().getTitle(),
                                     LocalDateTime.ofInstant(topicPost.getTopic().getCreated().toInstant(), ZoneId.systemDefault()),
-                                   null, null, null))).collect(Collectors.toSet());
+                                   null, null, null));
+                                }).collect(Collectors.toSet());
         if (topicEntity != null) {
            topicJSON = new TopicJSON(topic.getTopicId(), topic.getTitle(), 
                                     LocalDateTime.ofInstant(topicEntity.getCreated().toInstant(), ZoneId.systemDefault()),

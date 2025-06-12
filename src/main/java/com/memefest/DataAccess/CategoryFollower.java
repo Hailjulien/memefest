@@ -22,14 +22,18 @@ public class CategoryFollower {
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
-  private Topic topic;
+  private Category category;
   
   public User getUser() {
     return this.user;
   }
   
-  public void setTopic(Topic topic) {
-    this.topic = topic;
+  public void setCategory(Category category) {
+    this.category = category;
+  }
+
+  public Category getCategory(){
+    return this.category;
   }
   
   public void setFollower(User follower) {

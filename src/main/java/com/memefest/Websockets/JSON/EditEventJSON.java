@@ -22,7 +22,6 @@ public class EditEventJSON extends EditJSON{
     public Set<EventJSON> getEvents() {
         return events;
     }
-
     public void setEvent(Set<EventJSON> events) {
         this.events = events;
     }

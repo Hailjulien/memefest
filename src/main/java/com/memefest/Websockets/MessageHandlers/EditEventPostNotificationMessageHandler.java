@@ -34,57 +34,27 @@ public class EditEventPostNotificationMessageHandler implements MessageHandler.W
 
         for(EventPostNotificationJSON event : eventNots){
             try{
-               if(event.isCanceled()){
-                    try{
-                        notOps.removeEventPostNotification(event);
-                        Set<EventPostNotificationJSON> eventCats  = successEdits.getEventPostNotifications();
-                        if(eventCats == null)
-                            eventCats = new HashSet<EventPostNotificationJSON>();
-                        eventCats.add(event);
-                        successEdits.setEventPostNotifications(eventNots);
-                    }
-                    catch (NoResultException e) {
-                        Set<EventPostNotificationJSON> eventCats  = successEdits.getEventPostNotifications();
-                        if(eventCats == null)
-                        eventCats = new HashSet<EventPostNotificationJSON>();
-                        eventCats.add(event);
-                        successEdits.setEventPostNotifications(eventNots);
-                    }
-                }
+                notOps.editEventPostNotification(event);
+                Set<EventPostNotificationJSON> candidates = notOps.getEventPostNotificationInfo(event);
+                if(candidates == null || candidates.size() > 1)
+                    throw new NoResultException();
                 else{
-                    try{
-                        Set<EventPostNotificationJSON> candidates = notOps.getEventPostNotificationInfo(event);
-                        if(candidates == null || candidates.size() > 1)
-                            throw new NoResultException();
-                    }
-                    catch(NoResultException ex){
-                        failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                        Set<EventPostNotificationJSON> eventCats  = failureEdits.getEventPostNotifications();
-                        if(eventCats == null)
-                            eventCats = new HashSet<EventPostNotificationJSON>();
-                        eventCats.add(event);
+                    Set<EventPostNotificationJSON> eventCats  = failureEdits.getEventPostNotifications();
+                    if(eventCats == null)
+                        eventCats = new HashSet<EventPostNotificationJSON>();
+                        eventCats.addAll(candidates);
                         failureEdits.setEventPostNotifications(eventNots);
-                    }         
                 }
             }
-            catch (RollbackException ex) {
+            catch(NoResultException | EJBException  ex){
                 failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
                 Set<EventPostNotificationJSON> eventCats  = failureEdits.getEventPostNotifications();
                 if(eventCats == null)
                     eventCats = new HashSet<EventPostNotificationJSON>();
-                eventCats.add(event);
-                failureEdits.setEventPostNotifications(eventNots);
+                    eventCats.add(event);
+                    failureEdits.setEventPostNotifications(eventNots);
             }
-            catch(EJBException ex){
-                failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                Set<EventPostNotificationJSON> eventCats  = failureEdits.getEventPostNotifications();
-                if(eventCats == null)
-                    eventCats = new HashSet<EventPostNotificationJSON>();
-                eventCats.add(event);
-                failureEdits.setEventPostNotifications(eventNots);
-            }
-                    
-        }
+        }         
         if(successEdits.getEventPostNotifications() != null)
             session.getAsyncRemote().sendObject(successEdits);
         if(failureEdits.getEventPostNotifications() != null)

@@ -37,28 +37,17 @@ import java.util.Set;
 @Entity(name = "MainCategoryEntity")
 @Table(name = "MAINCATEGORY")
 public class MainCategory extends Category {
-  
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "mainCategory")
-  @JoinColumn(name = "Cat_Id", referencedColumnName = "Parent_Id")
-  private Set<Topic> topics;
 
-  @OneToMany(mappedBy = "parentCategory")
-  public Set<SubCategory> getSubcategories() {
-    return super.getSubcategories();
-  }
-  
-  @OneToMany(mappedBy = "parentCategory")
-  public void setSubcategories(Set<SubCategory> subcategories) {
-    super.setSubcategories(subcategories);
+  @OneToMany(mappedBy = "mainCategory")
+  @JoinColumn(name = "Cat_Id")
+  private Set<SubCategory> subCategories;
+
+  public void setSubcategories(Set<SubCategory> subCategories){
+    this.subCategories = subCategories;
   }
 
-  public void setDirectTopics(Set<Topic> topics){
-    this.topics = topics;
-    topics.addAll(getTopics());
-    super.setTopics(getTopics());
+  public Set<SubCategory> getSubCategories(){
+    return this.subCategories;
   }
 
-  public Set<Topic> getDirectTopics(){
-    return topics;
-  }
 }

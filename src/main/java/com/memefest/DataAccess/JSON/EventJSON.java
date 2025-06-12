@@ -50,6 +50,8 @@ public class EventJSON implements Serializable{
     @JsonProperty("PostedBy")
     private UserJSON user;
 
+    @JsonProperty("DatePosted")
+    private LocalDateTime datePosted;
 
     @JsonProperty("CanceledImages")
     private Set<ImageJSON> canceledImages;
@@ -65,17 +67,20 @@ public class EventJSON implements Serializable{
                             @JsonProperty("EventDescription") String eventDescription,
                                 @JsonProperty("EventPin") String eventPin, 
                                     @JsonProperty("EventDate") LocalDateTime eventDate,
-                                        @JsonProperty("Clips") Set<VideoJSON> clips,
-                                            @JsonProperty("Posters") Set<ImageJSON> posters,
-                                                @JsonProperty("Posts") Set<EventPostJSON> posts,
-                                                    @JsonProperty("CanceledImages") Set<ImageJSON> canceledImages,
-                                                        @JsonProperty("CanceledClips") Set<VideoJSON> canceledClips,                                                   @JsonProperty("EventVenue") String eventVenue,
-                                                            @JsonProperty("PostedBy") UserJSON user){
+                                        @JsonProperty("DatePosted") LocalDateTime datePosted,
+                                            @JsonProperty("Clips") Set<VideoJSON> clips,
+                                                @JsonProperty("Posters") Set<ImageJSON> posters,
+                                                    @JsonProperty("Posts") Set<EventPostJSON> posts,
+                                                        @JsonProperty("CanceledImages") Set<ImageJSON> canceledImages,
+                                                            @JsonProperty("CanceledClips") Set<VideoJSON> canceledClips,                                                   
+                                                            @JsonProperty("EventVenue") String eventVenue,
+                                                                @JsonProperty("PostedBy") UserJSON user){
         this.eventID = eventID;
         this.eventTitle = eventTitle;
         this.eventDescription = eventDescription;
         this.eventPin = eventPin;
         this.eventDate = eventDate;
+        this.datePosted = datePosted;
         this.clips = clips;
         this.posters = posters;
         this.posts = posts;
@@ -153,6 +158,14 @@ public class EventJSON implements Serializable{
 
     public LocalDateTime getEventDate() {
         return this.eventDate;
+    }
+
+    public void setDatePosted(LocalDateTime datePosted) {
+        this.datePosted = datePosted;
+    }
+    
+    public LocalDateTime getDatePosted() {
+        return this.datePosted;
     }
 
     public void setEventDate(LocalDateTime eventDate) {

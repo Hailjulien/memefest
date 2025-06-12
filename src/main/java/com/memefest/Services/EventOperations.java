@@ -1,17 +1,19 @@
 package com.memefest.Services;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 import com.memefest.DataAccess.Event;
 import com.memefest.DataAccess.JSON.EventJSON;
+import com.memefest.DataAccess.JSON.TopicJSON;
 
-
+import jakarta.persistence.NoResultException;
 import jakarta.websocket.Session;
 
 public interface EventOperations {
     
-    public void createScheduledEvent(Session session, EventJSON eventInfo, LocalDateTime dateTime);
+    public void createScheduledEvent(EventJSON eventInfo, LocalDateTime dateTime);
 
     public void cancelScheduledEvent(EventJSON eventInfo);
 
@@ -19,6 +21,8 @@ public interface EventOperations {
     //public void editScheduledEvent(EventJSON eventInfo);
     
     public void editEvent(EventJSON eventInfo);
+
+    public void editScheduledEvent(Map<EventJSON, LocalDateTime> eventTimes);
 
     public void createEvent(EventJSON eventInfo);
 
@@ -32,7 +36,9 @@ public interface EventOperations {
 
     //public Set<PostJSON> getEventPosts(EventJSON eventInfo);
 
-    public Event getEventEntity(EventJSON event);
+    public Event getEventEntity(EventJSON event) throws NoResultException;
 
     public Set<EventJSON> searchEvents(EventJSON event);
+
+    public Map<EventJSON, LocalDateTime> getScheduledEvents(EventJSON event);
 }

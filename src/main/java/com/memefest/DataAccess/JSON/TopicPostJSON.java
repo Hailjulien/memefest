@@ -9,7 +9,7 @@ public class TopicPostJSON extends PostJSON {
     @JsonProperty("Topic")
     private TopicJSON topic;
 
-      @JsonCreator
+  @JsonCreator
   public TopicPostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes, @JsonProperty("User") UserJSON user, @JsonProperty("Topic") TopicJSON topic) {
     super(postId, comment,created,upvotes, downvotes, user);
     this.topic = topic;

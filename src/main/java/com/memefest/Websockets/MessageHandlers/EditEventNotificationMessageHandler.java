@@ -35,7 +35,7 @@ public class EditEventNotificationMessageHandler implements MessageHandler.Whole
             try{
                if(event.isCanceled()){
                     try{
-                        notOps.removeEventNotification(event);
+                        notOps.editEventNotification(event);
                         Set<EventNotificationJSON> eventCats  = successEdits.getEventNotifications();
                         if(eventCats == null)
                             eventCats = new HashSet<EventNotificationJSON>();

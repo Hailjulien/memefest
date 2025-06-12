@@ -15,7 +15,10 @@ import com.memefest.Websockets.MessageHandlers.EditEventPostMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditEventPostNotificationMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditPostMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditPostNotificationMessageHandler;
+import com.memefest.Websockets.MessageHandlers.EditPostWithReplyMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditRepostMessageHandler;
+import com.memefest.Websockets.MessageHandlers.EditScheduledEventMessageHandler;
+import com.memefest.Websockets.MessageHandlers.EditScheduledTopicMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditTopicFollowNotificationMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditTopicMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditTopicPostMessageHandler;
@@ -29,7 +32,10 @@ import com.memefest.Websockets.MessageHandlers.GetEventNotificationMessageHandle
 import com.memefest.Websockets.MessageHandlers.GetEventPostMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetEventPostNotificationMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetPostMessageHandler;
+import com.memefest.Websockets.MessageHandlers.GetPostReplysMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetRepostMessageHandler;
+import com.memefest.Websockets.MessageHandlers.GetScheduledEventMessageHandler;
+import com.memefest.Websockets.MessageHandlers.GetScheduledTopicMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetTopicFollowNotificationMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetTopicMessageHandler;
 import com.memefest.Websockets.MessageHandlers.GetTopicPostMessageHandler;
@@ -93,8 +99,8 @@ public class FeedsEndpoint extends Endpoint{
         });
         */
         feedsServer.addClient(session);
-        session.addMessageHandler(new EditUserMessageHandler(userOperations, session));
-        session.addMessageHandler(new EditPostMessageHandler(postOperations, session));
+        session.addMessageHandler(new EditUserMessageHandler(userOperations,topicOps,catOps,postOperations,eventOps,session));
+       /*  session.addMessageHandler(new EditPostMessageHandler(postOperations, session));
         session.addMessageHandler(new EditAdminMessageHandler(userOperations, session));
         session.addMessageHandler(new EditCategoryMessageHandler(catOps, session));
         session.addMessageHandler(new EditEventMessageHandler(eventOps, session));
@@ -121,19 +127,40 @@ public class FeedsEndpoint extends Endpoint{
         session.addMessageHandler(new GetTopicMessageHandler(topicOps, session));
         session.addMessageHandler(new GetTopicPostMessageHandler(postOperations, session));
         session.addMessageHandler(new GetUserFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetUserMessageHandler(userOperations, session)); 
+        session.addMessageHandler(new GetUserMessageHandler(userOperations, session));
+        session.addMessageHandler(new EditPostWithReplyMessageHandler(postOperations, session));
+        session.addMessageHandler(new EditScheduledEventMessageHandler(eventOps, session));
+        session.addMessageHandler(new EditScheduledTopicMessageHandler(topicOps, session));
+        session.addMessageHandler(new GetPostMessageHandler(postOperations, session));
+        session.addMessageHandler(new GetPostReplysMessageHandler(postOperations, session));
+        session.addMessageHandler(new GetScheduledEventMessageHandler(eventOps, session));
+        session.addMessageHandler(new GetScheduledTopicMessageHandler(topicOps, session)); 
         //fetch fresh relevant unseen content(Topics with most comments, topics subscribed by user) from database affiliated with the user
+        */
     }
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        feedsServer.removeClient(session);
+     
         try {
             session.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+           feedsServer.removeClient(session);
+    }
+
+    @Override
+    public void onError(Session session, Throwable throwable){
+        try{
+            session.getBasicRemote().sendText("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOps");
+            session.getBasicRemote().sendText(throwable.getMessage());
+            session.close();
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        feedsServer.removeClient(session);
     }
 
     //create a notification message to show logged in user

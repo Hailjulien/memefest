@@ -22,7 +22,7 @@ public class PostJSON {
   
   @JsonProperty("Created")
   @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
-   @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+  @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
   private LocalDateTime created;
   
   @JsonProperty("Upvotes")
@@ -38,11 +38,15 @@ public class PostJSON {
   private boolean canceled;
   
   @JsonCreator
-  public PostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes, @JsonProperty("User") UserJSON user) {
+  public PostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, 
+                      @JsonProperty("Created") LocalDateTime created, 
+                      @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes,
+                       @JsonProperty("User") UserJSON user) {
     this.postId = postId;
     this.comment = comment;
     this.created = created;
     this.upvotes = upvotes;
+    this.downvotes = downvotes;
     this.user = user;
   }
   

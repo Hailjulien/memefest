@@ -16,35 +16,57 @@ import jakarta.persistence.Table;
 @NamedQueries({
   @NamedQuery(
     name = "TopicCategory.getByTopicId", 
-    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicId = :topicId"),
+    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicCategoryId.topicId = :topicId"),
   @NamedQuery(
     name = "TopicCategory.getByCategoryId",
-    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.categoryId = :categoryId")
+    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicCategoryId.catId = :categoryId")
 })
 @Entity(name = "TopicCategoryEntity")
 @Table(name = "TOPIC_CATEGORY")
-public class TopicCategory  extends Topic{
-  
-  @Column(name = "Cat_Id", nullable = false, updatable = false, insertable = false)
-  private int categoryId; 
+public class TopicCategory{
 
-  @ManyToMany(cascade = {CascadeType.PERSIST})
+  @EmbeddedId
+  private TopicCategoryId topicCategoryId = new TopicCategoryId();
+
+  @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
-  private Set<Category> categories;
+  private Category category;
   
-  public void setCategories(Set<Category> categories) {
-    this.categories = categories;
+  @ManyToOne(cascade = {CascadeType.PERSIST})
+  @JoinColumn(name = "Topic_Id", referencedColumnName = "Topic_Id")
+  private Topic topic; 
+
+  public void setCategory(Category category) {
+    this.topicCategoryId.setCat_Id(category.getCat_Id());
+    this.category = category;
   }
   
-  public Set<Category> getCategories() {
-    return this.categories;
+  public Category getCategory() {
+    return this.category;
+  }
+
+  public void setTopic(Topic topic){
+    this.topicCategoryId.setTopic_Id(topic.getTopic_Id());
+    this.topic = topic;
+  }
+
+  public Topic getTopic(){
+    return this.topic;
   }
   
   public int getCat_Id(){
-    return categoryId;
+    return topicCategoryId.getCat_Id();
   }
 
   public void setCat_Id(int catId){
-    this.categoryId = catId;
+    this.topicCategoryId.setCat_Id(catId);
+  }
+
+  public int getTopic_Id(){
+    return topicCategoryId.getTopic_Id();
+  }
+
+  public void setTopic_Id(int topicId){
+    this.topicCategoryId.setTopic_Id(topicId);
   }
 }

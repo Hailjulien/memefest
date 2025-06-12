@@ -1,5 +1,6 @@
 package com.memefest.Services;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.JSON.CategoryJSON;
@@ -12,7 +13,7 @@ public interface TopicOperations {
 
     public void createTopic(TopicJSON topic);
 
-    public Set<CategoryJSON> getTopicCategories(TopicJSON topic);
+    //public Set<CategoryJSON> getTopicCategories(TopicJSON topic);
 
     public void createTopicCategories(TopicJSON topic);
 
@@ -37,6 +38,10 @@ public interface TopicOperations {
     public Topic getTopicEntity(TopicJSON topic);
 
     public Set<TopicJSON> searchTopic(TopicJSON topic);
+
+    public void editScheduledTopic(Map<TopicJSON, LocalDateTime> topicTimes);
+
+    public Map<TopicJSON, LocalDateTime> getScheduledTopics(TopicJSON topic);
 
     //public void getScheduledTopics(TopicJSON topic);
 

@@ -34,6 +34,8 @@ public class GetPostMessageHandler implements MessageHandler.Whole<GetPostJSON>{
                     PostJSON postEntity = postOps.getPostInfo(post);
                     if(postEntity!= null){
                         Set<PostJSON> postCats = successEdits.getPostResult();
+                        if(postCats == null)
+                            postCats = new HashSet<PostJSON>();
                         postCats.add(postEntity);
                         successEdits.setPostResult(postCats);
                     }

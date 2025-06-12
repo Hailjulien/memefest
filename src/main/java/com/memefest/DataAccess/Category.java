@@ -16,19 +16,20 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedNativeQueries;
 import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 
-
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "Category.getTopicByTitle",
-    query = "SELECT TOP(1) C.Category_Id as categoryId, C.Cat_Name as categoryName FROM TOPIC C "
-                + "WHERE C.title LIKE CONCAT('%', :title, '%')", resultSetMapping = "CategoryEntityMapping"
+    @NamedNativeQuery(name = "Category.getCategoryByTitle",
+    query = "SELECT TOP(1) C.Cat_Id as categoryId, C.Cat_Name as categoryName FROM CATEGORY C "
+                + "WHERE C.Cat_Name LIKE CONCAT('%',CONCAT(?,'%'))", resultSetMapping = "CategoryEntityMapping"
     ),
+
     @NamedNativeQuery(name = "Category.searchByName",
-    query = "SELECT C.Category_Id as categoryId, C.Cat_Name as categoryName FROM TOPIC C "
-                + "WHERE C.title LIKE CONCAT('%', :title, '%')", resultSetMapping = "CategoryEntityMapping"
+    query = "SELECT C.Category_Id as categoryId, C.Cat_Name as categoryName FROM CATEGORY C "
+                + "WHERE C.title LIKE CONCAT('%', title, '%')", resultSetMapping = "CategoryEntityMapping"
     )
 })
 @SqlResultSetMappings(
@@ -36,10 +37,10 @@ import jakarta.persistence.Table;
         name = "CategoryEntityMapping",
         entities = {
             @EntityResult(
-                entityClass = MainCategory.class,
+                entityClass = Category.class,
                 fields = {
-                    @FieldResult(name = "categoryId", column = "Cat_Id"),
-                    @FieldResult(name = "categoryName", column = "Cat_Name"),
+                    @FieldResult(name = "categoryId", column = "categoryId"),
+                    @FieldResult(name = "categoryName", column = "categoryName")
                 }
             )
         }
@@ -58,14 +59,22 @@ public class Category {
     @Column(name = "Cat_Name")
     private String categoryName;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "categories")
-    //@JoinColumn(name = "Topic_Id", referencedColumnName = "Topic_Id")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "parent")
+    @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
+    private Set<SubCategory> subcategories;
+  
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
+    @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
     private Set<TopicCategory> topics;
 
-    @ManyToMany(cascade = CascadeType.ALL, mappedBy = "parentCategories")
-    @JoinColumn(name = "Cat_Id", referencedColumnName = "Parent_Id")
-    private Set<SubCategory> subcategories;
+    public void setTopics(Set<TopicCategory> topics){
+        this.topics = topics;
+    }
 
+    public Set<TopicCategory> getTopics(){
+        return topics;
+    }
+    
     public void setCat_Id(int categoryId) {
         this.categoryId = categoryId;
     }
@@ -80,14 +89,6 @@ public class Category {
 
     public String getCat_Name() {
         return this.categoryName;
-    }
-
-    public void setTopics(Set<TopicCategory> topics) {
-        this.topics = topics;
-    }
-
-    public Set<TopicCategory> getTopics() {
-        return this.topics;
     }
 
     public void setSubcategories(Set<SubCategory> subcategories) {

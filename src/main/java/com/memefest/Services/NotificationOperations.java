@@ -16,30 +16,16 @@ import com.memefest.Websockets.JSON.UserFollowNotificationJSON;
 import jakarta.persistence.NoResultException;
 
 public interface NotificationOperations {
-   
-    public void createTopicPostNotification(TopicPostNotificationJSON topicPostNotification);
 
     public TopicPostNotification getTopicPostNotificationEntity(TopicPostNotificationJSON topicPostNotification) throws NoResultException;
 
     public PostNotification getPostNotificationEntity(PostNotificationJSON postNotification) throws NoResultException;
-    
-    public void createEventNotification(EventNotificationJSON postNotification) ;
 
     public EventNotification getEventNotificationEntity(EventNotificationJSON eventNotification) throws NoResultException;
-
-    public void createEventPostNotification(EventPostNotificationJSON eventPostNotification);
 
     public EventPostNotification getEventPostNotificationEntity(EventPostNotificationJSON eventNotification) throws NoResultException;
 
     public Set<TopicFollowNotificationJSON> getTopicFollowNotificationInfo(TopicFollowNotificationJSON topicFollowNotification) throws NoResultException;
-
-    public void removePostNotification(PostNotificationJSON postNotification);
-
-    public void removeEventPostNotification(EventPostNotificationJSON eventPostNotification);
-
-    public void removeTopicPostNotification(TopicPostNotificationJSON topicPostNotification);
-
-    public void removeEventNotification(EventNotificationJSON eventNotification);
 
     public Set<EventPostNotificationJSON> getEventPostNotificationInfo(EventPostNotificationJSON eventPostNotification) throws NoResultException;
 

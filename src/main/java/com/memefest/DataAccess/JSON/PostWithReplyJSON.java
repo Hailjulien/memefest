@@ -12,7 +12,12 @@ public class PostWithReplyJSON extends PostJSON {
   private Set<PostJSON> posts;
   
   @JsonCreator
-  public PostWithReplyJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, @JsonProperty("Created") LocalDateTime created, @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes, @JsonProperty("User") UserJSON user, @JsonProperty("Topic") TopicJSON topic, @JsonProperty("Replys") Set<PostJSON> posts) {
+  public PostWithReplyJSON(@JsonProperty("PostId") int postId,
+                      @JsonProperty("Comment") String comment, @JsonProperty("Created") 
+                        LocalDateTime created, @JsonProperty("Upvotes") int upvotes, 
+                        @JsonProperty("Downvotes") int downvotes,
+                         @JsonProperty("User") UserJSON user,
+                           @JsonProperty("Replys") Set<PostJSON> posts) {
     super(postId, comment, created, upvotes, downvotes, user);
     this.posts = posts;
   }

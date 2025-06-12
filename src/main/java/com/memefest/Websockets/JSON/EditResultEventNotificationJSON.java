@@ -20,12 +20,10 @@ public class EditResultEventNotificationJSON  extends EditResultJSON {
         this.eventNotifications = eventNotifications;                                                        
     }
 
-    @JsonProperty("EventNotifications")
     public void setEventNotifications(Set<EventNotificationJSON> eventNotifications){
         this.eventNotifications = eventNotifications;
     }
-
-    @JsonProperty("EventNotifications")
+    
     public Set<EventNotificationJSON> getEventNotifications(){
         return this.eventNotifications;
     }

@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Set;
 
-public abstract class EditPostJSON extends EditJSON{
+public class EditPostJSON extends EditJSON{
 
     @JsonProperty("Posts")
     private Set<PostJSON> posts; 
 
     @JsonCreator
-    public EditPostJSON(@JsonProperty("Posts") Set<PostJSON> posts) {
+    public EditPostJSON(@JsonProperty("Posts")Set<PostJSON> posts) {
         super(Editable.POST);
         this.posts = posts;
     }

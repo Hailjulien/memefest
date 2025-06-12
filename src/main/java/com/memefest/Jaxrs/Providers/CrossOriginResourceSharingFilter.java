@@ -13,7 +13,7 @@ public class CrossOriginResourceSharingFilter implements ContainerResponseFilter
     cresp.getHeaders().putSingle("Access-Control-Allow-Origin", "http://localhost:5173");
     cresp.getHeaders().putSingle("Access-Control-Allow-Credentials", "true");
     cresp.getHeaders().putSingle("Access-Control-Allow-Methods", "GET,DELETE, PUT, HEAD, OPTIONS");
-    cresp.getHeaders().putSingle("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, Origin, Referer  ");
+    cresp.getHeaders().putSingle("Access-Control-Allow-Headers", "Content-Type, Accept, Authorization, Origin, Referer, Host");
     cresp.getHeaders().putSingle("Access-Control-Max-Age", "1209600");
   }
 }

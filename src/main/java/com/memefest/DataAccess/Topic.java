@@ -25,7 +25,7 @@ import java.util.Set;
   @NamedNativeQuery(
     name = "Topic.getTopicByTitle",
     query = "SELECT TOP(1) T.Topic_Id as topicId, T.Title as topicName, T.Created as created FROM TOPIC T" 
-      + " WHERE T.title LIKE CONCAT('%', :title, '%')",
+      + " WHERE T.Title LIKE CONCAT('%',CONCAT(?, '%'))",
     resultSetMapping = "TopicEntityMapping"),
     @NamedNativeQuery(
       name = "Topic.searchTopic",
@@ -38,11 +38,11 @@ import java.util.Set;
     name = "TopicEntityMapping",
     entities = {
       @EntityResult(
-        entityClass = MainCategory.class, 
+        entityClass = Topic.class, 
         fields = {
-          @FieldResult(name = "topicId", column = "Topic_Id"), 
-          @FieldResult(name = "topicName", column = "Title"), 
-          @FieldResult(name = "created", column = "Created")
+          @FieldResult(name = "topicId", column = "topicId"), 
+          @FieldResult(name = "topicName", column = "topicName"), 
+          @FieldResult(name = "created", column = "created")
         }
       )
     }
@@ -82,12 +82,15 @@ public class Topic {
   @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy = "topic")
   private Set<TopicVideo> topicVideos;
 
-  @ManyToOne(cascade = CascadeType.ALL)
+  @OneToMany(cascade = {CascadeType.PERSIST}, mappedBy = "topic")
+  private Set<TopicCategory> topicCategories;
+
+  /*@ManyToOne(cascade = CascadeType.ALL)
   private MainCategory mainCategory;
 
   @ManyToMany(cascade = CascadeType.ALL)
   private Set<SubCategory> subCategories;
-
+  */
 
   public Set<TopicFollower> getFollowedBy() {
     return this.followedBy;
@@ -152,20 +155,29 @@ public class Topic {
     this.topicVideos = topicVideos;
   }
 
+  public Set<TopicCategory> getCategories(){
+    return this.topicCategories;
+  }
+
+  public void setCategories(Set<TopicCategory> categories){
+    this.topicCategories = categories;
+  }
+
+/* 
   public Set<SubCategory> getSubCategories(){
     return this.subCategories;
   }
 
   public void setSubCategories(Set<SubCategory> subCategories){
     this.subCategories = subCategories;
-  }
-
+  } 
   public MainCategory getMainCategory(){
     return mainCategory;
   }
-
+  
   public void setMainCategory(MainCategory mainCategory){
     this.mainCategory = mainCategory;
   }
+  */
 }
 

@@ -10,11 +10,15 @@ import java.util.stream.Collectors;
 
 import com.memefest.DataAccess.Event;
 import com.memefest.DataAccess.EventPost;
+import com.memefest.DataAccess.EventPostId;
 import com.memefest.DataAccess.Post;
 import com.memefest.DataAccess.PostReply;
+import com.memefest.DataAccess.PostReplyId;
 import com.memefest.DataAccess.Repost;
+import com.memefest.DataAccess.RepostId;
 import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.TopicPost;
+import com.memefest.DataAccess.TopicPostId;
 import com.memefest.DataAccess.User;
 import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.EventPostJSON;
@@ -30,12 +34,18 @@ import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
-import com.memefest.Websockets.JSON.EventPostNotificationJSON;
 import com.memefest.Websockets.JSON.PostNotificationJSON;
 import com.memefest.Websockets.JSON.TopicPostNotificationJSON;
 
 import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
+import jakarta.ejb.EJBTransactionRolledbackException;
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
+import jakarta.ejb.TransactionRolledbackLocalException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -43,6 +53,7 @@ import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
 
 @Stateless(name = "PostService")
+@TransactionManagement(TransactionManagementType.CONTAINER)
 public class PostService implements PostOperations{
     
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
@@ -63,276 +74,331 @@ public class PostService implements PostOperations{
     @EJB
     private NotificationOperations notOps;
 
-    private void createPostEntity(Post post) {
-        this.entityManager.persist(post);
-    }
-    
+    /* */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     //add custom exception to show object was not created
-    public void createPost(PostJSON post) {
+    private void createPost(PostJSON post) {
         User user = null;
+        user = this.userOperations.getUserEntity(post.getUser());
+        Post newPost = new Post();
+        newPost.setComment(post.getComment());
+        newPost.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
+        newPost.setUser(user);
+        newPost.setUpvotes(post.getUpvotes());
+        newPost.setDownvotes(post.getDownvotes());
+        this.entityManager.persist(newPost);
         try{
-            user = this.userOperations.getUserEntity(post.getUser());
-            Post newPost = new Post();
-            newPost.setComment(post.getComment());
-            newPost.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-            newPost.setUser(user);
-            newPost.setUpvotes(post.getUpvotes());
-            newPost.setDownvotes(post.getDownvotes());
-            createPostEntity(newPost);
-            userOperations.getFollowing(post.getUser()).stream().map(candidate ->{
+            userOperations.getFollowers(post.getUser()).stream().map(candidate ->{
                 return new PostNotificationJSON(0, post, LocalDateTime.now(), candidate);
-            }).forEach(candidate ->{
-                feedEndPointService.sendToUser(newPost, candidate.getUser().getUsername());
-            });;
+                }).forEach(candidate ->{
+            feedEndPointService.sendToUser(newPost, candidate.getUser().getUsername());
+           });
         }
-        catch(NoResultException ex){
+        catch(EJBException ex){
             return;
         }
-
+    }
+    /* */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void createEventPost(Post post, Event event){   
+            EventPost  eventPostEntity = new EventPost();
+            eventPostEntity.setEvent(event);
+            eventPostEntity.setPost(post);
+            entityManager.persist(eventPostEntity);
     }
 
-    public void createEventPost(EventPostJSON post){
-        Event event = null;
-        try {
-            event = eventOperations.getEventEntity(post.getEvent());  
-        } catch (NoResultException e) {
-        //find if user is an admin then execute createtopic otherwise exit method 
-        eventOperations.createEvent(post.getEvent());
-        createEventPost(post);      
-        }
-        EventPost  eventPostEntity = new EventPost();
-        eventPostEntity.setEvent(event);
-        entityManager.persist(eventPostEntity);
-        EventPostNotificationJSON eventPostNot = new EventPostNotificationJSON(0, post, LocalDateTime.now(),  null);
-        feedEndPointService.sendToAll(eventPostNot);
-    }
-
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editEventPost(EventPostJSON eventPost){
-        EventPost eventPostEntity = null;
+        if(eventPost== null || eventPost.getEvent() == null)
+            return;
         try{
-            eventPostEntity = getEventPostEntity(eventPost);
-        } catch(NoResultException e){
-            createEventPost(eventPost);
+            getEventPostEntity(eventPost);
         }
-        eventPostEntity.setEvent(eventOperations.getEventEntity(eventPost.getEvent()));
-        this.entityManager.merge(eventPostEntity);
+        catch(NoResultException | EJBException e){
+            Event event = null;
+            Post postEntity  = null;
+            
+            try{
+                event = eventOperations.getEventEntity(eventPost.getEvent());
+            }
+            catch(NoResultException | EJBException ec){
+                eventOperations.createEvent(eventPost.getEvent());
+                event = eventOperations.getEventEntity(eventPost.getEvent());
+            }
+
+            try{
+                postEntity = getPostEntity((PostJSON)eventPost);    
+            }catch(NoResultException | EJBException ex) {
+                //find if user is an admin then execute createtopic otherwise exit method 
+                createPost((PostJSON)eventPost);
+                postEntity = getPostEntity(eventPost);
+            }
+            createEventPost (postEntity, event);
+            
+        }
         removeEventPost(eventPost);
     }
 
-    public void removeEventPost(EventPostJSON eventPost){
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    private void removeEventPost(EventPostJSON eventPost){
         if(eventPost.isCancelled() == false)
             return;
         EventPost eventPostEntity = null;
         try{
             eventPostEntity = getEventPostEntity(eventPost);
-        } catch(NoResultException e){
+        } catch(NoResultException | EJBException e){
             return;
         }
         this.entityManager.remove(eventPostEntity);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
-    public void createRepost(RepostJSON repost){
-        Post post = null;
-        User user = null;
-        try{
-            post = getPostEntity((PostJSON)repost.getPost());
-        }
-        catch(NoResultException ex){
-            return;
-        }
-        try{
-            user = userOperations.getUserEntity(repost.getUser());
-        }
-        catch(NoResultException ex){
-            return;
-        } 
+    private void createRepost(Post post, User user)throws NoResultException{
+        if(post == null || user == null)
+            return; 
         Repost repostEntity = new Repost();
         repostEntity.setUser(user);
         repostEntity.setPost(post);
         this.entityManager.persist(repostEntity);
     }
-  
-    public Repost getRepostEntity(RepostJSON repost) throws NoResultException{
-        if(repost.getRepostId() != 0)
-            return entityManager.find(Repost.class, repost.getRepostId());
-        throw new NoResultException("No Repost found with rePostId" + repost.getRepostId()); 
+    
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Repost getRepostEntity(Post post, User owner) throws NoResultException, 
+                                                        TransactionRolledbackLocalException, 
+                                                            EJBTransactionRolledbackException{
+        if(owner == null || post == null)
+            throw new NoResultException();
+        RepostId repostId = new RepostId();
+        repostId.setPost_Id(post.getPost_Id());
+        repostId.setUserId(owner.getUserId());
+        Repost repost = entityManager.find(Repost.class, repostId);
+        if(repost == null)
+            throw new NoResultException("No Repost found ");
+        return repost; 
     }
 
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public RepostJSON getRepostInfo(RepostJSON repost){
-        Repost repostEntity = null;
-        try{
-            repostEntity = getRepostEntity(repost);
-        }
-        catch(NoResultException ex){
-            return null;
-        }
-        Post postEntity = repostEntity.getPost();
-        User userEntity = repostEntity.getUser();
-        UserJSON user = userOperations.getUserInfo(new UserJSON( userEntity.getUserId(), userEntity.getUsername()));
+        Post postEntity = null;
+        User userEntity = null;
+        postEntity = getPostEntity(repost);
+        userEntity = userOperations.getUserEntity(repost.getUser());
         PostJSON post = getPostInfo(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0,null));
-        RepostJSON repostInfo = new RepostJSON(repostEntity.getRepostId(), post, user);
+        UserJSON owner = userOperations.getUserInfo(new UserJSON( userEntity.getUserId(), userEntity.getUsername()));
+        getRepostEntity(postEntity, userEntity);
+
+        RepostJSON repostInfo = new RepostJSON(post.getPostId(),post.getComment(),
+                                      post.getCreated(),
+                                        post.getUpvotes(), post.getDownvotes(), post.getUser(), owner);
         return repostInfo;
     }
 
-    public EventPostJSON getEventPostInfo(EventPostJSON eventPost) throws NoResultException{
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public EventPostJSON getEventPostInfo(EventPostJSON eventPost) throws 
+                                                                NoResultException, 
+                                                                    EJBTransactionRolledbackException,
+                                                                        TransactionRolledbackLocalException{
         EventPost eventPostEntity = getEventPostEntity(eventPost);
-        eventPost.setComment(eventPostEntity.getComment());
-        eventPost.setCreated(LocalDateTime.ofInstant(eventPostEntity.getCreated().toInstant(), ZoneId.systemDefault()));
-        eventPost.setDownvotes(eventPostEntity.getDownvotes());
-        eventPost.setUpvotes(eventPostEntity.getUpvotes());
+        Post postEntity = eventPostEntity.getPost();
+        eventPost.setComment(postEntity.getComment());
+        eventPost.setCreated(LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()));
+        eventPost.setDownvotes(postEntity.getDownvotes());
+        eventPost.setUpvotes(postEntity.getUpvotes());
         eventPost.setPostId(eventPostEntity.getPost_Id());
-        eventPost.setUser(new UserJSON(eventPostEntity.getUser().getUserId(), eventPostEntity.getUser().getUsername()));
-        eventPost.setEvent(new EventJSON(eventPostEntity.getEvent().getEvent_Id(), eventPostEntity.getEvent().getEvent_Title(), null, null, null, null, null, null, null, null, null, null));
+        eventPost.setUser(new UserJSON(postEntity.getUser().getUserId(), postEntity.getUser().getUsername()));
+        eventPost.setEvent(new EventJSON(eventPostEntity.getEvent().getEvent_Id(), eventPostEntity.getEvent().getEvent_Title(), null, null, null, null, null, null,null, null, null, null, null));
         return eventPost;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editRepost(RepostJSON post){
-        Repost repostEntity = null;
+        if(post == null|| post.getOwner() == null)
+            return;
         Post postEntity = null;
         User user = null;
+        postEntity = getPostEntity((PostJSON)post);
+        user = userOperations.getUserEntity(post.getOwner());
         try{
-            repostEntity = getRepostEntity(post);
+            getRepostEntity(postEntity, user);
         }
-        catch(NoResultException ex){
-            createRepost(post);
+        catch(NoResultException | EJBException ex){
+            createRepost(postEntity, user);
             editRepost(post);
-        }
-        try{
-            postEntity = getPostEntity((PostJSON)post.getPost());
-        }
-        catch(NoResultException ex){
-            createPost(post.getPost());
-            editRepost(post);
-        }
-        try{
-            user = userOperations.getUserEntity(post.getUser());
-        }
-        catch(NoResultException ex){
             return;
         }
-        repostEntity.setPost(postEntity);
-        repostEntity.setUser(user);
-        this.entityManager.merge(repostEntity);
         removeRepost(post);
     }
 
+    @TransactionAttribute(TransactionAttributeType.MANDATORY)
     public void removeRepost(RepostJSON post){
         if(post.isCanceled() ==  false)
             return;
         try{
-            Repost repostEntity = getRepostEntity(post);
+            Post postEntity = getPostEntity(post);
+            User userEntity = userOperations.getUserEntity(post.getOwner());
+            Repost repostEntity = getRepostEntity(postEntity, userEntity);
             this.entityManager.remove(repostEntity);
         }
-        catch(NoResultException ex){
+        catch(NoResultException | EJBException ex){
             return;
         }
     }
 
-
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     //add custom exception to show object was not created
-    public void createPostReplies(PostWithReplyJSON post) {
-        for (PostJSON postInst : post.getPosts()) {
-            Post parent = getPostEntity((PostJSON)post);
-            if (parent == null)
-                return; 
-            Post child = getPostEntity(postInst);
-            if (child != null)
-                continue; 
-            PostReply postReply = new PostReply();
-            postReply.setComment(postInst.getComment());
-            postReply.setCreated(Date.from(postInst.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-            postReply.setPost(parent);
-            postReply.setUser(this.userOperations.getUserEntity(postInst.getUser()));
-            postReply.setDownvotes(postInst.getDownvotes());
-            postReply.setUpvotes(postInst.getUpvotes());
-            this.entityManager.persist(postReply);
+    private void createPostReplies(PostWithReplyJSON post) {
+        Post parent = null; 
+        try{
+            parent = getPostEntity((PostJSON)post);
+        }
+        catch(NoResultException | EJBException ex){
+            createPost((PostJSON)post);
+            createPostReplies(post);
+            return;
+        }
+        if (post.getPosts() == null)
+            return;
+        for(PostJSON postInst : post.getPosts()) {
+            Post child = null;
+            try{
+                child = getPostEntity(postInst);
+                try{
+                    getPostReplyEntity(postInst, (PostJSON) post);
+                }
+                catch(NoResultException | EJBException ex){
+                    createPostReply(child, parent);
+                }
+            }
+            catch(NoResultException |EJBException ex){
+                createPost(postInst);
+                child = getPostEntity(postInst);
+                createPostReply(child, parent);   
+            }
+            
         }
     }
 
-    //add custom exception to show object was not created
-    public void editPostReplies(PostWithReplyJSON post){
-        Set<PostReply> postEntities = null;
-        try{
-            postEntities = getPostReplyEntities(post);
-        for(PostReply postReply : postEntities){
-            for(PostJSON postReplyJSON : post.getPosts()){
-                if(postReplyJSON.getPostId() == postReply.getPost_Info()){
-                    postReply.setComment(postReplyJSON.getComment());
-                    postReply.setCreated(Date.from(postReplyJSON.getCreated().atZone(ZoneId.systemDefault()).toInstant()));
-                    postReply.setDownvotes(postReplyJSON.getDownvotes());
-                    postReply.setUpvotes(postReplyJSON.getUpvotes());
-                    postReply.setUser(this.userOperations.getUserEntity(postReplyJSON.getUser()));
-                    this.entityManager.merge(postReply);
-                    if(postReplyJSON instanceof PostWithReplyJSON){
-                        editPostReplies((PostWithReplyJSON)postReplyJSON);
-                    }
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    private PostReply getPostReplyEntity(PostJSON post, PostJSON parent) throws NoResultException{
+        PostReplyId postRepId = new PostReplyId();
+        postRepId.setPost_Id(post.getPostId());
+        postRepId.setPost_Info(parent.getPostId());
+
+        PostReply result = null;
+        result = entityManager.find(PostReply.class, postRepId);
+        if(result != null)
+            return result;
+        throw new NoResultException();
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    //@TransactionAttribute(TransactionAttributeType.MANDATORY)
+    private void createPostReply(Post post, Post parent){
+            if (post == null || parent == null)
+                return;
+         //editPost(post);
+            try{
+                PostReplyId postReplyId = new PostReplyId();
+                postReplyId.setPost_Id(post.getPost_Id());
+                postReplyId.setPost_Info(parent.getPost_Id());
+                PostReply result =this.entityManager.find(PostReply.class, postReplyId);
+                if(result== null){
+                    PostReply postReply = new PostReply();
+                    postReply.setParent(parent);
+                    postReply.setPost(post);
+                    this.entityManager.persist(postReply);
                 }
             }
+            catch(NoResultException | EJBException ex){
+                PostReply postReply = new PostReply();
+                postReply.setParent(parent);
+                postReply.setPost(post);
+                this.entityManager.persist(postReply);
+            }
+    }
+
+    @TransactionAttribute(TransactionAttributeType.MANDATORY)
+    //add custom exception to show object was not created
+    public void editPostReplies(PostWithReplyJSON post){
+        try{
+            getPostEntity(post);
         }
-        }catch(NoResultException ex){
-            createPostReplies(post);
+        catch(NoResultException | EJBException ex){
+            createPost(post);
             editPostReplies(post);
             return;
         }
+        createPostReplies(post);
+            //editPostReplies(post);
+            //return;
+        
         removePostReplies(post);
     }
-  
-    public void removePostReplies(PostWithReplyJSON postWithReply) {
+    
+    @TransactionAttribute(TransactionAttributeType.MANDATORY)
+    private void removePostReplies(PostWithReplyJSON postWithReply) {
+        if(postWithReply.getPosts() == null)
+            return;
         for (PostJSON post : postWithReply.getPosts()) {
-            if (post.isCancelled()) {
-                Post postEntity = getPostEntity(post);
-                if (postEntity != null)
-                    this.entityManager.remove(postEntity); 
-            } 
-        } 
+            removePost(post); 
+        }
+
     }
     
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editPost(PostJSON post) {
         Post postEntity = null;
         try{
             postEntity = getPostEntity(post);
-        }catch(NoResultException ex){
+        }catch(NoResultException | EJBException ex){
             createPost(post);
-            editPost(post);
+            //editPost(post);
             return;
         }
-        User user = this.userOperations.getUserEntity(post.getUser());
-        //check if user is admin then execute create topic
-        if (user != null)
-            postEntity.setUser(user); 
-        if (post.getComment() != null)
-            postEntity.setComment(post.getComment());  
-        if (post.getCreated() != null)
-            postEntity.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant())); 
-        if (postEntity.getDownvotes() != 0)
-            postEntity.setDownvotes(post.getDownvotes()); 
-        if (postEntity.getUpvotes() != 0)
-            postEntity.setUpvotes(post.getUpvotes()); 
-        this.entityManager.merge(postEntity);
+        try{
+            User user = this.userOperations.getUserEntity(post.getUser());
+            //check if user is admin then execute create topic
+            if (user != null)
+                postEntity.setUser(user); 
+            if (post.getComment() != null)
+                postEntity.setComment(post.getComment());  
+            if (post.getCreated() != null)
+                postEntity.setCreated(Date.from(post.getCreated().atZone(ZoneId.systemDefault()).toInstant())); 
+            if (postEntity.getDownvotes() != 0)
+                postEntity.setDownvotes(post.getDownvotes()); 
+            if (postEntity.getUpvotes() != 0)
+                postEntity.setUpvotes(post.getUpvotes()); 
+            this.entityManager.merge(postEntity);
+        }
+        catch(NoResultException ex){
+            return;   
+        }
         removePost(post);
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editPostWithReply(PostWithReplyJSON postWithReply){       
         try{
             getPostEntity((PostJSON)postWithReply);
-            editPost(postWithReply);
+            //editPost(postWithReply);
         }
-        catch(NoResultException ex){
-            createPost(postWithReply);
-            editPostWithReply(postWithReply);
+        catch(NoResultException |EJBException ex){
+            createPost((PostJSON)postWithReply);
+            //editPostWithReply(postWithReply);
         }
-        createPostReplies(postWithReply);
+        //createPostReplies(postWithReply);
         editPostReplies(postWithReply);
-        removePostReplies(postWithReply);
+        //removePostReplies(postWithReply);
         removePostWithReply(postWithReply); 
     }
 
-    public void removePostWithReply(PostWithReplyJSON postWithReply){
+    @TransactionAttribute(TransactionAttributeType.MANDATORY)
+    private void removePostWithReply(PostWithReplyJSON postWithReply){
         if(postWithReply.isCancelled()){
             try{
                 Post postEntity = getPostEntity((PostJSON)postWithReply);
@@ -340,120 +406,138 @@ public class PostService implements PostOperations{
                     this.entityManager.remove(postEntity);
                 }
             }
-            catch(NoResultException ex){
+            catch(NoResultException | EJBException ex){
                 return;
             }
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     //add custom exception to show object was not created
-    public void createTopicPost(TopicPostJSON topicPost){
-        Topic topic = null;
-        try{
-            topic = topicOperations.getTopicEntity(topicPost.getTopic());
-        }
-        catch(NoResultException ex){
-            topicOperations.createTopic(topicPost.getTopic());
-            try{
-                topic = topicOperations.getTopicEntity(topicPost.getTopic());
-            }
-            catch(NoResultException exp){
-                return;
-            }
-            createTopicPost(topicPost); 
-        }
-        createPost((PostJSON) topicPost);
-        Post post = null;
-        try{
-            post = getPostEntity(topicPost);
-        }
-        catch(NoResultException ex){
-            createPost(topicPost);
-            try{
-                post = getPostEntity(topicPost);
-            }
-            catch(NoResultException exp){
-                return;
-            }
-            createTopicPost(topicPost); 
+    private void createTopicPost(Topic topic, Post post){
+            TopicPost  topicPostEntity = new TopicPost();
+            topicPostEntity.setTopic(topic);
+            topicPostEntity.setPost(post);
+            entityManager.persist(topicPostEntity);
+    }
+
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public TopicPost getTopicPostEntity(TopicPostJSON post) throws NoResultException,
+                                                                        EJBTransactionRolledbackException,
+                                                                            TransactionRolledbackLocalException, 
+                                                                                EJBException{
+        if(post == null){
+            throw new NoResultException("No result for TopicPost");
         } 
-        TopicPost topicPostEntity = new TopicPost();
-        topicPostEntity.setTopic(topic);
-        this.entityManager.persist(topicPostEntity);
-        topic.getFollowedBy().stream().forEach(candidate->{
-            notOps.createTopicPostNotification(new TopicPostNotificationJSON(0, topicPost,LocalDateTime.now(), new UserJSON(candidate.getUser().getUsername())));
-        });
-        
-    }
+        Topic topicEntity = topicOperations.getTopicEntity(post.getTopic());
 
-    public TopicPost getTopicPostEntity(TopicPostJSON post) throws NoResultException{
-        if(post.getPostId() != 0)
-            return (TopicPost)this.entityManager.find(TopicPost.class, Integer.valueOf(post.getPostId()));
-        if (post.getComment() != null){
-            Query query = this.entityManager.createNamedQuery("Post.getPostByComment");
-            query.setParameter("comment", "%" + post.getComment()  + "%");
-            return (TopicPost)query.getSingleResult();
-        }
-        throw new NoResultException("No TopicPost found for post" + post.getPostId());
-    }
+        Post postEntity = getPostEntity((PostJSON)post);
 
-    public TopicPostJSON getTopicPostInfo(TopicPostJSON topicPost) throws NoResultException{
+        TopicPostId topicPostId = new TopicPostId();
+        topicPostId.setTopic_Id(topicEntity.getTopic_Id());
+        topicPostId.setPost_Id(postEntity.getPost_Id());
+        TopicPost topicPost = this.entityManager.find(TopicPost.class, topicPostId);
+        if(topicPost == null)
+            throw new NoResultException(); 
+        return topicPost;    }
+
+    //@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public TopicPostJSON getTopicPostInfo(TopicPostJSON topicPost) throws NoResultException,
+                                                                            TransactionRolledbackLocalException,
+                                                                                EJBTransactionRolledbackException,
+                                                                                    EJBException{
         TopicPost topicPostEntity = getTopicPostEntity(topicPost);
+        Post postEntity = topicPostEntity.getPost();
         return new TopicPostJSON(topicPostEntity.getPost_Id(), 
-                            topicPostEntity.getComment(), 
-                            LocalDateTime.ofInstant(topicPostEntity.getCreated().toInstant(), ZoneId.systemDefault()), 
-                            topicPostEntity.getUpvotes(), 
-                            topicPostEntity.getDownvotes(),
-                            new UserJSON(topicPostEntity.getUserId(), null), new TopicJSON(topicPostEntity.getTopic().getTopic_Id(), null, null, null, null, null));
+                            postEntity.getComment(), 
+                            LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()), 
+                            postEntity.getUpvotes(), 
+                            postEntity.getDownvotes(),
+                            new UserJSON(postEntity.getUserId(), null), new TopicJSON(topicPostEntity.getTopic().getTopic_Id(), null, null, null, null, null));
     }
 
+    //@TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public PostJSON getPostInfo(PostJSON post) throws NoResultException{
         Post postInfo = getPostEntity(post);
-        return new PostJSON(post.getPostId(), post.getComment(), 
+        return new PostJSON(postInfo.getPost_Id(), post.getComment(), 
         LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
             post.getUpvotes(), post.getDownvotes(), new UserJSON(post.getUser().getUserId(), post.getUser().getUsername()));
     }
- 
-    public void removeTopicPost(TopicPostJSON topicPost){
+    
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    private void removeTopicPost(TopicPostJSON topicPost){
         if(topicPost.isCancelled() == false)
             return;
         try{
             TopicPost topicPostEntity = getTopicPostEntity(topicPost);
             this.entityManager.remove(topicPostEntity);
         }
-        catch(NoResultException ex){
+        catch(NoResultException | EJBException ex){
             return;
         }
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editTopicPost(TopicPostJSON topicPost){
-        TopicPost topicPostEntity = null;
+        if(topicPost== null || topicPost.getTopic() == null)
+            return;
         try{
-            topicPostEntity = getTopicPostEntity(topicPost);
-        } catch(NoResultException e){
-            createTopicPost(topicPost);
+            getTopicPostEntity(topicPost);
         }
-        topicPostEntity.setTopic(topicOperations.getTopicEntity(topicPost.getTopic()));
-        this.entityManager.merge(topicPostEntity);
+        catch(NoResultException | EJBException e){
+            Topic topic = null;
+            Post postEntity  = null;
+            
+            try{
+                topic = topicOperations.getTopicEntity(topicPost.getTopic());
+            }
+            catch(NoResultException | EJBException ec){
+                topicOperations.createTopic(topicPost.getTopic());
+                topic = topicOperations.getTopicEntity(topicPost.getTopic());
+            }
+
+            try{
+                postEntity = getPostEntity((PostJSON)topicPost);    
+            }catch(NoResultException | EJBException ex) {
+                //find if user is an admin then execute createtopic otherwise exit method 
+                createPost((PostJSON)topicPost);
+                postEntity = getPostEntity(topicPost);
+            }
+            createTopicPost(topic, postEntity);
+            
+        }
         removeTopicPost(topicPost);
     }
-  
-    public Post getPostEntity(PostJSON post) throws NoResultException {
+    
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Post getPostEntity(PostJSON post) throws NoResultException,
+                                                        TransactionRolledbackLocalException,
+                                                            EJBTransactionRolledbackException,
+                                                                EJBException {
+        if(post == null)
+            throw new NoResultException();
         Post postEntity = null;
-        if (post.getPostId() != 0 && post.getPostId() != 1)
+        if (post.getPostId() != 0 && post != null){
             postEntity = this.entityManager.find(Post.class, Integer.valueOf(post.getPostId()));
-        if (postEntity != null)
-            return postEntity;
-        if (post.getComment() != null) {
-            Query query = this.entityManager.createNamedQuery("Post.getPostByComment");
-            query.setParameter("comment", "%" + post.getComment() + "%");
-            postEntity =(Post) query.getSingleResult();
+            if (postEntity != null)
+                return postEntity;
+            else throw new NoResultException();
         }
-        return postEntity; 
+        else if(post.getComment() != null) {
+            Query query = this.entityManager.createNamedQuery("Post.getPostByComment",Post.class);
+            query.setParameter(1, post.getComment());
+            postEntity =(Post) query.getSingleResult();
+             if (postEntity != null)
+                return postEntity;
+            else
+             throw new NoResultException();
+        }
+        throw new NoResultException();
     }
-  
-    public void removePost(PostJSON post) {
+    
+    @TransactionAttribute(TransactionAttributeType.MANDATORY)
+    private void removePost(PostJSON post) {
         if (post.isCancelled()) {
             try{
                 Post postEntity = getPostEntity(post);
@@ -463,13 +547,17 @@ public class PostService implements PostOperations{
                     this.entityManager.remove(postEntity);
                 }
             }
-            catch(NoResultException ex){
+            catch(NoResultException | EJBException ex){
                 return;
             } 
         } 
     }
 
-    public Set<PostReply> getPostReplyEntities(PostWithReplyJSON postWithReply) throws NoResultException{
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public Set<PostReply> getPostReplyEntities(PostWithReplyJSON postWithReply) throws NoResultException, 
+                                                                                        TransactionRolledbackLocalException,
+                                                                                            EJBTransactionRolledbackException,
+                                                                                                EJBException{
         Set<PostReply> result = new HashSet<>();
         List<PostReply> postReplies = this.entityManager.createNamedQuery("PostReplyEntity.getRepliesOfPostId", PostReply.class)
                                         .setParameter("postId", Integer.valueOf(postWithReply.getPostId()))
@@ -477,8 +565,12 @@ public class PostService implements PostOperations{
         result = (Set<PostReply>)postReplies.stream().collect(Collectors.toSet());
         return result;
     }
-  
-    public PostWithReplyJSON getPostWithReplyInfo(PostWithReplyJSON postWithReply) throws NoResultException{
+
+    //@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public PostWithReplyJSON getPostWithReplyInfo(PostWithReplyJSON postWithReply) throws NoResultException,
+                                                                                            TransactionRolledbackLocalException,
+                                                                                                EJBException,
+                                                                                                    EJBTransactionRolledbackException{
         Set<PostReply> postReplyEntities = getPostReplyEntities(postWithReply);
         if (postReplyEntities == null)
             return null; 
@@ -489,12 +581,24 @@ public class PostService implements PostOperations{
         return postWithReply;
     }
 
-    public EventPost getEventPostEntity(EventPostJSON event) throws NoResultException{
-        if(event.getEvent().getEventID() == 0 || event.getPostId() == 0){
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public EventPost getEventPostEntity(EventPostJSON event) throws NoResultException, 
+                                                                EJBException,
+                                                                     EJBTransactionRolledbackException, 
+                                                                        TransactionRolledbackLocalException{
+        if(event == null){
             throw new NoResultException("No result for EventPost");
-        }
-        Post post = getPostEntity(event);
-        EventPost eventPost = this.entityManager.find(EventPost.class,post.getPost_Id()); 
+        } 
+        Event eventEntity = eventOperations.getEventEntity(event.getEvent());
+
+        Post postEntity = getPostEntity(event);
+
+        EventPostId eventPostId = new EventPostId();
+        eventPostId.setEvent_Id(eventEntity.getEvent_Id());
+        eventPostId.setPost_Id(postEntity.getPost_Id());
+        EventPost eventPost = this.entityManager.find(EventPost.class,eventPostId);
+        if(eventPost == null)
+            throw new NoResultException(); 
         return eventPost;
     }
 

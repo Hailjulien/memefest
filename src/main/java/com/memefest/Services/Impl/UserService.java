@@ -27,6 +27,10 @@ import com.memefest.Websockets.JSON.UserFollowNotificationJSON;
 
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.ejb.TransactionAttribute;
+import jakarta.ejb.TransactionAttributeType;
+import jakarta.ejb.TransactionManagement;
+import jakarta.ejb.TransactionManagementType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
@@ -45,6 +49,7 @@ import jakarta.persistence.RollbackException;
 )
 */
 //add role based security
+@TransactionManagement(TransactionManagementType.CONTAINER)
 @Stateless(name = "userservice")
 public class UserService implements UserSecurityService, UserOperations{
     @PersistenceContext(unitName = "memeFest", type = PersistenceContextType.TRANSACTION)
@@ -406,13 +411,16 @@ public class UserService implements UserSecurityService, UserOperations{
         return categJSONs;
     }
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public User getUserEntity(UserJSON user)throws NoResultException{
         if(user.getUserId() == 0 && user.getUsername() == null)
             throw new NoResultException("No User Found");
         User userEntity = null;
         if(user.getUserId() != 0){
             try {
-                userEntity = entityManager.find(User.class, user.getUserId()); 
+                userEntity = entityManager.find(User.class, user.getUserId());
+                if(userEntity == null)
+                    throw new NoResultException(); 
             } catch (NoResultException ex) {
                 Query query = entityManager.createNamedQuery("User.findUsersByUsername");
                 query.setParameter("username", user.getUsername());

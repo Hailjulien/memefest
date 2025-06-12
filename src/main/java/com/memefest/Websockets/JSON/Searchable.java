@@ -8,13 +8,13 @@ public enum Searchable {
 
     
     @JsonCreator
-    public static Searchable forValues(@JsonProperty("SearchableType") String Type){
+    public static Searchable forValues(@JsonProperty("SearchType") String Type){
         for(Searchable searchable : Searchable.values()){
             if(searchable.name().equalsIgnoreCase(Type)){
                 return searchable;
             }
         }
-        throw new IllegalArgumentException("Invalid SearchableType: " + Type);
+        throw new IllegalArgumentException("Invalid SearchType: " + Type);
     }
 
     public String getValueString(){

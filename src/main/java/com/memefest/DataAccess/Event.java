@@ -31,7 +31,7 @@ import jakarta.persistence.Table;
     @NamedNativeQuery(name = "Event.getEventByTitle", 
         query = "SELECT TOP(1) E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_venue "
-            +"as venue FROM TOPIC T WHERE E.Event_Title LIKE CONCAT('%', :title, '%')",
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
         resultSetMapping = "EventEntityMapping"),
     @NamedNativeQuery(name = "Event.SeaarchEventsByTitle", 
         query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
@@ -76,30 +76,26 @@ public class Event {
     @Column(name = "Event_Pin")
     private String eventPin;
 
-    @Column(name = "Poster_Id")
-    private int posterId;
-
-    @Column(name = "Video_Id")
-    private int videoId;
-
-    @Column(name = "Posted_By")
+    @Column(name = "Posted_By", nullable = false, insertable = false, updatable = false)
     private int userId;
 
     @Column(name = "Event_Venue")
     private String venue;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(mappedBy = "event", cascade = {CascadeType.PERSIST}, fetch = FetchType.LAZY)
     @JoinColumn(name = "Event_Id")
     private Set<EventVideo> videos;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
+    @JoinColumn(name = "Event_Id")
     private Set<EventImage> images;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
+    @JoinColumn(name = "Event_Id")
     private Set<EventPost> posts;
 
     @ManyToOne
-    @JoinColumn(name = "UserId")
+    @JoinColumn(name = "Posted_By", referencedColumnName =  "UserId")
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
@@ -174,12 +170,12 @@ public class Event {
         this.datePosted = datePosted;
     }
 
-    public int getUserId(){
+    public int getPosted_By(){
         return this.userId;
     }
 
-    public void setUserId(int userId){
-        this.userId = userId;
+    public void setPosted_By(int postedBy){
+        this.userId = postedBy;
     }
 
     public String getEvent_Venue() {

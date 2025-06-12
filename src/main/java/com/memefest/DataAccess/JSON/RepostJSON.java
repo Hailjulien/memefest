@@ -1,5 +1,7 @@
 package com.memefest.DataAccess.JSON;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,52 +9,34 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonRootName("Repost")
-@JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "RepostID")
-public class RepostJSON {
+@JsonIdentityInfo(generator = ObjectIdGenerators.None.class)
+public class RepostJSON extends PostJSON{
 
-    @JsonProperty("RepostID")
-    private int repostId;
-
-    @JsonProperty("Post")
-    private PostJSON post;
-
-    @JsonProperty("User")
-    private UserJSON user;
+    @JsonProperty("Owner")
+    private UserJSON owner;
 
     @JsonProperty("IsCanceled")
     private boolean isCanceled;
 
     @JsonCreator
-    public RepostJSON(@JsonProperty("RepostID") int repostId, @JsonProperty("Post") PostJSON post,
-                        @JsonProperty("User") UserJSON user) {
-        this.repostId = repostId;
-        this.post = post;
-        this.user = user;
+    public RepostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, 
+                        @JsonProperty("Created") LocalDateTime created, 
+                            @JsonProperty("Upvotes") int upvotes,
+                                 @JsonProperty("Downvotes") int downvotes,
+                                    @JsonProperty("User") UserJSON user,
+                                        @JsonProperty("Owner") UserJSON owner) {
+        super(postId,comment,created,upvotes, downvotes,user);
+        this.owner = owner;
         this.isCanceled = false;
     }
 
-    public int getRepostId() {
-        return this.repostId;
+
+    public UserJSON getOwner() {
+        return this.owner;
     }
 
-    public void setRepostId(int repostId) {
-        this.repostId = repostId;
-    }
-
-    public PostJSON getPost() {
-        return this.post;
-    }
-
-    public void setPost(PostJSON post) {
-        this.post = post;
-    }
-
-    public UserJSON getUser() {
-        return this.user;
-    }
-
-    public void setUser(UserJSON user) {
-        this.user = user;
+    public void setOwner(UserJSON owner) {
+        this.owner = owner;
     }
 
     public boolean isCanceled() {

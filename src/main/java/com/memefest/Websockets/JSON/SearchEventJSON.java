@@ -12,7 +12,7 @@ public class SearchEventJSON extends SearchJSON {
     private EventJSON event;
 
     @JsonCreator
-    public SearchEventJSON(@JsonProperty("Search") SearchJSON search, @JsonProperty("Event") EventJSON event) {
+    public SearchEventJSON(@JsonProperty("Event") EventJSON event) {
         super(Searchable.EVENT);
         this.event = event;
     }
