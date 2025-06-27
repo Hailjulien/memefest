@@ -7,40 +7,7 @@ import com.memefest.Services.NotificationOperations;
 import com.memefest.Services.PostOperations;
 import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
-import com.memefest.Websockets.MessageHandlers.EditAdminMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditCategoryMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditEventMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditEventNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditEventPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditEventPostNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditPostNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditPostWithReplyMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditRepostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditScheduledEventMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditScheduledTopicMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditTopicFollowNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditTopicMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditTopicPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditTopicPostNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.EditUserFollowNotificationMessageHandler;
 import com.memefest.Websockets.MessageHandlers.EditUserMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetAdminMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetCategoryMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetEventMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetEventNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetEventPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetEventPostNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetPostReplysMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetRepostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetScheduledEventMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetScheduledTopicMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetTopicFollowNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetTopicMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetTopicPostMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetUserFollowNotificationMessageHandler;
-import com.memefest.Websockets.MessageHandlers.GetUserMessageHandler;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
@@ -86,57 +53,16 @@ public class FeedsEndpoint extends Endpoint{
     public void onOpen(Session session, EndpointConfig config){
         //notifiacation about user joining room
         //timer to monitor time spent for each student in session
-        //int topicId = Integer.valueOf(session.getPathParameters().get("topicId"));
-        /*topic = new TopicJSON(topicId, null, null, null, null, null);
-            topic = topicOps.getTopicInfo(topic);
         
-        this.peers.add(session);
-        session.addMessageHandler(new MessageHandler.Whole<PostJSON>() {
-            @Override
-            public void onMessage(PostJSON message) {
-                broadcast(session, message);
-            }
-        });
-        */
         feedsServer.addClient(session);
         session.addMessageHandler(new EditUserMessageHandler(userOperations,topicOps,catOps,postOperations,eventOps,session));
-       /*  session.addMessageHandler(new EditPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new EditAdminMessageHandler(userOperations, session));
-        session.addMessageHandler(new EditCategoryMessageHandler(catOps, session));
-        session.addMessageHandler(new EditEventMessageHandler(eventOps, session));
-        session.addMessageHandler(new EditEventPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new EditTopicFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditEventNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditEventPostNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditPostNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditRepostMessageHandler(postOperations, session));
-        session.addMessageHandler(new EditTopicMessageHandler(topicOps, session));
-        session.addMessageHandler(new EditTopicFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditTopicPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new EditTopicPostNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new EditUserFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetAdminMessageHandler(userOperations, session));
-        session.addMessageHandler(new GetCategoryMessageHandler(catOps, session));
-        session.addMessageHandler(new GetEventMessageHandler(eventOps, session));
-        session.addMessageHandler(new GetEventPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new GetEventNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetEventPostNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new GetRepostMessageHandler(postOperations, session)); 
-        session.addMessageHandler(new GetTopicFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetTopicMessageHandler(topicOps, session));
-        session.addMessageHandler(new GetTopicPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new GetUserFollowNotificationMessageHandler(notOps, session));
-        session.addMessageHandler(new GetUserMessageHandler(userOperations, session));
-        session.addMessageHandler(new EditPostWithReplyMessageHandler(postOperations, session));
-        session.addMessageHandler(new EditScheduledEventMessageHandler(eventOps, session));
-        session.addMessageHandler(new EditScheduledTopicMessageHandler(topicOps, session));
-        session.addMessageHandler(new GetPostMessageHandler(postOperations, session));
-        session.addMessageHandler(new GetPostReplysMessageHandler(postOperations, session));
-        session.addMessageHandler(new GetScheduledEventMessageHandler(eventOps, session));
-        session.addMessageHandler(new GetScheduledTopicMessageHandler(topicOps, session)); 
-        //fetch fresh relevant unseen content(Topics with most comments, topics subscribed by user) from database affiliated with the user
+        /*
+        Set<EventNotificationJSON> eventNot = notOps.getEventNotificationInfo(new EventNotificationJSON(0, null, null, new UserJSON(session.getUserPrincipal().getName())));
+        Set<EventPostNotificationJSON> eventPostNots = notOps.getEventPostNotificationInfo(new EventPostNotificationJSON(0, null, null, new UserJSON(session.getUserPrincipal().getName())));
+        Set<PostNotificationJSON> postNots = notOps.getPostNotificationInfo(new PostNotificationJSON(0, null, null, new UserJSON(session.getUserPrincipal().getName())));
+        notOps.getTopicFollowNotificationInfo(new TopicFollowNotificationJSON(0, null, null, null));
         */
+        
     }
 
     @Override

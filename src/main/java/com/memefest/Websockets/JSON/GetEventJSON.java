@@ -7,14 +7,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.EventJSON;
 
-@JsonRootName("Events")
-public class GetEventJSON {
+@JsonRootName("GetEvents")
+public class GetEventJSON extends GetJSON{
     
     @JsonProperty("Events")
     private Set<EventJSON> events;
 
     @JsonCreator
     public GetEventJSON(@JsonProperty("Events") Set<EventJSON> events) {
+        super(Getable.EVENT);
         this.events = events;
     }
 

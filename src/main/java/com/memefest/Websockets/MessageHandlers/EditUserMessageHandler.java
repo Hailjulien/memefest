@@ -28,10 +28,15 @@ import com.memefest.Websockets.JSON.EditResultTopicJSON;
 import com.memefest.Websockets.JSON.EditResultUserJSON;
 import com.memefest.Websockets.JSON.EditTopicJSON;
 import com.memefest.Websockets.JSON.EditUserJSON;
+import com.memefest.Websockets.JSON.GetEventJSON;
+import com.memefest.Websockets.JSON.GetResultEventJSON;
+
 import jakarta.websocket.Session;
 import jakarta.ejb.EJBException;
 import jakarta.persistence.NoResultException;
 import jakarta.websocket.MessageHandler;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.PongMessage;
 
 public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
 
@@ -76,8 +81,9 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
             editEventPost((EditEventPostJSON)userEdit);
         else if(userEdit instanceof EditEventJSON)
             editEvent((EditEventJSON)userEdit);
+        else if(userEdit instanceof GetEventJSON)
+            getEvent((GetEventJSON)userEdit);
    }
-
 
    private void editUsers(EditUserJSON userEdit){
         Set<UserJSON> users = userEdit.getUsers();
@@ -288,8 +294,36 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         if(successEdits.getEvents() != null)
             session.getAsyncRemote().sendObject(successEdits);
         if(failureEdits.getEvents() != null)
-            session.getAsyncRemote().sendObject(failureEdits);
-               
+            session.getAsyncRemote().sendObject(failureEdits);           
    }
+
+    public void getEvent(GetEventJSON getEvent){
+        GetResultEventJSON successEdits = new GetResultEventJSON(200, "Success",null);
+        GetResultEventJSON failureEdits = new GetResultEventJSON(203, "Could not edit", null);
+           for(EventJSON event : getEvent.getEvents()){
+                try{
+                    EventJSON eventEntity = eventOps.getEventInfo(event);
+                    if(eventEntity!= null){
+                        Set<EventJSON> eventCats = successEdits.getEventResults();
+                        if(eventCats == null)
+                            eventCats = new HashSet<EventJSON>();
+                        eventCats.add(eventEntity);
+                        successEdits.setEventResults(eventCats);
+                    }
+                }      
+                catch(EJBException ex){
+                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
+                    Set<EventJSON> eventCats = failureEdits.getEventResults();
+                    if(eventCats == null)
+                        eventCats = new HashSet<EventJSON>();
+                    eventCats.add(event);
+                    failureEdits.setEventResults(eventCats);
+                }
+        }
+        if(successEdits.getEventResults() != null)
+            session.getAsyncRemote().sendObject(successEdits);
+        if(failureEdits.getEventResults() != null)
+            session.getAsyncRemote().sendObject(failureEdits);
+    }
 
 }

@@ -51,6 +51,8 @@ public class EventJSON implements Serializable{
     private UserJSON user;
 
     @JsonProperty("DatePosted")
+    @JsonDeserialize(using = CustomLocalDateTimeDeserializer.class)
+    @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     private LocalDateTime datePosted;
 
     @JsonProperty("CanceledImages")

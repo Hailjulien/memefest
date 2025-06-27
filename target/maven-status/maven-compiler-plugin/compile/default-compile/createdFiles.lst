@@ -310,6 +310,7 @@ com\memefest\Websockets\JSON\GetEventNotificationJSON.class
 com\memefest\Websockets\JSON\EditEventPostNotificationJSON.class
 com\memefest\Websockets\Decoders\EditCategoryDecoder.class
 com\memefest\Websockets\Decoders\EditResultTopicDecoder.class
+com\memefest\DataAccess\EventPostNotificationId.class
 com\memefest\Websockets\MessageHandlers\SearchEventMessageHandler.class
 com\memefest\Websockets\Encoders\NotificationEncoder.class
 com\memefest\Services\UserOperations.class
@@ -355,6 +356,7 @@ com\memefest\Websockets\JSON\TopicPostNotificationJSON.class
 com\memefest\Websockets\MessageHandlers\GetTopicPostMessageHandler.class
 com\memefest\Websockets\Encoders\GetAdminEncoder.class
 com\memefest\Websockets\Encoders\GetRepostEncoder.class
+com\memefest\DataAccess\TopicPostNotificationId.class
 com\memefest\DataAccess\PostReply.class
 com\memefest\Websockets\MessageHandlers\GetUserMessageHandler.class
 com\memefest\Websockets\JSON\GetUserFollowNotificationJSON.class
@@ -435,6 +437,7 @@ com\memefest\Websockets\Decoders\GetUserDecoder.class
 com\memefest\Websockets\JSON\GetUserJSON.class
 com\memefest\Websockets\JSON\FollowNotificationJSON.class
 com\memefest\Websockets\Encoders\GetEventPostNotificationEncoder.class
+com\memefest\DataAccess\RepostId.class
 com\memefest\Websockets\Decoders\EditTopicPostDecoder.class
 com\memefest\Websockets\MessageHandlers\GetTopicMessageHandler.class
 com\memefest\Security\CustomKeyLocator.class

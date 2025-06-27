@@ -26,7 +26,7 @@ import jakarta.persistence.Table;
 public class PostNotification {
 
     @EmbeddedId
-    private PostNotificationId id;
+    private PostNotificationId id = new PostNotificationId();
 
     @ManyToOne
     @JoinColumn(name = "Post_Id", referencedColumnName = "Post_Id")

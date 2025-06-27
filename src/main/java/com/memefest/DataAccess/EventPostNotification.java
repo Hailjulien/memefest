@@ -16,24 +16,21 @@ import jakarta.persistence.Table;
     @NamedQuery(name = "EventPostNotification.getEventPostNotificationByPostId",
         query = "SELECT epN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.postId = :postId"),
     @NamedQuery(name = "EventPostNotification.getEventPostNotificationByUserId",
-        query = "SELECT epN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.userId = :userId"),
-    @NamedQuery(name = "EventPostNotification.getEvenntPostNotificationByUserId",
-        query = " SELECT ePN FROM EventPostNotificationEntity ePN ePN.eventPostNot.userId = :userId"),
+        query = "SELECT epN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.recipientId = :userId"),
     @NamedQuery(name = "EventPostNotification.getEventPostNotificationByPostId&UserId",
-        query =  "SELECT ePN FROM EventPostNotificatioEntity ePN ePN.eventPostNot.userId = :userId AND"
-                    + "ePN.eventPostNot.postId = :postId"),
+        query =  "SELECT ePN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.recipientId = :userId AND"
+                    + " ePN.eventPostNot.postId = :postId"),
     @NamedQuery(name = "EventPostNotification.getEventPostNotificationByPostId&EventId",
-        query =  "SELECT ePN FROM EventPostNotificatioEntity ePN ePN.eventEventNot.eventId = :eventId AND"
-                    + "ePN.eventPostNot.postId = :postId"),
+        query =  "SELECT ePN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.eventId = :eventId AND"
+                    + " ePN.eventPostNot.postId = :postId"),
     @NamedQuery(name = "EventPostNotification.getEventPostNotificationByUserId&EventId",
-        query =  "SELECT ePN FROM EventPostNotificatioEntity ePN ePN.eventEventNot.eventId = :eventId AND"
-                    + "ePN.eventPostNot.userId = :userId")
+        query =  "SELECT ePN FROM EventPostNotificationEntity ePN WHERE ePN.eventPostNot.eventId = :eventId AND"
+                    + " ePN.eventPostNot.recipientId = :userId")
 })
 @Entity(name = "EventPostNotificationEntity")
 @Table(name = "EVENT_POST_NOTIFICATION")
 public class EventPostNotification{
     
-    @Id
     @EmbeddedId
     private EventPostNotificationId eventPostNot = new EventPostNotificationId();
 

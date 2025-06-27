@@ -16,22 +16,21 @@ import jakarta.persistence.Table;
     @NamedQuery(name = "TopicPostNotification.getTopicNotificationByPostId",
         query = "SELECT tPN FROM TopicPostNotificationEntity tPN WHERE tPN.topicPostNot.postId = :postId"),
     @NamedQuery(name = "TopicPostNotification.getTopicNotificationByUserId",
-        query =  "SELECT tPN FROM TopicPostNotificationEntity tPN WHERE tPN.topicPostNot.recipientId = :userId" ),
+        query =  "SELECT tPN FROM TopicPostNotificationEntity tPN WHERE tPN.topicPostNot.recipientId = :userId"),
     @NamedQuery(name = "TopicPostNotification.getTopicPostNotificationByPostId&UserId", 
-        query =  "SELECT ePN FROM TopicPostNotificatioEntity ePN ePN.topicPostNot.userId = :userId AND"
-                    + "ePN.topicPostNot.postId = :postId"),
+        query =  "SELECT ePN FROM TopicPostNotificationEntity ePN WHERE ePN.topicPostNot.recipientId = :userId AND"
+                    + " (ePN.topicPostNot.postId = :postId)"),
     @NamedQuery(name = "TopicPostNotification.getTopicPostNotificationByTopicId&PostId",
-        query =  "SELECT ePN FROM TopicPostNotificatioEntity ePN ePN.topicPostNot.topicId = :topicId AND"
-                    + "ePN.topicPostNot.postId = :postId"),
+        query =  "SELECT ePN FROM TopicPostNotificationEntity ePN WHERE ePN.topicPostNot.topicId = :topicId AND"
+                    + " (ePN.topicPostNot.postId = :postId)"),
     @NamedQuery(name = "TopicPostNotification.getTopicPostNotificationByUserId&TopicId",
-        query =  "SELECT ePN FROM TopicPostNotificatioEntity ePN ePN.topicPostNot.topicId = :topicId AND"
-                    + "ePN.topicPostNot.userId = :userId")
+        query =  "SELECT ePN FROM TopicPostNotificationEntity ePN WHERE ePN.topicPostNot.topicId = :topicId AND"
+                    + " (ePN.topicPostNot.recipientId = :userId)")
 })
 @Entity(name = "TopicPostNotificationEntity")
 @Table(name = "TOPIC_POST_NOTIFICATION")
 public class TopicPostNotification {
     
-    @Id
     @EmbeddedId
     private TopicPostNotificationId topicPostNot = new TopicPostNotificationId();
 

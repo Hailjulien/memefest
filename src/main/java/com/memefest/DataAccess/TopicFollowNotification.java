@@ -20,8 +20,9 @@ import jakarta.persistence.Table;
 @Entity(name = "TopicFollowNotificationEntity")
 @Table(name = "TOPIC_FOLLOW_NOTIFICATION")
 public class TopicFollowNotification {
+  
   @EmbeddedId
-  private TopicFollowNotificationId id;
+  private TopicFollowNotificationId id = new TopicFollowNotificationId();
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "UserId", referencedColumnName = "UserId")

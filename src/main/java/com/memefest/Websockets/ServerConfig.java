@@ -196,13 +196,20 @@ public class ServerConfig implements ServerApplicationConfig {
     for (Class<? extends Endpoint> endpointClass : endpoints) {
       if (endpointClass.equals(FeedsEndpoint.class)) {
         ServerEndpointConfig serverEndpointConfig = ServerEndpointConfig.Builder.create(endpointClass, "/feeds")
-                  .encoders(Arrays.asList(         EditUserEncoder.class,
+                  .encoders(Arrays.asList(          
+                                                EditEventEncoder.class,
+                                                    EditResultEventEncoder.class,
+                                                    GetResultEventEncoder.class,
+                                                    GetEventEncoder.class
+                                                    /* 
+                                                    EditUserEncoder.class,
                                                     UserEncoder.class,
                                                     TopicEncoder.class,
                                                     PostEncoder.class,
                                                     EventEncoder.class,
                                                     PostWithReplyEncoder.class,
                                                     EditTopicEncoder.class,
+                                                    
                                                     EditResultUserEncoder.class,
                                                     EditResultTopicEncoder.class,
                                                     CategoryEncoder.class,
@@ -210,8 +217,6 @@ public class ServerConfig implements ServerApplicationConfig {
                                                     EditResultCategoryEncoder.class,
                                                     EditResultTopicEncoder.class,
                                                     EditPostEncoder.class,
-                                                    EditEventEncoder.class,
-                                                    EditResultEventEncoder.class,
                                                     EditResultPostEncoder.class,
                                                     EditPostWithReplyEncoder.class,
                                                     EditResultPostWithReplyEncoder.class,
@@ -327,12 +332,18 @@ public class ServerConfig implements ServerApplicationConfig {
 
                                           )
                   .decoders(Arrays.asList(
+                    EditEventDecoder.class,
+                    EditResultEventDecoder.class,
+                    GetResultEventDecoder.class,
+                    GetEventDecoder.class
+                    /* 
                     EditUserDecoder.class,
                     UserDecoder.class,
                     TopicDecoder.class,
                     PostDecoder.class,
                     EventDecoder.class,
                     EditTopicDecoder.class,
+                    
                     PostWithReplyDecoder.class,
                     EditResultUserDecoder.class,
                     EditResultTopicDecoder.class,
@@ -340,8 +351,8 @@ public class ServerConfig implements ServerApplicationConfig {
                     EditCategoryDecoder.class,
                     EditResultCategoryDecoder.class,
                     EditPostDecoder.class,
-                    EditEventDecoder.class,
-                    EditResultEventDecoder.class,
+                    
+                   
                     EditResultPostDecoder.class,
                     EditPostWithReplyDecoder.class,
                     EditResultPostWithReplyDecoder.class,

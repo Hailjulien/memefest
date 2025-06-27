@@ -9,12 +9,17 @@ import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 
-@NamedQueries({@NamedQuery(name = "CategoryFollower.findByCategoryId", query = "SELECT u FROM CategoryFollowerEntity u WHERE u.id.categoryId = :categoryId"), @NamedQuery(name = "CategoryFollower.findByUserId", query = "SELECT u FROM CategoryFollowerEntity u WHERE u.id.userId = :userId")})
+@NamedQueries(
+  {@NamedQuery(name = "CategoryFollower.findByCategoryId",
+        query = "SELECT u FROM CategoryFollowerEntity u WHERE u.id.categoryId = :categoryId"), 
+  
+    @NamedQuery(name = "CategoryFollower.findByUserId",
+        query = "SELECT u FROM CategoryFollowerEntity u WHERE u.id.userId = :userId")})
 @Entity(name = "CategoryFollowerEntity")
 @Table(name = "CATEGORY_FOLLOWS")
 public class CategoryFollower {
   @EmbeddedId
-  private CategoryFollowerId id;
+  private CategoryFollowerId id = new CategoryFollowerId();
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "UserId", referencedColumnName = "UserId")

@@ -13,7 +13,7 @@ import jakarta.persistence.Table;
 @Entity(name = "RepostEntity")
 @Table(name = "REPOST")
 public class Repost {
-    @Id
+    
     @EmbeddedId
     private RepostId repostId = new RepostId();
 

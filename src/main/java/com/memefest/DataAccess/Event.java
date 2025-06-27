@@ -36,7 +36,7 @@ import jakarta.persistence.Table;
     @NamedNativeQuery(name = "Event.SeaarchEventsByTitle", 
         query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_venue "
-            +"as venue FROM TOPIC T WHERE E.Event_Title LIKE CONCAT('%', :title, '%')",
+            +"as venue FROM TOPIC T WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
         resultSetMapping = "EventEntityMapping")})
 @SqlResultSetMappings({
     @SqlResultSetMapping(name = "EventEntityMapping",
@@ -94,7 +94,7 @@ public class Event {
     @JoinColumn(name = "Event_Id")
     private Set<EventPost> posts;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     @JoinColumn(name = "Posted_By", referencedColumnName =  "UserId")
     private User user;
 

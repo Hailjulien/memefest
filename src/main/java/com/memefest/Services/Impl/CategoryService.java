@@ -538,5 +538,6 @@ public class CategoryService implements CategoryOperations{
       }
       CategoryJSON categoryJson = new CategoryJSON(categoryEntity.getCat_Id(), categoryEntity.getCat_Name(), categoryTopics, followers, null);
       return categoryJson;
-    }
+  }
+
 }

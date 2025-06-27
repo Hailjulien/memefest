@@ -41,7 +41,7 @@ import jakarta.persistence.Table;
 public class SubCategory{
 
   @EmbeddedId
-  private SubCategoryId subCategoryId;
+  private SubCategoryId subCategoryId = new SubCategoryId();
 
   @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")

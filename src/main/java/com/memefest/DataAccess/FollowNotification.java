@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
 public class FollowNotification {
     
     @EmbeddedId
-    private FollowNotificationId id;
+    private FollowNotificationId id = new FollowNotificationId();
 
     @ManyToOne
     @JoinColumn(name = "UserId", referencedColumnName = "UserId")

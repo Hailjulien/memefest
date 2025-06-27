@@ -207,7 +207,7 @@ public class EventService implements EventOperations{
         removeEvent(event);
     }
 
-    // /@TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public EventJSON getEventInfo(EventJSON event){
         Event eventEntity = getEventEntity(event);
         User postedByEntity = eventEntity.getPostedBy();

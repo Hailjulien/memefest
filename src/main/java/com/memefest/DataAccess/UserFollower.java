@@ -21,7 +21,7 @@ import jakarta.persistence.Table;
 @Table(name = "USER_FOLLOWS")
 public class UserFollower {
   @EmbeddedId
-  private UserFollowerId id;
+  private UserFollowerId id = new UserFollowerId();
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
   @JoinColumn(name = "UserId")
