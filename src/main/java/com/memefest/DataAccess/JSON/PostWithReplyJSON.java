@@ -17,8 +17,10 @@ public class PostWithReplyJSON extends PostJSON {
                         LocalDateTime created, @JsonProperty("Upvotes") int upvotes, 
                         @JsonProperty("Downvotes") int downvotes,
                          @JsonProperty("User") UserJSON user,
-                           @JsonProperty("Replys") Set<PostJSON> posts) {
-    super(postId, comment, created, upvotes, downvotes, user);
+                           @JsonProperty("Replys") Set<PostJSON> posts,
+                           @JsonProperty("Categories") Set<CategoryJSON> categories,
+                      @JsonProperty("CanceledCategories")Set<CategoryJSON> canceledCats) {
+    super(postId, comment, created, upvotes, downvotes, user, categories, canceledCats);
     this.posts = posts;
   }
   

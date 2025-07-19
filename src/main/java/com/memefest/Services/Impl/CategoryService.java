@@ -2,12 +2,14 @@ package com.memefest.Services.Impl;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.memefest.DataAccess.Category;
 import com.memefest.DataAccess.CategoryFollower;
+import com.memefest.DataAccess.Event;
 import com.memefest.DataAccess.SubCategory;
 import com.memefest.DataAccess.SubCategoryId;
 import com.memefest.DataAccess.TopicCategory;
@@ -51,17 +53,6 @@ public class CategoryService implements CategoryOperations{
       this.entityManager.persist(newCategory);
     }
   } 
-      
-  public Set<CategoryJSON> searchCategory(CategoryJSON category){
-    if(category !=  null && category.getCategoryName() != null){
-      Stream<Category> query = entityManager.createNamedQuery("Category.searchByName", Category.class)
-                            .setParameter("title","%" + category.getCategoryName() + "%").getResultStream();
-      return query.map(categoryInst->{
-        return new CategoryJSON(categoryInst.getCat_Id(), null, null, null, null);
-      }).collect(Collectors.toSet());
-    } 
-    return null;
-  }
 
   //throw a custom exception to show object was not created
   public void editCategory(CategoryJSON category){
@@ -538,6 +529,33 @@ public class CategoryService implements CategoryOperations{
       }
       CategoryJSON categoryJson = new CategoryJSON(categoryEntity.getCat_Id(), categoryEntity.getCat_Name(), categoryTopics, followers, null);
       return categoryJson;
+  }
+
+  public Set<CategoryJSON> searchCategory(CategoryJSON category){
+    List<Category> categories= null;
+    if(category == null)
+      categories = this.entityManager.createNamedQuery("Category.getAll", Category.class).getResultList();
+    else if(category.getCategoryName() != null)
+      categories = this.entityManager.createNamedQuery("Category.searchByTitle", Category.class).setParameter(1, category.getCategoryName())
+                .getResultList();
+      return categories.stream().map(catEntity -> {
+        Set<TopicJSON> catTopics = new HashSet<TopicJSON>();
+        Set<UserJSON> followers = new HashSet<UserJSON>();
+        try{
+          catTopics = getCategoryTopics(category);
+        }
+        catch(NoResultException ex){
+    
+        }
+        try{
+          followers = getCategoryFollowersInfo(category);
+        }
+        catch(NoResultException ex){
+
+        }
+        return new CategoryJSON(catEntity.getCat_Id(), catEntity.getCat_Name(), catTopics,followers, null);
+      }).toList().stream().collect(Collectors.toSet());
+
   }
 
 }

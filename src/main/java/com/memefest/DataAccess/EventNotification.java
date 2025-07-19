@@ -1,5 +1,8 @@
 package com.memefest.DataAccess;
 
+import java.sql.Date;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -35,6 +38,12 @@ public class EventNotification {
     @JoinColumn(name = "Event_Id", referencedColumnName = "Event_Id")
     private Event event;
 
+    @Column(name = "Created", nullable = false)
+    private Date created;
+
+    @Column(name = "Seen")
+    private boolean seen;
+
     public User getUser(){
         return this.user;
     }
@@ -67,5 +76,21 @@ public class EventNotification {
     public void setEvent(Event event){
         this.event = event;
         setEvent_Id(event.getEvent_Id());   
+    }
+
+    public void setCreated(Date created){
+        this.created = created;
+    }
+
+    public Date getCreated(){
+        return this.created;
+    }
+
+    public boolean getSeen(){
+        return this.seen;
+    }
+
+    public void setSeen(boolean seen){
+        this.seen = seen;
     }
 }

@@ -19,9 +19,11 @@ public class EventNotificationJSON extends NotificationJSON {
     
     @JsonCreator
     public EventNotificationJSON(@JsonProperty("NotificationID") int notId, 
-                                @JsonProperty("Timestamp") LocalDateTime date, 
-                                    @JsonProperty("Event")EventJSON event, UserJSON user) {
-        super(notId, date, Notification.EVENT, user);
+                                    @JsonProperty("Timestamp") LocalDateTime date, 
+                                        @JsonProperty("Event")EventJSON event, 
+                                            @JsonProperty("User")UserJSON user,
+                                                @JsonProperty("Seen") boolean seen) {
+        super(notId, date, Notification.EVENT, user, seen);
         this.event = event;
         this.canceled = false;
     }

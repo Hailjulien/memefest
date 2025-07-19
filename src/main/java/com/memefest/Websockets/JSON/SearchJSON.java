@@ -7,17 +7,16 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "SearchId")
-@JsonRootName("Search")
 public abstract class SearchJSON {
     
-    @JsonProperty("Searchable")
+    @JsonProperty("SearchType")
     private Searchable searchable;
 
     @JsonProperty("SearchId")
     private int searchId;
 
     @JsonCreator
-    public SearchJSON(@JsonProperty("Searchable") Searchable search){
+    public SearchJSON(@JsonProperty("SearchType") Searchable search){
         this.searchable = search;
     }
 

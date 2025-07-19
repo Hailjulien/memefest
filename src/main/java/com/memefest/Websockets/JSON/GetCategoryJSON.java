@@ -8,13 +8,14 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.CategoryJSON;
 
 @JsonRootName("GetCategory")
-public class GetCategoryJSON {
+public class GetCategoryJSON extends GetJSON{
 
     @JsonProperty("Categories")
     private Set<CategoryJSON> categories;
     
     @JsonCreator
     public GetCategoryJSON(@JsonProperty("Categories") Set<CategoryJSON> categories) {
+        super(Getable.CATEGORY);
         this.categories = categories;
     }
 

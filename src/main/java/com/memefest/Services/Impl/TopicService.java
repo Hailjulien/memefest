@@ -138,16 +138,6 @@ public class TopicService implements TopicOperations{
             }
         });
     }
-
-    public Set<TopicJSON> searchTopic(TopicJSON topic) throws NoResultException{
-        List<Topic> results  = this.entityManager.createNamedQuery("Topic.searchTopic", Topic.class)
-                        .setParameter("title","%" + topic.getTitle() + "%").getResultList();
-        Set<TopicJSON> topicSet = results.stream().map(topicEntity ->{
-                                    TopicJSON topicJSON = new TopicJSON(topicEntity.getTopic_Id(), null, null, null, null, null);
-                                    return getTopicInfo(topicJSON);
-        }).collect(Collectors.toSet());
-        return topicSet;
-    }
     
     //add custom exception to show object was not created
     public void createTopic(TopicJSON topic) {
@@ -427,13 +417,45 @@ public class TopicService implements TopicOperations{
                                     new UserJSON(postInfo.getUser().getUsername()), 
                                     new TopicJSON(topicPost.getTopic().getTopic_Id(), topicPost.getTopic().getTitle(),
                                     LocalDateTime.ofInstant(topicPost.getTopic().getCreated().toInstant(), ZoneId.systemDefault()),
-                                   null, null, null));
+                                   null, null, null),null,null);
                                 }).collect(Collectors.toSet());
         if (topicEntity != null) {
-           topicJSON = new TopicJSON(topic.getTopicId(), topic.getTitle(), 
+           topicJSON = new TopicJSON(topicEntity.getTopic_Id(), topicEntity.getTitle(), 
                                     LocalDateTime.ofInstant(topicEntity.getCreated().toInstant(), ZoneId.systemDefault()),
                                     categories, posts, users);
         } 
         return topicJSON;
+    }
+
+    public Set<TopicJSON> searchTopic(TopicJSON topic){
+        List<Topic> topics = null;
+        if(topic == null)
+            topics = this.entityManager.createNamedQuery("Topic.getAll", Topic.class).getResultList();
+        else if(topic.getTitle() != null)
+            topics = this.entityManager.createNamedQuery("Topic.searchByTitle", Topic.class)
+                            .setParameter(1, topic.getTitle()).getResultList();
+            return topics.stream().map(topicEntity ->{
+                 TopicJSON topicJSON = null; 
+                 Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
+                Set<CategoryJSON> categories = getTopicCategories(topic);
+                Set<UserJSON> users = (Set<UserJSON>)topicFollowers.stream().map(topicFollower -> new UserJSON(topicFollower.getUser()
+                                .getUsername())).collect(Collectors.toSet());
+                Set<TopicPostJSON> posts = (Set<TopicPostJSON>)topicEntity.getPosts().stream().map(topicPost ->{
+                                    Post postInfo = topicPost.getPost();
+                                    return new TopicPostJSON(topicPost.getPost_Id(), postInfo.getComment(), 
+                                    LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()),
+                                    postInfo.getUpvotes(), postInfo.getDownvotes(), 
+                                    new UserJSON(postInfo.getUser().getUsername()), 
+                                    new TopicJSON(topicPost.getTopic().getTopic_Id(), topicPost.getTopic().getTitle(),
+                                    LocalDateTime.ofInstant(topicPost.getTopic().getCreated().toInstant(), ZoneId.systemDefault()),
+                                   null, null, null),null, null);
+                                }).collect(Collectors.toSet());
+                topicJSON = new TopicJSON(topicEntity.getTopic_Id(), topicEntity.getTitle(), 
+                                    LocalDateTime.ofInstant(topicEntity.getCreated().toInstant(), ZoneId.systemDefault()),
+                                    categories, posts, users);
+                return topicJSON;
+            }).collect(Collectors.toSet());
+            
+
     }
 }

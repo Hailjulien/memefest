@@ -17,8 +17,9 @@ public class TopicFollowNotificationJSON extends FollowNotificationJSON{
     public TopicFollowNotificationJSON(@JsonProperty("NotificationID") int notId,
                                             @JsonProperty("Topic") TopicJSON topic,
                                                 @JsonProperty("Timestamp") LocalDateTime timestamp,
-                                                    @JsonProperty("Follower") UserJSON user) {
-        super(notId,timestamp, user);
+                                                    @JsonProperty("Follower") UserJSON user,
+                                                        @JsonProperty("Seen") boolean seen) {
+        super(notId,timestamp, user, seen);
         this.topic = topic;         
     }
     

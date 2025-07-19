@@ -57,6 +57,7 @@ com\memefest\Websockets\JSON\EditResultTopicJSON.class
 com\memefest\Websockets\Encoders\EditResultScheduledEventEncoder.class
 com\memefest\Websockets\Encoders\SearchEncoder.class
 com\memefest\Websockets\Decoders\UserSecurityDecoder.class
+com\memefest\DataAccess\EventCategory.class
 com\memefest\Websockets\Encoders\FollowNotificationEncoder.class
 com\memefest\Websockets\JSON\EditTopicFollowNotificationJSON.class
 com\memefest\Websockets\MessageHandlers\SearchTopicMessageHandler.class
@@ -373,6 +374,7 @@ com\memefest\Websockets\Encoders\GetFollowNotificationEncoder.class
 com\memefest\Websockets\JSON\EditUserJSON.class
 com\memefest\DataAccess\PostNotification.class
 com\memefest\Websockets\JSON\GetResultJSON.class
+com\memefest\DataAccess\EventCategoryId.class
 com\memefest\Websockets\Decoders\GetTopicFollowNotificationDecoder.class
 com\memefest\Websockets\MessageHandlers\GetCategoryMessageHandler.class
 com\memefest\Websockets\Decoders\AdminDecoder.class
@@ -451,6 +453,7 @@ com\memefest\Websockets\JSON\EditResultPostNotificationJSON.class
 com\memefest\Websockets\JSON\SearchResultJSON.class
 com\memefest\Websockets\Encoders\EditTopicFollowNotificationEncoder.class
 com\memefest\Websockets\JSON\NotificationJSON.class
+com\memefest\DataAccess\PostCategoryId.class
 com\memefest\Websockets\Encoders\EditResultEventPostEncoder.class
 com\memefest\Websockets\Encoders\EditFollowNotificationEncoder.class
 com\memefest\Websockets\Encoders\GetResultEventPostNotificationEncoder.class
@@ -464,6 +467,7 @@ com\memefest\DataAccess\TopicCategoryId.class
 com\memefest\DataAccess\TopicImage.class
 com\memefest\Websockets\Encoders\EditResultEventNotificationEncoder.class
 com\memefest\Websockets\JSON\SearchJSON.class
+com\memefest\DataAccess\PostCategory.class
 com\memefest\Websockets\MessageHandlers\GetScheduledTopicMessageHandler.class
 com\memefest\Websockets\MessageHandlers\EditCategoryMessageHandler.class
 com\memefest\Websockets\Decoders\PostNotificationDecoder.class

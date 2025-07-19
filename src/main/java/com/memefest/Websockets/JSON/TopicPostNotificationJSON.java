@@ -18,8 +18,10 @@ public class TopicPostNotificationJSON extends PostNotificationJSON{
     @JsonCreator
     public TopicPostNotificationJSON(@JsonProperty("NotificationID") int notId, 
                                         @JsonProperty("TopicPost") TopicPostJSON topicPost,
-                                            @JsonProperty("TimeStamp") LocalDateTime time, UserJSON user){
-        super(notId, (PostJSON)topicPost,time, user);
+                                            @JsonProperty("TimeStamp") LocalDateTime time,
+                                                @JsonProperty("User") UserJSON user,
+                                                    @JsonProperty("Seen") boolean seen){
+        super(notId, (PostJSON)topicPost,time, user, seen);
         this.topicPost = topicPost;
     }
 

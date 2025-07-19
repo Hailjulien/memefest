@@ -54,5 +54,7 @@ public interface PostOperations {
 
     public EventPostJSON getEventPostInfo(EventPostJSON eventPost);
 
+    public Set<PostJSON> searchPost(PostJSON post);
+
     //public Set<RepostJSON> getReposts(RepostJSON repost);
 }

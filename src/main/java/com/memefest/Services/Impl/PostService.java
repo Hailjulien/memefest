@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.memefest.DataAccess.Category;
 import com.memefest.DataAccess.Event;
 import com.memefest.DataAccess.EventPost;
 import com.memefest.DataAccess.EventPostId;
 import com.memefest.DataAccess.Post;
+import com.memefest.DataAccess.PostCategory;
+import com.memefest.DataAccess.PostCategoryId;
 import com.memefest.DataAccess.PostReply;
 import com.memefest.DataAccess.PostReplyId;
 import com.memefest.DataAccess.Repost;
@@ -20,6 +23,7 @@ import com.memefest.DataAccess.Topic;
 import com.memefest.DataAccess.TopicPost;
 import com.memefest.DataAccess.TopicPostId;
 import com.memefest.DataAccess.User;
+import com.memefest.DataAccess.JSON.CategoryJSON;
 import com.memefest.DataAccess.JSON.EventJSON;
 import com.memefest.DataAccess.JSON.EventPostJSON;
 import com.memefest.DataAccess.JSON.PostJSON;
@@ -28,6 +32,7 @@ import com.memefest.DataAccess.JSON.RepostJSON;
 import com.memefest.DataAccess.JSON.TopicJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 import com.memefest.DataAccess.JSON.UserJSON;
+import com.memefest.Services.CategoryOperations;
 import com.memefest.Services.EventOperations;
 import com.memefest.Services.FeedsOperations;
 import com.memefest.Services.NotificationOperations;
@@ -63,6 +68,9 @@ public class PostService implements PostOperations{
     private UserOperations userOperations;
 
     @EJB
+    private CategoryOperations catOps;
+
+    @EJB
     private FeedsOperations feedEndPointService;
 
     @EJB
@@ -87,16 +95,57 @@ public class PostService implements PostOperations{
         newPost.setUpvotes(post.getUpvotes());
         newPost.setDownvotes(post.getDownvotes());
         this.entityManager.persist(newPost);
+        if(post.getCategories() != null)
+            post.getCategories().stream().forEach(category -> {
+                    catOps.editCategory(category);
+                    Category categoryEntity = catOps.getCategoryEntity(category);
+                    createPostCategory(newPost, categoryEntity);
+        });
+    }
+
+    private void editPostCategory(PostJSON post){
         try{
-            userOperations.getFollowers(post.getUser()).stream().map(candidate ->{
-                return new PostNotificationJSON(0, post, LocalDateTime.now(), candidate);
-                }).forEach(candidate ->{
-            feedEndPointService.sendToUser(newPost, candidate.getUser().getUsername());
-           });
+            Post postEntity = getPostEntity(post);
+            if(post.getCategories() != null)
+                post.getCategories().stream().forEach(category -> {
+                        catOps.editCategory(category);
+                        Category categoryEntity = catOps.getCategoryEntity(category);
+                        createPostCategory(postEntity, categoryEntity);
+                });
+            if(post.getCanceledCategories() != null)
+                post.getCanceledCategories().stream().forEach(category -> {
+                        catOps.editCategory(category);
+                        Category categoryEntity = catOps.getCategoryEntity(category);
+                        removePostCategory(postEntity, categoryEntity);
+                });
         }
-        catch(EJBException ex){
+        catch(NoResultException ex){
             return;
         }
+    }
+
+    private void createPostCategory(Post post, Category category){
+        PostCategory postCat = new PostCategory();
+        postCat.setCat_Id(category.getCat_Id());
+        postCat.setPost_Id(post.getPost_Id());
+        entityManager.persist(postCat);
+    }
+
+    private Set<CategoryJSON> getPostCategories(PostJSON post){
+        if(post== null || post.getCategories() == null)
+            return null;
+        List<PostCategory> categories = this.entityManager.createNamedQuery("PostCategory.findByPostId", PostCategory.class)
+                                            .setParameter(1, post.getPostId()).getResultList();
+        return categories.stream().map(catEntity -> {
+            return  new CategoryJSON(catEntity.getCategory().getCat_Id(), catEntity.getCategory().getCat_Name(), null, null, null);
+        }).collect(Collectors.toSet());        
+    }
+
+    private void removePostCategory(Post postEntity, Category catEntity){
+            PostCategoryId postCat = new PostCategoryId();
+            postCat.setCat_Id(catEntity.getCat_Id());
+            postCat.setPost_Id(postEntity.getPost_Id());
+            entityManager.remove(entityManager.find(PostCategory.class,postCat));
     }
     /* */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
@@ -123,7 +172,7 @@ public class PostService implements PostOperations{
                 event = eventOperations.getEventEntity(eventPost.getEvent());
             }
             catch(NoResultException | EJBException ec){
-                eventOperations.createEvent(eventPost.getEvent());
+                eventOperations.editEvent(eventPost.getEvent());
                 event = eventOperations.getEventEntity(eventPost.getEvent());
             }
 
@@ -185,13 +234,13 @@ public class PostService implements PostOperations{
         User userEntity = null;
         postEntity = getPostEntity(repost);
         userEntity = userOperations.getUserEntity(repost.getUser());
-        PostJSON post = getPostInfo(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0,null));
+        PostJSON post = getPostInfo(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0,null, null,null));
         UserJSON owner = userOperations.getUserInfo(new UserJSON( userEntity.getUserId(), userEntity.getUsername()));
         getRepostEntity(postEntity, userEntity);
 
         RepostJSON repostInfo = new RepostJSON(post.getPostId(),post.getComment(),
                                       post.getCreated(),
-                                        post.getUpvotes(), post.getDownvotes(), post.getUser(), owner);
+                                        post.getUpvotes(), post.getDownvotes(), post.getUser(), owner, post.getCategories(), null);
         return repostInfo;
     }
 
@@ -202,13 +251,15 @@ public class PostService implements PostOperations{
                                                                         TransactionRolledbackLocalException{
         EventPost eventPostEntity = getEventPostEntity(eventPost);
         Post postEntity = eventPostEntity.getPost();
+        Set<CategoryJSON> categories = getPostCategories(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0, null, null, null));
         eventPost.setComment(postEntity.getComment());
         eventPost.setCreated(LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()));
         eventPost.setDownvotes(postEntity.getDownvotes());
         eventPost.setUpvotes(postEntity.getUpvotes());
         eventPost.setPostId(eventPostEntity.getPost_Id());
         eventPost.setUser(new UserJSON(postEntity.getUser().getUserId(), postEntity.getUser().getUsername()));
-        eventPost.setEvent(new EventJSON(eventPostEntity.getEvent().getEvent_Id(), eventPostEntity.getEvent().getEvent_Title(), null, null, null, null, null, null,null, null, null, null, null));
+        eventPost.setEvent(new EventJSON(eventPostEntity.getEvent().getEvent_Id(), eventPostEntity.getEvent().getEvent_Title(), null, null, null, null, null, null,null, null, null, null, null, null,null));
+        eventPost.setCategories(categories);
         return eventPost;
     }
 
@@ -312,7 +363,7 @@ public class PostService implements PostOperations{
                     this.entityManager.persist(postReply);
                 }
             }
-            catch(NoResultException | EJBException ex){
+            catch(NoResultException ex){
                 PostReply postReply = new PostReply();
                 postReply.setParent(parent);
                 postReply.setPost(post);
@@ -351,19 +402,9 @@ public class PostService implements PostOperations{
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editPost(PostJSON post) {
-        Post postEntity = null;
         try{
-            postEntity = getPostEntity(post);
-        }catch(NoResultException | EJBException ex){
-            createPost(post);
-            //editPost(post);
-            return;
-        }
-        try{
-            User user = this.userOperations.getUserEntity(post.getUser());
-            //check if user is admin then execute create topic
-            if (user != null)
-                postEntity.setUser(user); 
+            Post postEntity = getPostEntity(post);
+            this.userOperations.getUserEntity(post.getUser()); 
             if (post.getComment() != null)
                 postEntity.setComment(post.getComment());  
             if (post.getCreated() != null)
@@ -373,9 +414,11 @@ public class PostService implements PostOperations{
             if (postEntity.getUpvotes() != 0)
                 postEntity.setUpvotes(post.getUpvotes()); 
             this.entityManager.merge(postEntity);
-        }
-        catch(NoResultException ex){
-            return;   
+            postEntity = getPostEntity(post);
+            editPostCategory(post);
+        }catch(NoResultException ex){
+            createPost(post);
+            return;
         }
         removePost(post);
     }
@@ -385,6 +428,7 @@ public class PostService implements PostOperations{
     public void editPostWithReply(PostWithReplyJSON postWithReply){       
         try{
             getPostEntity((PostJSON)postWithReply);
+            editPost(postWithReply);
             //editPost(postWithReply);
         }
         catch(NoResultException |EJBException ex){
@@ -439,7 +483,10 @@ public class PostService implements PostOperations{
         TopicPost topicPost = this.entityManager.find(TopicPost.class, topicPostId);
         if(topicPost == null)
             throw new NoResultException(); 
-        return topicPost;    }
+        return topicPost;    
+    }
+
+
 
     //@TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public TopicPostJSON getTopicPostInfo(TopicPostJSON topicPost) throws NoResultException,
@@ -448,20 +495,23 @@ public class PostService implements PostOperations{
                                                                                     EJBException{
         TopicPost topicPostEntity = getTopicPostEntity(topicPost);
         Post postEntity = topicPostEntity.getPost();
+         Set<CategoryJSON> categories = getPostCategories(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0, null, null, null));
         return new TopicPostJSON(topicPostEntity.getPost_Id(), 
                             postEntity.getComment(), 
                             LocalDateTime.ofInstant(postEntity.getCreated().toInstant(), ZoneId.systemDefault()), 
                             postEntity.getUpvotes(), 
                             postEntity.getDownvotes(),
-                            new UserJSON(postEntity.getUserId(), null), new TopicJSON(topicPostEntity.getTopic().getTopic_Id(), null, null, null, null, null));
+                            new UserJSON(postEntity.getUserId(), null), 
+                            new TopicJSON(topicPostEntity.getTopic().getTopic_Id(), null, null, null, null, null),categories, null);
     }
 
     //@TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public PostJSON getPostInfo(PostJSON post) throws NoResultException{
         Post postInfo = getPostEntity(post);
-        return new PostJSON(postInfo.getPost_Id(), post.getComment(), 
+        Set<CategoryJSON> categories = getPostCategories(new PostJSON(postInfo.getPost_Id(), null, null, 0, 0, null, null, null));
+        return new PostJSON(postInfo.getPost_Id(), postInfo.getComment(), 
         LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
-            post.getUpvotes(), post.getDownvotes(), new UserJSON(post.getUser().getUserId(), post.getUser().getUsername()));
+            postInfo.getUpvotes(), postInfo.getDownvotes(), new UserJSON(postInfo.getUser().getUserId(), postInfo.getUser().getUsername()),categories,null);
     }
     
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -484,6 +534,7 @@ public class PostService implements PostOperations{
             return;
         try{
             getTopicPostEntity(topicPost);
+            editPost(topicPost);
         }
         catch(NoResultException | EJBException e){
             Topic topic = null;
@@ -575,7 +626,7 @@ public class PostService implements PostOperations{
         if (postReplyEntities == null)
             return null; 
         Set<PostJSON> postReplys = (Set<PostJSON>)postReplyEntities.stream().map(candidate -> 
-                                  new PostJSON(candidate.getPost_Id(), null, null, 0, 0, null))
+                                  new PostJSON(candidate.getPost_Id(), null, null, 0, 0, null, null, null))
                                     .collect(Collectors.toSet());
         postWithReply.setPosts(postReplys);
         return postWithReply;
@@ -600,6 +651,27 @@ public class PostService implements PostOperations{
         if(eventPost == null)
             throw new NoResultException(); 
         return eventPost;
+    }
+
+    public Set<PostJSON> searchPost(PostJSON post){
+        List<Post> posts = null;
+        if(post == null)
+            posts = this.entityManager.createNamedQuery("Post.getAll", Post.class).getResultList();
+        else if(post.getComment() != null && post.getUser().getUserId() == 0)
+            posts = this.entityManager.createNamedQuery("Post.searchByComment",Post.class)
+                        .setParameter(1, post.getComment())
+                        .getResultList();
+        else if(post.getComment() == null && post.getUser().getUserId() != 0)
+            posts = this.entityManager.createNamedQuery("Post.findByUserId", Post.class)
+                        .setParameter(1, post.getUser().getUserId())
+                        .getResultList();
+        return posts.stream().map(postInfo ->{
+            Set<CategoryJSON> categories = getPostCategories(new PostJSON(postInfo.getPost_Id(), null, null, 0, 0, null, null, null));
+             return new PostJSON(postInfo.getPost_Id(), post.getComment(), 
+        LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
+            postInfo.getUpvotes(), postInfo.getDownvotes(), new UserJSON(postInfo.getUser().getUserId(), postInfo.getUser().getUsername()),categories,null);
+        }).collect(Collectors.toSet());
+
     }
 
 }

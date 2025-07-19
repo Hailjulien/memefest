@@ -8,13 +8,14 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.PostJSON;
 
 @JsonRootName("GetPost")
-public class GetPostJSON {
+public class GetPostJSON extends GetJSON{
     
     @JsonProperty("Posts")
     private Set<PostJSON> posts;
 
     @JsonCreator
     public GetPostJSON(@JsonProperty("Posts") Set<PostJSON> posts) {
+        super(Getable.POST);
         this.posts = posts;
     }
 

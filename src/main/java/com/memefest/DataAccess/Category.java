@@ -16,6 +16,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.NamedNativeQueries;
 import jakarta.persistence.NamedNativeQuery;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SqlResultSetMapping;
 import jakarta.persistence.SqlResultSetMappings;
@@ -46,6 +48,12 @@ import jakarta.persistence.Table;
         }
     )   
 )
+@NamedQueries({
+    @NamedQuery(
+        name = "Category.getAll",
+        query = "SELECT c FROM CategoryEntity c"
+    )
+})
 @Table(name = "CATEGORY")
 @Entity(name = "CategoryEntity")
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -66,6 +74,14 @@ public class Category {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "category")
     @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
     private Set<TopicCategory> topics;
+
+    @OneToMany(cascade =  CascadeType.ALL, mappedBy = "category")
+    @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")
+    private Set<PostCategory> posts;
+
+    @OneToMany(cascade =  CascadeType.ALL, mappedBy = "category")
+    @JoinColumn(name = "Cat_Id", referencedColumnName = "Cat_Id")   
+    private Set<EventCategory> events;
 
     public void setTopics(Set<TopicCategory> topics){
         this.topics = topics;
@@ -97,5 +113,13 @@ public class Category {
 
     public Set<SubCategory> getSubcategories() {
         return this.subcategories;
+    }
+
+    public Set<PostCategory> getPostCategories(){
+        return this.posts;
+    }
+
+    public Set<EventCategory> getEvents(){
+        return this.events;
     }
 }

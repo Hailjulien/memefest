@@ -20,8 +20,9 @@ public class UserFollowNotificationJSON extends FollowNotificationJSON{
     public UserFollowNotificationJSON(@JsonProperty("NotificationID") int notID, 
                                         @JsonProperty("User") UserJSON user,
                                             @JsonProperty("TimeStamp") LocalDateTime time,
-                                                @JsonProperty("Follower") UserJSON follower){
-        super(notID, time, user);
+                                                @JsonProperty("Follower") UserJSON follower,
+                                                    @JsonProperty("Seen") boolean seen){
+        super(notID, time, user, seen);
         this.follower = follower;
     }
 

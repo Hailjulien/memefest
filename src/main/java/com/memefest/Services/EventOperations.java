@@ -24,7 +24,7 @@ public interface EventOperations {
 
     public void editScheduledEvent(Map<EventJSON, LocalDateTime> eventTimes);
 
-    public void createEvent(EventJSON eventInfo);
+    //public void createEvent(EventJSON eventInfo);
 
     public void removeEvent(EventJSON eventInfo);
 

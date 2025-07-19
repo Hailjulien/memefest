@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.memefest.DataAccess.JSON.Deserialize.CustomLocalDateTimeDeserializer;
 import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @JsonRootName("Post")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "PostId")
@@ -33,7 +34,13 @@ public class PostJSON {
 
   @JsonProperty("User")
   private UserJSON user;
-  
+
+  @JsonProperty("Categories")
+  private Set<CategoryJSON> categories;
+
+  @JsonProperty("CanceledCategories")
+  private Set<CategoryJSON> canceledCats;
+
   @JsonProperty("Cancel")
   private boolean canceled;
   
@@ -41,13 +48,17 @@ public class PostJSON {
   public PostJSON(@JsonProperty("PostId") int postId, @JsonProperty("Comment") String comment, 
                       @JsonProperty("Created") LocalDateTime created, 
                       @JsonProperty("Upvotes") int upvotes, @JsonProperty("Downvotes") int downvotes,
-                       @JsonProperty("User") UserJSON user) {
+                      @JsonProperty("User") UserJSON user, 
+                      @JsonProperty("Categories") Set<CategoryJSON> categories,
+                      @JsonProperty("CanceledCategories")Set<CategoryJSON> canceledCats) {
     this.postId = postId;
     this.comment = comment;
     this.created = created;
     this.upvotes = upvotes;
     this.downvotes = downvotes;
     this.user = user;
+    this.categories = categories;
+    this.canceledCats = canceledCats;
   }
   
   @JsonProperty("PostId")
@@ -119,6 +130,25 @@ public class PostJSON {
   public void setUser(UserJSON user) {
     this.user = user;
   }
+
+  @JsonProperty("Categories")
+  public void setCategories(Set<CategoryJSON> categories){
+    this.categories = categories;
+  }
   
+  @JsonProperty("Categories")
+  public Set<CategoryJSON> getCategories(){
+    return this.categories;
+  }
+
+  @JsonProperty("CanceledCategories")
+  public void setCanceledCategories(Set<CategoryJSON> canceledCats){
+    this.canceledCats = canceledCats;
+  }
+
+  @JsonProperty("CanceledCategories")
+  public Set<CategoryJSON> getCanceledCategories(){
+    return this.canceledCats;
+  }
 
 }

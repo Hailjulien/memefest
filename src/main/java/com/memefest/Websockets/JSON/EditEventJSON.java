@@ -10,7 +10,7 @@ import com.memefest.DataAccess.JSON.EventJSON;
 @JsonRootName("EditEvent")
 public class EditEventJSON extends EditJSON{
 
-    @JsonProperty("Event")
+    @JsonProperty("Events")
     private Set<EventJSON> events;
 
     @JsonCreator
@@ -20,7 +20,7 @@ public class EditEventJSON extends EditJSON{
     }
 
     public Set<EventJSON> getEvents() {
-        return events;
+        return this.events;
     }
     public void setEvent(Set<EventJSON> events) {
         this.events = events;

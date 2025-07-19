@@ -8,11 +8,11 @@ import com.memefest.DataAccess.JSON.TopicJSON;
 @JsonRootName("SearchTopic")
 public class SearchTopicJSON extends SearchJSON{
     
-    @JsonProperty("Topics")
+    @JsonProperty("Topic")
     private TopicJSON topic;
 
     @JsonCreator
-    public SearchTopicJSON(@JsonProperty("Topics") TopicJSON topic){
+    public SearchTopicJSON(@JsonProperty("Topic") TopicJSON topic){
         super(Searchable.TOPIC);
         this.topic = topic;
     }

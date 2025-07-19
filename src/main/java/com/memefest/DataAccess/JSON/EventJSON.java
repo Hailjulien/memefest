@@ -55,6 +55,12 @@ public class EventJSON implements Serializable{
     @JsonSerialize(using = CustomLocalDateTimeSerializer.class)
     private LocalDateTime datePosted;
 
+    @JsonProperty("Categories")
+    private Set<CategoryJSON> categories;
+
+    @JsonProperty("CanceledCategories")
+    private Set<CategoryJSON> canceledCats;
+
     @JsonProperty("CanceledImages")
     private Set<ImageJSON> canceledImages;
 
@@ -76,7 +82,9 @@ public class EventJSON implements Serializable{
                                                         @JsonProperty("CanceledImages") Set<ImageJSON> canceledImages,
                                                             @JsonProperty("CanceledClips") Set<VideoJSON> canceledClips,                                                   
                                                             @JsonProperty("EventVenue") String eventVenue,
-                                                                @JsonProperty("PostedBy") UserJSON user){
+                                                                @JsonProperty("PostedBy") UserJSON user,
+                                                                @JsonProperty("Categories") Set<CategoryJSON> categories,
+                                                                @JsonProperty("CanceledCategories") Set<CategoryJSON> canceledCategories){
         this.eventID = eventID;
         this.eventTitle = eventTitle;
         this.eventDescription = eventDescription;
@@ -91,6 +99,8 @@ public class EventJSON implements Serializable{
         this.canceledImages = canceledImages;
         this.canceledClips = canceledClips;
         this.isCanceled = false;
+        this.categories = categories;
+        this.canceledCats = canceledCategories;
     }
 
     public int getEventID() {
@@ -206,4 +216,20 @@ public class EventJSON implements Serializable{
         this.isCanceled = canceled;
     }
 
+    public Set<CategoryJSON> getCanceledCategories(){
+        return this.canceledCats;
+    }
+
+    public void setCanceledCategories(Set<CategoryJSON> canceledCategories){
+        this.canceledCats = canceledCategories;
+    }
+
+    public void setCategories(Set<CategoryJSON> categories){
+        this.categories = categories;
+    }
+
+    public Set<CategoryJSON> getCategories(){
+        return this.categories;
+    }
+    
 }

@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.SqlResultSetMappings;
 import jakarta.persistence.Table;
 
 @NamedQueries({
@@ -19,7 +20,7 @@ import jakarta.persistence.Table;
     query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicCategoryId.topicId = :topicId"),
   @NamedQuery(
     name = "TopicCategory.getByCategoryId",
-    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicCategoryId.catId = :categoryId")
+    query = "SELECT tc FROM TopicCategoryEntity tc WHERE tc.topicCategoryId.catId = :categoryId"),
 })
 @Entity(name = "TopicCategoryEntity")
 @Table(name = "TOPIC_CATEGORY")

@@ -34,14 +34,19 @@ public class NotificationJSON {
     @JsonProperty("Canceled")
     private boolean canceled;
 
+    @JsonProperty("Seen")
+    private boolean seen;
+
     
     @JsonCreator
     public NotificationJSON(@JsonProperty("NotificationID") int notId, 
                                 @JsonProperty("Timestamp") LocalDateTime date,
-                                     @JsonProperty("NotificationType") Notification notification, UserJSON user){
+                                    @JsonProperty("NotificationType") Notification notification, UserJSON user,
+                                        @JsonProperty("Seen") boolean seen){
         this.date = date;
         this.notification = notification;
         this.user = user;
+        this.seen = seen;
     }
 
     public LocalDateTime getDate(){
@@ -78,5 +83,13 @@ public class NotificationJSON {
 
     public void cancel(boolean canceled){
         this.canceled = canceled;
+    }
+
+    public void setSeen(boolean seen){
+        this.seen = seen;
+    }
+
+    public boolean getSeen(){
+        return this.seen;
     }
 }

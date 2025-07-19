@@ -30,6 +30,11 @@ import jakarta.persistence.Table;
     query = "SELECT TOP(1) P.Post_Id as postId, P.Comment as comment, P.Created as created," 
                    + "P.Upvotes as upvotes, P.downvotes as downvotes, P.UserId as userId FROM POST P "
                 + "WHERE P.Comment LIKE CONCAT(CONCAT( '%',?),'%')", resultSetMapping = "PostEntityMapping"
+    ),
+    @NamedNativeQuery(name = "Post.searchByComment",
+    query = "SELECT P.Post_Id as postId, P.Comment as comment, P.Created as created," 
+                   + "P.Upvotes as upvotes, P.downvotes as downvotes, P.UserId as userId FROM POST P "
+                + "WHERE P.Comment LIKE CONCAT(CONCAT( '%',?),'%')", resultSetMapping = "PostEntityMapping"
     )
 })
 @SqlResultSetMappings(
@@ -54,6 +59,10 @@ import jakarta.persistence.Table;
     @NamedQuery(
         name = "Post.findByUserId",
         query = "SELECT p FROM PostEntity p WHERE p.userId = :userId"
+    ),
+    @NamedQuery(
+        name = "Post.getAll",
+        query = "SELECT p FROM PostEntity p"
     )
 })
 @Entity(name = "PostEntity")
@@ -118,8 +127,15 @@ public class Post {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
     private Set<Repost> reposts;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    private Set<PostCategory> categories;
+
     public int getPost_Id(){
         return postId;
+    }
+
+    public Set<PostCategory> getCategories(){
+        return this.categories; 
     }
 
     public void setPost_Id(int postId){

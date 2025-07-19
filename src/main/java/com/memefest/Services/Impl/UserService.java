@@ -357,7 +357,7 @@ public class UserService implements UserSecurityService, UserOperations{
         if(userPosts == null)
             return null;
         for(Post p : userPosts){
-            postJSONs.add(new PostJSON(p.getPost_Id(), null, null, 0,0,null));
+            postJSONs.add(new PostJSON(p.getPost_Id(), null, null, 0,0,null,null,null));
         }
         return postJSONs;
     }
@@ -500,7 +500,6 @@ public class UserService implements UserSecurityService, UserOperations{
         userFollowerEntity.setFollower_Id(followerEntity.getUserId());
         userFollowerEntity.setUserId(userEntity.getUserId());
         entityManager.persist(userFollowerEntity);
-        feedsOps.sendToAll(new UserFollowNotificationJSON(0, user, LocalDateTime.now(), follower));
     }
 
     public void removeFollower(UserJSON user, UserJSON follower){

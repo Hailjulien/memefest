@@ -21,8 +21,10 @@ public class InteractNotificationJSON extends NotificationJSON{
     public InteractNotificationJSON(@JsonProperty("NotificationID") int notId,
                                         @JsonProperty("Post") PostJSON postJSON, 
                                             @JsonProperty("TimeStamp") LocalDateTime time, 
-                                                @JsonProperty("InteractionType") InteractionType interactionType, UserJSON user){
-        super(notId, time, Notification.INTERACT,user);
+                                                @JsonProperty("InteractionType") InteractionType interactionType,
+                                                    @JsonProperty("User") UserJSON user,
+                                                        @JsonProperty("Seen") boolean seen){
+        super(notId, time, Notification.INTERACT,user, seen);
         this.interaction = interactionType;
 
     }

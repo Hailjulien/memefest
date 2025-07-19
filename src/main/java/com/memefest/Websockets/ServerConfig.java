@@ -68,10 +68,12 @@ import com.memefest.Websockets.Decoders.GetResultFollowNotificationDecoder;
 import com.memefest.Websockets.Decoders.GetResultNotificationDecoder;
 import com.memefest.Websockets.Decoders.GetResultPostDecoder;
 import com.memefest.Websockets.Decoders.GetResultPostNotificationDecoder;
+import com.memefest.Websockets.Decoders.GetResultPostWithReplysDecoder;
 import com.memefest.Websockets.Decoders.GetResultRepostDecoder;
 import com.memefest.Websockets.Decoders.GetResultScheduledEventDecoder;
 import com.memefest.Websockets.Decoders.GetResultScheduledTopicDecoder;
 import com.memefest.Websockets.Decoders.GetResultTopicDecoder;
+import com.memefest.Websockets.Decoders.GetResultTopicFollowNotificationDecoder;
 import com.memefest.Websockets.Decoders.GetResultTopicPostDecoder;
 import com.memefest.Websockets.Decoders.GetResultTopicPostNotificationDecoder;
 import com.memefest.Websockets.Decoders.GetResultUserDecoder;
@@ -88,6 +90,10 @@ import com.memefest.Websockets.Decoders.NotificationDecoder;
 import com.memefest.Websockets.Decoders.PostDecoder;
 import com.memefest.Websockets.Decoders.PostNotificationDecoder;
 import com.memefest.Websockets.Decoders.PostWithReplyDecoder;
+import com.memefest.Websockets.Decoders.SearchCategoryDecoder;
+import com.memefest.Websockets.Decoders.SearchEventDecoder;
+import com.memefest.Websockets.Decoders.SearchResultCategoryDecoder;
+import com.memefest.Websockets.Decoders.SearchResultEventDecoder;
 import com.memefest.Websockets.Decoders.TopicDecoder;
 import com.memefest.Websockets.Decoders.TopicFollowNotificationDecoder;
 import com.memefest.Websockets.Decoders.UserDecoder;
@@ -158,30 +164,24 @@ import com.memefest.Websockets.Encoders.GetResultFollowNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetResultNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetResultPostEncoder;
 import com.memefest.Websockets.Encoders.GetResultPostNotificationEncoder;
+import com.memefest.Websockets.Encoders.GetResultPostWithReplysEncoder;
 import com.memefest.Websockets.Encoders.GetResultRepostEncoder;
 import com.memefest.Websockets.Encoders.GetResultScheduledEventEncoder;
 import com.memefest.Websockets.Encoders.GetResultScheduledTopicEncoder;
 import com.memefest.Websockets.Encoders.GetResultTopicEncoder;
+import com.memefest.Websockets.Encoders.GetResultTopicFollowNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetResultTopicPostEncoder;
 import com.memefest.Websockets.Encoders.GetResultTopicPostNotificationEncoder;
-import com.memefest.Websockets.Encoders.GetResultUserEncoder;
 import com.memefest.Websockets.Encoders.GetResultUserFollowNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetScheduledEventEncoder;
 import com.memefest.Websockets.Encoders.GetScheduledTopicEncoder;
 import com.memefest.Websockets.Encoders.GetTopicEncoder;
 import com.memefest.Websockets.Encoders.GetTopicFollowNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetTopicPostEncoder;
-import com.memefest.Websockets.Encoders.GetTopicPostNotificationEncoder;
-import com.memefest.Websockets.Encoders.GetUserEncoder;
-import com.memefest.Websockets.Encoders.GetUserFollowNotificationEncoder;
-import com.memefest.Websockets.Encoders.NotificationEncoder;
-import com.memefest.Websockets.Encoders.PostEncoder;
-import com.memefest.Websockets.Encoders.PostNotificationEncoder;
-import com.memefest.Websockets.Encoders.PostWithReplyEncoder;
-import com.memefest.Websockets.Encoders.TopicEncoder;
-import com.memefest.Websockets.Encoders.TopicFollowNotificationEncoder;
-import com.memefest.Websockets.Encoders.UserEncoder;
-
+import com.memefest.Websockets.Encoders.SearchCategoryEncoder;
+import com.memefest.Websockets.Encoders.SearchEventEncoder;
+import com.memefest.Websockets.Encoders.SearchResultCategoryEncoder;
+import com.memefest.Websockets.Encoders.SearchResultEventEncoder;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerApplicationConfig;
 import jakarta.websocket.server.ServerEndpoint;
@@ -197,270 +197,257 @@ public class ServerConfig implements ServerApplicationConfig {
       if (endpointClass.equals(FeedsEndpoint.class)) {
         ServerEndpointConfig serverEndpointConfig = ServerEndpointConfig.Builder.create(endpointClass, "/feeds")
                   .encoders(Arrays.asList(          
-                                                EditEventEncoder.class,
-                                                    EditResultEventEncoder.class,
-                                                    GetResultEventEncoder.class,
-                                                    GetEventEncoder.class
-                                                    /* 
-                                                    EditUserEncoder.class,
-                                                    UserEncoder.class,
-                                                    TopicEncoder.class,
-                                                    PostEncoder.class,
-                                                    EventEncoder.class,
-                                                    PostWithReplyEncoder.class,
-                                                    EditTopicEncoder.class,
+                                                    EditEventEncoder.class,
+                                                    EditResultEventEncoder.class, 
                                                     
-                                                    EditResultUserEncoder.class,
+                                                    SearchEventEncoder.class,
+                                                    SearchResultEventEncoder.class,
+
+                                                    GetEventEncoder.class,
+                                                    GetResultEventEncoder.class,
+                                                    
+
+
+
+                                                    EditTopicEncoder.class,
                                                     EditResultTopicEncoder.class,
-                                                    CategoryEncoder.class,
-                                                    EditCategoryEncoder.class,
-                                                    EditResultCategoryEncoder.class,
-                                                    EditResultTopicEncoder.class,
+
+                                                    GetTopicEncoder.class,
+                                                    GetResultTopicEncoder.class,
+
+
+
+
+                                                    
                                                     EditPostEncoder.class,
                                                     EditResultPostEncoder.class,
+
+                                                    GetPostEncoder.class,
+                                                    GetResultPostEncoder.class,
+                                                    
+
+
+
                                                     EditPostWithReplyEncoder.class,
                                                     EditResultPostWithReplyEncoder.class,
+                                                    
+                                                    GetPostReplysEncoder.class,
+                                                    GetResultPostWithReplysEncoder.class,
+                                                    
+                                              
                                                     EditEventPostEncoder.class,
-                                                    EditResultEventPostEncoder.class
-                                               /*  
-                                          /*EditAdminEncoder.class,*/
-                                          /*
-                                          EditCategoryEncoder.class,
-                                          EditEncoder.class,
-                                          EditEventEncoder.class,
-                                          EditEventNotificationEncoder.class,
-                                          EditEventPostEncoder.class,
-                                          EditEventPostNotificationEncoder.class,
-                                          EditFollowNotificationEncoder.class,
-                                          EditTopicFollowNotificationEncoder.class,
-                                          EditPostNotificationEncoder.class,
-                                          EditRepostEncoder.class,
-                                          EditResultEventEncoder.class,
-                                          EditResultEventNotificationEncoder.class,
-                                          EditResultEventPostNotificationEncoder.class,
-                                          EditResultFollowNotificationEncoder.class,
-                                          EditResultPostEncoder.class,
-                                          EditResultPostNotificationEncoder.class,
-                                          EditResultRepostEncoder.class,
-                                          EditResultTopicEncoder.class,
-                                          EditResultTopicFollowNotificationEncoder.class,
-                                          EditResultTopicPostEncoder.class,
-                                          EditResultTopicPostNotificationEncoder.class,
-                                          EditResultUserEncoder.class,
-                                          EditResultUserFollowNotificationEncoder.class,
-                                          EditResultTopicEncoder.class,
-                                          EditResultTopicFollowNotificationEncoder.class,
-                                          EditTopicPostEncoder.class,
-                                          EditTopicPostNotificationEncoder.class,
-                                         
-                                          EditUserFollowNotificationEncoder.class,
-                                          EventNotificationEncoder.class,
-                                          EventPostNotificationEncoder.class,
-                                          FollowNotificationEncoder.class,
-                                          GetAdminEncoder.class,
-                                          GetCategoryEncoder.class,
-                                          GetEncoder.class,
-                                          GetEventEncoder.class,
-                                          GetEventNotificationEncoder.class,
-                                          GetEventPostEncoder.class,
-                                          GetEventPostNotificationEncoder.class,
-                                          GetFollowNotificationEncoder.class,
-                                          GetNotificationEncoder.class,
-                                          GetPostEncoder.class,
-                                          GetPostNotificationEncoder.class,
-                                          GetRepostEncoder.class,
-                                          GetResultAdminEncoder.class,
-                                          GetResultCategoryEncoder.class,
-                                          GetResultEncoder.class,
-                                          GetResultEventEncoder.class,
-                                          GetResultEventNotificationEncoder.class,
-                                          GetResultEventPostEncoder.class,
-                                          GetResultEventPostNotificationEncoder.class,
-                                          GetResultFollowNotificationEncoder.class,
-                                          GetResultNotificationEncoder.class,
-                                          GetResultPostEncoder.class,
-                                          GetResultPostNotificationEncoder.class,
-                                          GetResultRepostEncoder.class,
-                                          GetResultTopicEncoder.class,
-                                          GetResultTopicPostEncoder.class,
-                                          GetResultTopicPostNotificationEncoder.class,
-                                          GetResultUserEncoder.class,
-                                          GetResultUserFollowNotificationEncoder.class,
-                                          GetTopicEncoder.class,
-                                          GetTopicFollowNotificationEncoder.class,
-                                          GetTopicPostEncoder.class,
-                                          GetTopicPostNotificationEncoder.class,
-                                          GetUserEncoder.class,
-                                          GetUserFollowNotificationEncoder.class,
-                                          NotificationEncoder.class,
-                                          PostNotificationEncoder.class,
-                                          TopicFollowNotificationEncoder.class,
-                                          PostEncoder.class,
-                                          PostNotificationEncoder.class,
-                                          AdminEncoder.class,
-                                          EditPostNotificationEncoder.class,
-                                          EditResultPostNotificationEncoder.class,
-                                          CategoryEncoder.class,
-                                          EditPostEncoder.class,
-                                          EditTopicEncoder.class,
-                                          GetTopicEncoder.class,
-                                          EditEventEncoder.class,
-                                          GetEventEncoder.class,
-                                          GetEventPostEncoder.class,
-                                          EditEncoder.class,
-                                          GetEventEncoder.class,
-                                          GetPostEncoder.class,
-                                          GetTopicPostEncoder.class,
-                                          GetTopicEncoder.class,
-                                          GetEventPostEncoder.class,
-                                                                                    
-                    EditPostWithReplyEncoder.class,
-                    EditResultPostWithReplyEncoder.class,
-                    EditResultScheduledEventEncoder.class,
-                    EditResultScheduledTopicEncoder.class,
-                    EditScheduledEventEncoder.class,
-                    EditScheduledTopicEncoder.class,
-                    GetPostReplysEncoder.class,
-                    GetResultScheduledEventEncoder.class,
-                    GetResultScheduledTopicEncoder.class,
-                    GetScheduledEventEncoder.class,
-                    GetScheduledTopicEncoder.class
-                    */
-                                          
+                                                    EditResultEventPostEncoder.class,
+                                                    
+                                                    GetEventPostEncoder.class,
+                                                    GetResultEventPostEncoder.class,                                                    
+                                                    
+                                                          
+                                                    GetTopicPostEncoder.class,
+                                                    GetResultTopicPostEncoder.class,
+                                                    
+                                                    EditTopicPostEncoder.class,
+                                                    EditResultTopicPostEncoder.class,
+                                                    
+
+                                                    EditRepostEncoder.class,
+                                                    EditResultRepostEncoder.class,
+
+                                                    GetRepostEncoder.class,
+                                                    GetResultRepostEncoder.class,
+                                                    
+
+
+
+                                                    EditCategoryEncoder.class,
+                                                    EditResultCategoryEncoder.class,
+                                                    
+                                                    SearchCategoryEncoder.class,
+                                                    SearchResultCategoryEncoder.class,
+
+                                                    GetCategoryEncoder.class,
+                                                    GetResultCategoryEncoder.class,
+
+
+                                                    
+                                                    
+                                                    EditEventNotificationEncoder.class,
+                                                    EditResultEventNotificationEncoder.class,
+                                                    
+                                                    GetEventNotificationEncoder.class,
+                                                    GetResultEventNotificationEncoder.class,
+                                                    
+
+
+
+                                                    EditEventPostNotificationEncoder.class,
+                                                    EditResultEventPostNotificationEncoder.class,
+
+                                                    GetEventPostNotificationEncoder.class,
+                                                    GetResultEventPostNotificationEncoder.class,
+
+
+                                                    
+                                                    EditFollowNotificationEncoder.class,
+                                                    EditResultFollowNotificationEncoder.class,
+
+                                                    GetFollowNotificationEncoder.class,
+                                                    GetResultFollowNotificationEncoder.class,
+
+                                                    
+
+
+                                                    EditTopicFollowNotificationEncoder.class,
+                                                    EditResultTopicFollowNotificationEncoder.class,
+                                                    
+                                                    GetTopicFollowNotificationEncoder.class,
+                                                    GetResultTopicFollowNotificationEncoder.class,      
+
+
+
+
+                                                    EditPostNotificationEncoder.class,
+                                                    EditResultPostNotificationEncoder.class,
+                                                    
+                                                    GetPostNotificationEncoder.class,
+                                                    GetResultPostNotificationEncoder.class,
+
+
+
+
+                                                    EditResultTopicPostNotificationEncoder.class,
+                                                    EditResultTopicPostNotificationEncoder.class,
+                                                    
+                                                    GetPostNotificationEncoder.class,
+                                                    GetResultTopicPostNotificationEncoder.class
                                           )
                                           
 
                                           )
                   .decoders(Arrays.asList(
-                    EditEventDecoder.class,
-                    EditResultEventDecoder.class,
-                    GetResultEventDecoder.class,
-                    GetEventDecoder.class
-                    /* 
-                    EditUserDecoder.class,
-                    UserDecoder.class,
-                    TopicDecoder.class,
-                    PostDecoder.class,
-                    EventDecoder.class,
-                    EditTopicDecoder.class,
-                    
-                    PostWithReplyDecoder.class,
-                    EditResultUserDecoder.class,
-                    EditResultTopicDecoder.class,
-                    CategoryDecoder.class,
-                    EditCategoryDecoder.class,
-                    EditResultCategoryDecoder.class,
-                    EditPostDecoder.class,
-                    
-                   
-                    EditResultPostDecoder.class,
-                    EditPostWithReplyDecoder.class,
-                    EditResultPostWithReplyDecoder.class,
-                    EditEventPostDecoder.class,
-                    EditResultEventPostDecoder.class
-                    /*EditAdminDecoder.class,*/
-                    /*EditCategoryDecoder.class,
-                    
-                    EditDecoder.class,
-                    EditEventDecoder.class,
-                    EditEventNotificationDecoder.class,
-                    EditEventPostDecoder.class,
-                    EditEventPostNotificationDecoder.class,
-                    EditFollowNotificationDecoder.class,
-                    EditTopicFollowNotificationDecoder.class,
-                    EditPostNotificationDecoder.class,
-                    EditRepostDecoder.class,
-                    EditResultEventDecoder.class,
-                    EditResultEventNotificationDecoder.class,
-                    EditResultEventPostNotificationDecoder.class,
-                    EditResultFollowNotificationDecoder.class,
-                    EditResultPostDecoder.class,
-                    EditResultPostNotificationDecoder.class,
-                    EditResultRepostDecoder.class,
-                    EditResultTopicDecoder.class,
-                    EditResultTopicFollowNotificationDecoder.class,
-                    EditResultTopicPostDecoder.class,
-                    EditResultTopicPostNotificationDecoder.class,
-                    EditResultUserDecoder.class,
-                    EditResultUserFollowNotificationDecoder.class,
-                    EditResultTopicDecoder.class,
-                    EditResultTopicFollowNotificationDecoder.class,
-                    EditTopicPostDecoder.class,
-                    EditTopicPostNotificationDecoder.class,
-                    
-                    EditUserFollowNotificationDecoder.class,
-                    EventNotificationDecoder.class,
-                    EventPostNotificationDecoder.class,
-                    FollowNotificationDecoder.class,
-                    GetAdminDecoder.class,
-                    GetCategoryDecoder.class,
-                    GetDecoder.class,
-                    GetEventDecoder.class,
-                    GetEventNotificationDecoder.class,
-                    GetEventPostDecoder.class,
-                    GetEventPostNotificationDecoder.class,
-                    GetFollowNotificationDecoder.class,
-                    GetNotificationDecoder.class,
-                    GetPostDecoder.class,
-                    GetPostNotificationDecoder.class,
-                    GetRepostDecoder.class,
-                    GetResultAdminDecoder.class,
-                    GetResultCategoryDecoder.class,
-                    GetResultDecoder.class,
-                    GetResultEventDecoder.class,
-                    GetResultEventNotificationDecoder.class,
-                    GetResultEventPostDecoder.class,
-                    GetResultEventPostNotificationDecoder.class,
-                    GetResultFollowNotificationDecoder.class,
-                    GetResultNotificationDecoder.class,
-                    GetResultPostDecoder.class,
-                    GetResultPostNotificationDecoder.class,
-                    GetResultRepostDecoder.class,
-                    GetResultTopicDecoder.class,
-                    GetResultTopicPostDecoder.class,
-                    GetResultTopicPostNotificationDecoder.class,
-                    GetResultUserDecoder.class,
-                    GetResultUserFollowNotificationDecoder.class,
-                    GetTopicDecoder.class,
-                    GetTopicFollowNotificationDecoder.class,
-                    GetTopicPostDecoder.class,
-                    GetTopicPostNotificationDecoder.class,
-                    GetUserDecoder.class,
-                    GetUserFollowNotificationDecoder.class,
-                    NotificationDecoder.class,
-                    PostNotificationDecoder.class,
-                    TopicFollowNotificationDecoder.class,
-                    
-                    EditPostWithReplyDecoder.class,
-                    EditResultPostWithReplyDecoder.class,
-                    EditResultScheduledEventDecoder.class,
-                    EditResultScheduledTopicDecoder.class,
-                    EditScheduledEventDecoder.class,
-                    EditScheduledTopicDecoder.class,
-                    GetPostWithReplysDecoder.class,
-                    GetResultScheduledEventDecoder.class,
-                    GetResultScheduledTopicDecoder.class,
-                    GetScheduledEventDecoder.class,
-                    GetScheduledTopicDecoder.class,
 
-                                        PostDecoder.class,
-                                              PostNotificationDecoder.class,
-                                              EditPostNotificationDecoder.class,
-                                              EditResultPostNotificationDecoder.class,
-                                              GetEventPostDecoder.class,
-                                              AdminDecoder.class,
-                                              EditTopicDecoder.class,
-                                              GetTopicDecoder.class,
-                                              GetEventDecoder.class,
-                                              EditEventDecoder.class,
-                                              CategoryDecoder.class,
-                                              EditPostDecoder.class,
-                                              EditDecoder.class,
-                                              GetEventDecoder.class,
-                                              GetPostDecoder.class,
-                                              GetTopicPostDecoder.class,
-                                              GetTopicDecoder.class,
-                                              GetEventPostDecoder.class*/)).build();
+                                                    EditEventDecoder.class,
+                                                    EditResultEventDecoder.class, 
+                                                    
+                                                    SearchEventDecoder.class,
+                                                    SearchResultEventDecoder.class,
+
+                                                    GetEventDecoder.class,
+                                                    GetResultEventDecoder.class,
+                                                    
+
+
+
+                                                    EditTopicDecoder.class,
+                                                    EditResultTopicDecoder.class,
+
+                                                    GetTopicDecoder.class,
+                                                    GetResultTopicDecoder.class,
+
+
+
+
+                                                    
+                                                    EditPostDecoder.class,
+                                                    EditResultPostDecoder.class,
+
+                                                    GetPostDecoder.class,
+                                                    GetResultPostDecoder.class,
+                                                    
+
+
+
+                                                    EditPostWithReplyDecoder.class,
+                                                    EditResultPostWithReplyDecoder.class,
+                                                    
+                                                    GetPostWithReplysDecoder.class,
+                                                    GetResultPostWithReplysDecoder.class,
+                                                    
+                                              
+                                                    EditEventPostDecoder.class,
+                                                    EditResultEventPostDecoder.class,
+                                                    
+                                                    GetEventPostDecoder.class,
+                                                    GetResultEventPostDecoder.class,                                                    
+                                                    
+                                                          
+                                                    GetTopicPostDecoder.class,
+                                                    GetResultTopicPostDecoder.class,
+                                                    
+                                                    EditTopicPostDecoder.class,
+                                                    EditResultTopicPostDecoder.class,
+                                                    
+
+                                                    EditRepostDecoder.class,
+                                                    EditResultRepostDecoder.class,
+
+                                                    GetRepostDecoder.class,
+                                                    GetResultRepostDecoder.class,
+                                                    
+
+
+
+                                                    EditCategoryDecoder.class,
+                                                    EditResultCategoryDecoder.class,
+                                                    
+                                                    SearchCategoryDecoder.class,
+                                                    SearchResultCategoryDecoder.class,
+
+                                                    GetCategoryDecoder.class,
+                                                    GetResultCategoryDecoder.class,
+
+
+                                                    
+                                                    
+                                                    EditEventNotificationDecoder.class,
+                                                    EditResultEventNotificationDecoder.class,
+                                                    
+                                                    GetEventNotificationDecoder.class,
+                                                    GetResultEventNotificationDecoder.class,
+                                                    
+
+
+
+                                                    EditEventPostNotificationDecoder.class,
+                                                    EditResultEventPostNotificationDecoder.class,
+
+                                                    GetEventPostNotificationDecoder.class,
+                                                    GetResultEventPostNotificationDecoder.class,
+
+
+                                                    
+                                                    EditFollowNotificationDecoder.class,
+                                                    EditResultFollowNotificationDecoder.class,
+
+                                                    GetFollowNotificationDecoder.class,
+                                                    GetResultFollowNotificationDecoder.class,
+
+                                                    
+
+
+                                                    EditTopicFollowNotificationDecoder.class,
+                                                    EditResultTopicFollowNotificationDecoder.class,
+                                                    
+                                                    GetTopicFollowNotificationDecoder.class,
+                                                    GetResultTopicFollowNotificationDecoder.class,      
+
+
+
+
+                                                    EditPostNotificationDecoder.class,
+                                                    EditResultPostNotificationDecoder.class,
+                                                    
+                                                    GetPostNotificationDecoder.class,
+                                                    GetResultPostNotificationDecoder.class,
+
+
+
+
+                                                    EditResultTopicPostDecoder.class,
+                                                    EditResultTopicPostNotificationDecoder.class,
+                                                    
+                                                    GetPostNotificationDecoder.class,
+                                                    GetResultTopicPostNotificationDecoder.class
+                   )).build();
         configs.add(serverEndpointConfig);
       } 
     } 

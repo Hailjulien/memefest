@@ -1,5 +1,8 @@
 package com.memefest.DataAccess;
 
+import java.sql.Date;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Inheritance;
@@ -27,6 +30,12 @@ public class PostNotification {
 
     @EmbeddedId
     private PostNotificationId id = new PostNotificationId();
+
+    @Column(name = "Created", nullable = false)
+    private Date created;
+
+    @Column(name = "Seen")
+    private boolean seen;
 
     @ManyToOne
     @JoinColumn(name = "Post_Id", referencedColumnName = "Post_Id")
@@ -68,4 +77,19 @@ public class PostNotification {
         this.id.setUserId(userId);
     }
 
+    public void setCreated(Date created){
+        this.created = created;
+    }
+
+    public Date getCreated(){
+        return this.created;
+    }
+
+    public boolean getSeen(){
+        return this.seen;
+    }
+
+    public void setSeen(boolean seen){
+        this.seen = seen;
+    }
 }

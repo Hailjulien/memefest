@@ -25,19 +25,60 @@ import jakarta.persistence.Table;
 
 
 @NamedQueries({
-    @NamedQuery(name = "Event.getEventById", query = "SELECT u FROM EventEntity u Where u.eventId  = :eventId")
+    @NamedQuery(name = "Event.getEventById",
+         query = "SELECT u FROM EventEntity u Where u.eventId  = :eventId"),
+    @NamedQuery(name = "Event.getAll",
+        query = "SELECT u FROM EventEntity u")
 })
 @NamedNativeQueries({
-    @NamedNativeQuery(name = "Event.getEventByTitle", 
+    @NamedNativeQuery(
+        name = "Event.getEventByTitle", 
         query = "SELECT TOP(1) E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
-            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_venue "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
         resultSetMapping = "EventEntityMapping"),
-    @NamedNativeQuery(name = "Event.SeaarchEventsByTitle", 
+    @NamedNativeQuery(
+        name = "Event.searchByTitle", 
         query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
-            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_venue "
-            +"as venue FROM TOPIC T WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
-        resultSetMapping = "EventEntityMapping")})
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
+        resultSetMapping = "EventEntityMapping"),
+    @NamedNativeQuery(
+        name = "Event.searchByPostedBy",
+        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Posted_By = ?",
+        resultSetMapping =  "EventEntityMapping"),
+    @NamedNativeQuery(
+        name = "Event.searchByVenue",
+        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?),'%')",
+        resultSetMapping = "EventEntityMapping"
+    ),
+    @NamedNativeQuery(
+        name = "Event.searchByVenue&Title",
+        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?),'%') AND E.Event_Title LIKE "
+            +"CONCAT(CONCAT('%', ?),'%')",
+        resultSetMapping = "EventEntityMapping"
+    ),
+    @NamedNativeQuery(
+        name = "Event.searchByVenue&PostedBy",
+        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?), '%') AND E.Posted_By = ?",
+        resultSetMapping = "EventEntityMapping"
+    ),
+    @NamedNativeQuery(
+        name = "Event.searchByPostedBy&Title",
+        query =  "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+            +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
+        resultSetMapping = "EventEntityMapping"
+    )
+})
 @SqlResultSetMappings({
     @SqlResultSetMapping(name = "EventEntityMapping",
         entities = {@EntityResult(entityClass = Event.class, fields = {
@@ -105,6 +146,10 @@ public class Event {
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
     @JoinColumn(name = "Event_Id")
     private Set<EventNotification> eventNotifications;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
+    @JoinColumn(name = "Event_Id")
+    private Set<EventCategory> categories;
 
     public Set<EventPostNotification> getEventPostNotifications(){
         return this.eventPostNotifications;
@@ -216,5 +261,9 @@ public class Event {
 
     public void setPosts(Set<EventPost> posts) {
         this.posts = posts;
+    }
+
+    public Set<EventCategory> getCategories(){
+        return this.categories;
     }
 }

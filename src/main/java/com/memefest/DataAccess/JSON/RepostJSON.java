@@ -1,6 +1,7 @@
 package com.memefest.DataAccess.JSON;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -24,8 +25,10 @@ public class RepostJSON extends PostJSON{
                             @JsonProperty("Upvotes") int upvotes,
                                  @JsonProperty("Downvotes") int downvotes,
                                     @JsonProperty("User") UserJSON user,
-                                        @JsonProperty("Owner") UserJSON owner) {
-        super(postId,comment,created,upvotes, downvotes,user);
+                                        @JsonProperty("Owner") UserJSON owner, 
+                                        @JsonProperty("Categories") Set<CategoryJSON>  categories,
+                      @JsonProperty("CanceledCategories")Set<CategoryJSON> canceledCats) {
+        super(postId,comment,created,upvotes, downvotes,user, categories,canceledCats);
         this.owner = owner;
         this.isCanceled = false;
     }

@@ -28,7 +28,7 @@ import java.util.Set;
       + " WHERE T.Title LIKE CONCAT('%',CONCAT(?, '%'))",
     resultSetMapping = "TopicEntityMapping"),
     @NamedNativeQuery(
-      name = "Topic.searchTopic",
+      name = "Topic.searchByTitle",
       query = "SELECT T.Topic_Id as topicId, T.Title as topicName, T.Created as created FROM TOPIC T" 
         + " WHERE T.title LIKE CONCAT('%', :title, '%')",
       resultSetMapping = "TopicEntityMapping")

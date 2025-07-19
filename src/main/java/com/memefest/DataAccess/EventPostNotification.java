@@ -1,6 +1,9 @@
 package com.memefest.DataAccess;
 
+import java.sql.Date;
+
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -33,6 +36,12 @@ public class EventPostNotification{
     
     @EmbeddedId
     private EventPostNotificationId eventPostNot = new EventPostNotificationId();
+
+    @Column(name = "Created", nullable = false)
+    private Date created;
+
+    @Column(name = "Seen")
+    private boolean seen;
 
     @ManyToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "Event_Id", referencedColumnName = "Event_Id")
@@ -96,5 +105,22 @@ public class EventPostNotification{
 
     public void setPost_Id(int postId){
         this.eventPostNot.setPost_Id(postId);
+    }
+
+    public void setCreated(Date created){
+        this.created = created;
+    }
+
+    public Date getCreated(){
+        return this.created;
+    }
+
+    
+    public boolean getSeen(){
+        return this.seen;
+    }
+
+    public void setSeen(boolean seen){
+        this.seen = seen;
     }
 }

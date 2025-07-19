@@ -195,7 +195,7 @@ public class FeedsEndPointService  implements FeedsOperations   {
             Set<UserJSON> users = new  HashSet<UserJSON>();
             users.addAll(userOps.getFollowers(postNot.getUser()));
             for(UserJSON user : users){ 
-                EventPostNotificationJSON postNotInst = new EventPostNotificationJSON(0, postNot.getEventPost(), LocalDateTime.now(), user);
+                EventPostNotificationJSON postNotInst = new EventPostNotificationJSON(0, postNot.getEventPost(), LocalDateTime.now(), user, false);
                 notOps.editEventPostNotification(postNotInst);
                 clientPeers.stream().filter(candidate ->{
                     return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
@@ -210,7 +210,7 @@ public class FeedsEndPointService  implements FeedsOperations   {
             users.addAll(userOps.getFollowers(postNot.getUser()));
             users.addAll(topicOps.getTopicInfo(postNot.getTopicPost().getTopic()).getFollowedBy());
             for(UserJSON user : users){
-                TopicPostNotificationJSON postNotInst = new TopicPostNotificationJSON(0, postNot.getTopicPost(), LocalDateTime.now(), user);
+                TopicPostNotificationJSON postNotInst = new TopicPostNotificationJSON(0, postNot.getTopicPost(), LocalDateTime.now(), user, false);
                 notOps.editTopicPostNotification(postNotInst);
                 clientPeers.stream().filter(candidate ->{
                     return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
@@ -222,7 +222,7 @@ public class FeedsEndPointService  implements FeedsOperations   {
         else if(message instanceof PostNotificationJSON){
             PostNotificationJSON postNot = (PostNotificationJSON) message;
             for(UserJSON user : userOps.getFollowers(postNot.getUser())){
-                PostNotificationJSON postNotInst = new PostNotificationJSON(0,postNot.getPost(), LocalDateTime.now(), user);
+                PostNotificationJSON postNotInst = new PostNotificationJSON(0,postNot.getPost(), LocalDateTime.now(), user, false);
                 notOps.editPostNotification(postNotInst);
                 clientPeers.stream().filter(candidate ->{
                     return user.getUsername().equalsIgnoreCase(candidate.getUserPrincipal().getName());
