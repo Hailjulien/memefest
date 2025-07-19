@@ -665,12 +665,15 @@ public class PostService implements PostOperations{
             posts = this.entityManager.createNamedQuery("Post.findByUserId", Post.class)
                         .setParameter(1, post.getUser().getUserId())
                         .getResultList();
-        return posts.stream().map(postInfo ->{
-            Set<CategoryJSON> categories = getPostCategories(new PostJSON(postInfo.getPost_Id(), null, null, 0, 0, null, null, null));
-             return new PostJSON(postInfo.getPost_Id(), post.getComment(), 
-        LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
-            postInfo.getUpvotes(), postInfo.getDownvotes(), new UserJSON(postInfo.getUser().getUserId(), postInfo.getUser().getUsername()),categories,null);
-        }).collect(Collectors.toSet());
+        else throw new NoResultException();
+        if(posts != null)
+            return posts.stream().map(postInfo ->{
+                Set<CategoryJSON> categories = getPostCategories(new PostJSON(postInfo.getPost_Id(), null, null, 0, 0, null, null, null));
+                    return new PostJSON(postInfo.getPost_Id(), postInfo.getComment(), 
+                        LocalDateTime.ofInstant(postInfo.getCreated().toInstant(), ZoneId.systemDefault()), 
+                    postInfo.getUpvotes(), postInfo.getDownvotes(), new UserJSON(postInfo.getUser().getUserId(), postInfo.getUser().getUsername()),categories,null);
+                 }).collect(Collectors.toSet());
+        else throw new NoResultException();
 
     }
 

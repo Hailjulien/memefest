@@ -1,102 +1,7 @@
 package com.memefest.Websockets;
 
 import com.memefest.DataAccess.JSON.PostWithReplyJSON;
-import com.memefest.Websockets.Decoders.AdminDecoder;
-import com.memefest.Websockets.Decoders.CategoryDecoder;
-import com.memefest.Websockets.Decoders.EditCategoryDecoder;
-import com.memefest.Websockets.Decoders.EditDecoder;
-import com.memefest.Websockets.Decoders.EditEventDecoder;
-import com.memefest.Websockets.Decoders.EditEventNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditEventPostDecoder;
-import com.memefest.Websockets.Decoders.EditEventPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditPostDecoder;
-import com.memefest.Websockets.Decoders.EditPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditPostWithReplyDecoder;
-import com.memefest.Websockets.Decoders.EditRepostDecoder;
-import com.memefest.Websockets.Decoders.EditResultCategoryDecoder;
-import com.memefest.Websockets.Decoders.EditResultEventDecoder;
-import com.memefest.Websockets.Decoders.EditResultEventNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultEventPostDecoder;
-import com.memefest.Websockets.Decoders.EditResultEventPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultPostDecoder;
-import com.memefest.Websockets.Decoders.EditResultPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultPostWithReplyDecoder;
-import com.memefest.Websockets.Decoders.EditResultRepostDecoder;
-import com.memefest.Websockets.Decoders.EditResultScheduledEventDecoder;
-import com.memefest.Websockets.Decoders.EditResultScheduledTopicDecoder;
-import com.memefest.Websockets.Decoders.EditResultTopicDecoder;
-import com.memefest.Websockets.Decoders.EditResultTopicFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultTopicPostDecoder;
-import com.memefest.Websockets.Decoders.EditResultTopicPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditResultUserDecoder;
-import com.memefest.Websockets.Decoders.EditResultUserFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditScheduledEventDecoder;
-import com.memefest.Websockets.Decoders.EditScheduledTopicDecoder;
-import com.memefest.Websockets.Decoders.EditTopicDecoder;
-import com.memefest.Websockets.Decoders.EditTopicFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditTopicPostDecoder;
-import com.memefest.Websockets.Decoders.EditTopicPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.EditUserDecoder;
-import com.memefest.Websockets.Decoders.EditUserFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.EventDecoder;
-import com.memefest.Websockets.Decoders.EventNotificationDecoder;
-import com.memefest.Websockets.Decoders.EventPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.FollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetAdminDecoder;
-import com.memefest.Websockets.Decoders.GetCategoryDecoder;
-import com.memefest.Websockets.Decoders.GetDecoder;
-import com.memefest.Websockets.Decoders.GetEventDecoder;
-import com.memefest.Websockets.Decoders.GetEventNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetEventPostDecoder;
-import com.memefest.Websockets.Decoders.GetEventPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetPostDecoder;
-import com.memefest.Websockets.Decoders.GetPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetPostWithReplysDecoder;
-import com.memefest.Websockets.Decoders.GetRepostDecoder;
-import com.memefest.Websockets.Decoders.GetResultAdminDecoder;
-import com.memefest.Websockets.Decoders.GetResultCategoryDecoder;
-import com.memefest.Websockets.Decoders.GetResultDecoder;
-import com.memefest.Websockets.Decoders.GetResultEventDecoder;
-import com.memefest.Websockets.Decoders.GetResultEventNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultEventPostDecoder;
-import com.memefest.Websockets.Decoders.GetResultEventPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultPostDecoder;
-import com.memefest.Websockets.Decoders.GetResultPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultPostWithReplysDecoder;
-import com.memefest.Websockets.Decoders.GetResultRepostDecoder;
-import com.memefest.Websockets.Decoders.GetResultScheduledEventDecoder;
-import com.memefest.Websockets.Decoders.GetResultScheduledTopicDecoder;
-import com.memefest.Websockets.Decoders.GetResultTopicDecoder;
-import com.memefest.Websockets.Decoders.GetResultTopicFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultTopicPostDecoder;
-import com.memefest.Websockets.Decoders.GetResultTopicPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetResultUserDecoder;
-import com.memefest.Websockets.Decoders.GetResultUserFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetScheduledEventDecoder;
-import com.memefest.Websockets.Decoders.GetScheduledTopicDecoder;
-import com.memefest.Websockets.Decoders.GetTopicDecoder;
-import com.memefest.Websockets.Decoders.GetTopicFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetTopicPostDecoder;
-import com.memefest.Websockets.Decoders.GetTopicPostNotificationDecoder;
-import com.memefest.Websockets.Decoders.GetUserDecoder;
-import com.memefest.Websockets.Decoders.GetUserFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.NotificationDecoder;
-import com.memefest.Websockets.Decoders.PostDecoder;
-import com.memefest.Websockets.Decoders.PostNotificationDecoder;
-import com.memefest.Websockets.Decoders.PostWithReplyDecoder;
-import com.memefest.Websockets.Decoders.SearchCategoryDecoder;
-import com.memefest.Websockets.Decoders.SearchEventDecoder;
-import com.memefest.Websockets.Decoders.SearchResultCategoryDecoder;
-import com.memefest.Websockets.Decoders.SearchResultEventDecoder;
-import com.memefest.Websockets.Decoders.TopicDecoder;
-import com.memefest.Websockets.Decoders.TopicFollowNotificationDecoder;
-import com.memefest.Websockets.Decoders.UserDecoder;
+import com.memefest.Websockets.Decoders.*;
 import com.memefest.Websockets.Encoders.AdminEncoder;
 import com.memefest.Websockets.Encoders.CategoryEncoder;
 import com.memefest.Websockets.Encoders.EditCategoryEncoder;
@@ -180,24 +85,33 @@ import com.memefest.Websockets.Encoders.GetTopicFollowNotificationEncoder;
 import com.memefest.Websockets.Encoders.GetTopicPostEncoder;
 import com.memefest.Websockets.Encoders.SearchCategoryEncoder;
 import com.memefest.Websockets.Encoders.SearchEventEncoder;
+import com.memefest.Websockets.Encoders.SearchPostEncoder;
 import com.memefest.Websockets.Encoders.SearchResultCategoryEncoder;
 import com.memefest.Websockets.Encoders.SearchResultEventEncoder;
+import com.memefest.Websockets.Encoders.SearchResultPostEncoder;
+import com.memefest.Websockets.Encoders.SearchResultTopicEncoder;
+import com.memefest.Websockets.Encoders.SearchTopicEncoder;
+
+import io.jsonwebtoken.lang.Collections;
+import jakarta.websocket.Decoder;
+import jakarta.websocket.Encoder;
 import jakarta.websocket.Endpoint;
 import jakarta.websocket.server.ServerApplicationConfig;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.server.ServerEndpointConfig;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ServerConfig implements ServerApplicationConfig {
   public Set<ServerEndpointConfig> getEndpointConfigs(Set<Class<? extends Endpoint>> endpoints) {
     Set<ServerEndpointConfig> configs = new HashSet<>();
     for (Class<? extends Endpoint> endpointClass : endpoints) {
       if (endpointClass.equals(FeedsEndpoint.class)) {
-        ServerEndpointConfig serverEndpointConfig = ServerEndpointConfig.Builder.create(endpointClass, "/feeds")
-                  .encoders(Arrays.asList(          
-                                                    EditEventEncoder.class,
+        Set<Class<? extends Encoder>> encoders = Collections.setOf(EditEventEncoder.class,        
                                                     EditResultEventEncoder.class, 
                                                     
                                                     SearchEventEncoder.class,
@@ -214,8 +128,10 @@ public class ServerConfig implements ServerApplicationConfig {
 
                                                     GetTopicEncoder.class,
                                                     GetResultTopicEncoder.class,
-
-
+                                                    
+                                                    SearchTopicEncoder.class,
+                                                    SearchResultTopicEncoder.class,
+        
 
 
                                                     
@@ -224,6 +140,9 @@ public class ServerConfig implements ServerApplicationConfig {
 
                                                     GetPostEncoder.class,
                                                     GetResultPostEncoder.class,
+
+                                                    SearchPostEncoder.class,
+                                                    SearchResultPostEncoder.class,                                                   
                                                     
 
 
@@ -318,13 +237,8 @@ public class ServerConfig implements ServerApplicationConfig {
                                                     EditResultTopicPostNotificationEncoder.class,
                                                     
                                                     GetPostNotificationEncoder.class,
-                                                    GetResultTopicPostNotificationEncoder.class
-                                          )
-                                          
-
-                                          )
-                  .decoders(Arrays.asList(
-
+                                                    GetResultTopicPostNotificationEncoder.class);
+        Set<Class<? extends Decoder>> decoders = Collections.setOf(
                                                     EditEventDecoder.class,
                                                     EditResultEventDecoder.class, 
                                                     
@@ -343,26 +257,29 @@ public class ServerConfig implements ServerApplicationConfig {
                                                     GetTopicDecoder.class,
                                                     GetResultTopicDecoder.class,
 
-
+                                                    SearchTopicDecoder.class,
+                                                    SearchResultTopicDecoder.class,
 
 
                                                     
+
                                                     EditPostDecoder.class,
                                                     EditResultPostDecoder.class,
 
                                                     GetPostDecoder.class,
                                                     GetResultPostDecoder.class,
                                                     
-
-
-
+                                                    SearchPostDecoder.class,
+                                                    SearchResultPostDecoder.class,
+                                                    
+                            
                                                     EditPostWithReplyDecoder.class,
                                                     EditResultPostWithReplyDecoder.class,
                                                     
                                                     GetPostWithReplysDecoder.class,
                                                     GetResultPostWithReplysDecoder.class,
                                                     
-                                              
+                  
                                                     EditEventPostDecoder.class,
                                                     EditResultEventPostDecoder.class,
                                                     
@@ -446,8 +363,11 @@ public class ServerConfig implements ServerApplicationConfig {
                                                     EditResultTopicPostNotificationDecoder.class,
                                                     
                                                     GetPostNotificationDecoder.class,
-                                                    GetResultTopicPostNotificationDecoder.class
-                   )).build();
+                                                    GetResultTopicPostNotificationDecoder.class);
+
+        ServerEndpointConfig serverEndpointConfig = ServerEndpointConfig.Builder.create(endpointClass, "/feeds")
+                  .encoders(encoders.stream().collect(Collectors.toList()))
+                  .decoders(decoders.stream().collect(Collectors.toList())).build();
         configs.add(serverEndpointConfig);
       } 
     } 

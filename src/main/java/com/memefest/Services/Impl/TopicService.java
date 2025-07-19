@@ -37,6 +37,7 @@ import com.memefest.Services.UserOperations;
 import jakarta.annotation.Resource;
 import jakarta.annotation.sql.DataSourceDefinition;
 import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.ejb.ScheduleExpression;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.Timeout;
@@ -226,11 +227,13 @@ public class TopicService implements TopicOperations{
     }
 
   
-    private Set<CategoryJSON> getTopicCategories(TopicJSON topic){
+    private Set<CategoryJSON> getTopicCategories(TopicJSON topic)throws NoResultException{
         Topic topicEntity = getTopicEntity(topic);
         Set<CategoryJSON> topics = new HashSet<CategoryJSON>();
         Stream<TopicCategory> topicCats = entityManager.createNamedQuery("TopicCategory.getByTopicId", TopicCategory.class)
               .setParameter("topicId", topicEntity.getTopic_Id()).getResultStream();
+        if (topicCats== null)
+            throw new NoResultException();
         topics = topicCats.map(candidate ->{
         return new CategoryJSON(candidate.getCat_Id(),null,null,null,null);
         }).collect(Collectors.toSet());
@@ -238,13 +241,15 @@ public class TopicService implements TopicOperations{
     }
   
     public Topic getTopicEntity(TopicJSON topic) throws NoResultException {
+        if(topic == null)
+            throw new NoResultException();
         Topic foundTopic = null;
         if ((topic != null) && topic.getTopicId() != 0) {
             foundTopic = (Topic)this.entityManager.find(Topic.class, topic.getTopicId());
             if(foundTopic == null)
                 throw new NoResultException("Topic with topic Id not found");
         } 
-        else if(topic.getTitle() != null && topic !=null){
+        else if(topic.getTitle() != null){
             foundTopic = this.entityManager.createNamedQuery("Topic.getTopicByTitle", Topic.class)
                             .setParameter(1, topic.getTitle()).getSingleResult();
         }
@@ -406,7 +411,13 @@ public class TopicService implements TopicOperations{
         TopicJSON topicJSON = null; 
 
         Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
-        Set<CategoryJSON> categories = getTopicCategories(topic);
+        Set<CategoryJSON> categories = null;
+        try{
+            categories = getTopicCategories(topic);
+        }
+        catch(NoResultException ex){
+            
+        }
         Set<UserJSON> users = (Set<UserJSON>)topicFollowers.stream().map(topicFollower -> new UserJSON(topicFollower.getUser()
                                 .getUsername())).collect(Collectors.toSet());
         Set<TopicPostJSON> posts = (Set<TopicPostJSON>)topicEntity.getPosts().stream().map(topicPost ->{
@@ -435,9 +446,14 @@ public class TopicService implements TopicOperations{
             topics = this.entityManager.createNamedQuery("Topic.searchByTitle", Topic.class)
                             .setParameter(1, topic.getTitle()).getResultList();
             return topics.stream().map(topicEntity ->{
-                 TopicJSON topicJSON = null; 
-                 Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
-                Set<CategoryJSON> categories = getTopicCategories(topic);
+                TopicJSON topicJSON = null; 
+                Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();
+                Set<CategoryJSON> categories = null;
+                try{
+                    categories = getTopicCategories(topic);}
+                catch(NoResultException ex){
+
+                }
                 Set<UserJSON> users = (Set<UserJSON>)topicFollowers.stream().map(topicFollower -> new UserJSON(topicFollower.getUser()
                                 .getUsername())).collect(Collectors.toSet());
                 Set<TopicPostJSON> posts = (Set<TopicPostJSON>)topicEntity.getPosts().stream().map(topicPost ->{

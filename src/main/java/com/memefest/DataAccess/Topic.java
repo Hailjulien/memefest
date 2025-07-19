@@ -51,7 +51,11 @@ import java.util.Set;
 @NamedQueries({
   @NamedQuery(
     name = "Topic.findByTopicId", 
-    query = "SELECT p FROM TopicEntity p WHERE p.topicId = :topicId")
+    query = "SELECT p FROM TopicEntity p WHERE p.topicId = :topicId"),
+    @NamedQuery(
+      name = "Topic.getAll",
+      query ="SELECT p FROM TopicEntity p" 
+    )
 })
 @Entity(name = "TopicEntity")
 @Table(name = "TOPIC")

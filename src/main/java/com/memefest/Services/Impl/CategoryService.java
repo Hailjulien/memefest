@@ -23,6 +23,7 @@ import com.memefest.Services.TopicOperations;
 import com.memefest.Services.UserOperations;
 
 import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -92,7 +93,7 @@ public class CategoryService implements CategoryOperations{
         Set<CategoryFollower> catFollowers = getCategoryFollowers(category);
         catUsers = (Set<User>)catFollowers.stream().map(catFollower -> catFollower.getUser()).collect(Collectors.toSet()); 
       }
-      catch(NoResultException ex){
+      catch(NoResultException | EJBException ex){
         return;
       }
       for (UserJSON user : category.getFollowedBy()) {
@@ -107,21 +108,16 @@ public class CategoryService implements CategoryOperations{
         }
       }
     }
-    catch(NoResultException ex){
+    catch(NoResultException | EJBException ex){
       return;
     }
   }
       
-  public Set<CategoryFollower> getCategoryFollowers(CategoryJSON category) throws NoResultException{
-    try{
+  public Set<CategoryFollower> getCategoryFollowers(CategoryJSON category) throws NoResultException, EJBException{
       Category foundCategory = getCategoryEntity(category);
       Stream<CategoryFollower> query = this.entityManager.createNamedQuery("CategoryFollower.findByCategoryId", CategoryFollower.class)
                     .setParameter("categoryId", Integer.valueOf(foundCategory.getCat_Id())).getResultStream();
       return (Set<CategoryFollower>)query.map(object -> (CategoryFollower)object).collect(Collectors.toSet());
-    }
-    catch(NoResultException ex){
-      throw new NoResultException();
-    }
   }
       
   public void removeCategoryFollowers(CategoryJSON category) {
@@ -140,27 +136,24 @@ public class CategoryService implements CategoryOperations{
           }).forEach(candidate -> this.entityManager.remove(candidate));
       }
     } 
-    catch(NoResultException ex){
+    catch(NoResultException | EJBException ex){
       
     }
   }
 
       
-  public Set<UserJSON> getCategoryFollowersInfo(CategoryJSON category) throws NoResultException{
-    try{
+  public Set<UserJSON> getCategoryFollowersInfo(CategoryJSON category) throws NoResultException, EJBException{
       Set<UserJSON> followers = getCategoryFollowers(category).stream().map(categFollowerEntity ->{
         UserJSON user = new UserJSON(categFollowerEntity.getUserId(), categFollowerEntity.getUser().getUsername());
         return user;
       }).collect(Collectors.toSet());
       return followers;
-    }
-    catch(NoResultException ex){
-      throw new NoResultException();
-    }
   }
       
   public Category getCategoryEntity(CategoryJSON category) throws NoResultException {
     Category foundCategory = null;
+    if(category ==  null)
+      throw new NoResultException();
     if((category != null) && category.getCategoryId() != 0 ) {
       foundCategory = (Category)this.entityManager.find(Category.class, Integer.valueOf(category.getCategoryId()));
       if (foundCategory == null){
@@ -494,7 +487,7 @@ public class CategoryService implements CategoryOperations{
     */
   }
     
-  public Set<TopicJSON> getCategoryTopics(CategoryJSON category)throws NoResultException{
+  public Set<TopicJSON> getCategoryTopics(CategoryJSON category)throws NoResultException, EJBException{
     Category catEntity = getCategoryEntity(category);
     Set<TopicJSON> topics = new HashSet<TopicJSON>();
     Stream<TopicCategory> topicCats = entityManager.createNamedQuery("TopicCategory.getByCategoryId", TopicCategory.class)
@@ -513,20 +506,13 @@ public class CategoryService implements CategoryOperations{
     */
   }
       
-  public CategoryJSON getCategoryInfo(CategoryJSON category) throws NoResultException{
+  public CategoryJSON getCategoryInfo(CategoryJSON category) throws NoResultException, EJBException{
       Category categoryEntity = getCategoryEntity(category);
       Set<TopicJSON> categoryTopics = null;
       Set<UserJSON> followers = null;
-      try{
-        followers = getCategoryFollowersInfo(category);
-      }
-      catch(NoResultException ex){  
-      }
-      try{
-        categoryTopics = getCategoryTopics(category);
-      }
-      catch(NoResultException ex){
-      }
+      followers = getCategoryFollowersInfo(category);
+      categoryTopics = getCategoryTopics(category);
+  
       CategoryJSON categoryJson = new CategoryJSON(categoryEntity.getCat_Id(), categoryEntity.getCat_Name(), categoryTopics, followers, null);
       return categoryJson;
   }
@@ -544,13 +530,13 @@ public class CategoryService implements CategoryOperations{
         try{
           catTopics = getCategoryTopics(category);
         }
-        catch(NoResultException ex){
+        catch(NoResultException | EJBException ex){
     
         }
         try{
           followers = getCategoryFollowersInfo(category);
         }
-        catch(NoResultException ex){
+        catch(NoResultException | EJBException ex){
 
         }
         return new CategoryJSON(catEntity.getCat_Id(), catEntity.getCat_Name(), catTopics,followers, null);
