@@ -39,26 +39,26 @@ import jakarta.persistence.Table;
         resultSetMapping = "EventEntityMapping"),
     @NamedNativeQuery(
         name = "Event.searchByTitle", 
-        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
+        query = "SELECT E.Event_Id as event_Id, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
         resultSetMapping = "EventEntityMapping"),
     @NamedNativeQuery(
         name = "Event.searchByPostedBy",
-        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Posted_By = ?",
         resultSetMapping =  "EventEntityMapping"),
     @NamedNativeQuery(
         name = "Event.searchByVenue",
-        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?),'%')",
         resultSetMapping = "EventEntityMapping"
     ),
     @NamedNativeQuery(
         name = "Event.searchByVenue&Title",
-        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?),'%') AND E.Event_Title LIKE "
             +"CONCAT(CONCAT('%', ?),'%')",
@@ -66,16 +66,16 @@ import jakarta.persistence.Table;
     ),
     @NamedNativeQuery(
         name = "Event.searchByVenue&PostedBy",
-        query = "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Venue LIKE CONCAT(CONCAT('%', ?), '%') AND E.Posted_By = ?",
         resultSetMapping = "EventEntityMapping"
     ),
     @NamedNativeQuery(
         name = "Event.searchByPostedBy&Title",
-        query =  "SELECT E.EventId as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
+        query =  "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
-            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%') AND E.Posted_By = ?",
         resultSetMapping = "EventEntityMapping"
     )
 })
@@ -117,7 +117,7 @@ public class Event {
     @Column(name = "Event_Pin")
     private String eventPin;
 
-    @Column(name = "Posted_By", nullable = false, insertable = false, updatable = false)
+    @Column(name = "Posted_By", nullable =  false, insertable = false, updatable = false)
     private int userId;
 
     @Column(name = "Event_Venue")
@@ -215,13 +215,6 @@ public class Event {
         this.datePosted = datePosted;
     }
 
-    public int getPosted_By(){
-        return this.userId;
-    }
-
-    public void setPosted_By(int postedBy){
-        this.userId = postedBy;
-    }
 
     public String getEvent_Venue() {
         return this.venue;
@@ -243,22 +236,26 @@ public class Event {
         return this.images;
     }
 
-    public void setImages(Set<EventImage> images) {
-        this.images = images;
-    }
-
-    public User getPostedBy(){
+    public User getUser(){
         return this.user;
-    }
-
-    public void setPostedBy(User user){
-        this.user = user;
     }
 
     public Set<EventPost> getPosts() {
         return this.posts;
     }
 
+    public void setPosted_By(int postedBy){
+        this.userId = postedBy;
+    }
+
+    public int getPosted_By(){
+        return this.userId;
+    }
+/* */
+    public void setUser(User user){
+        setPosted_By(user.getUserId());
+        this.user = user;
+    }
     public void setPosts(Set<EventPost> posts) {
         this.posts = posts;
     }

@@ -2,6 +2,7 @@ package com.memefest.Services.Impl;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -244,11 +245,10 @@ public class PostService implements PostOperations{
         return repostInfo;
     }
 
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public EventPostJSON getEventPostInfo(EventPostJSON eventPost) throws 
                                                                 NoResultException, 
-                                                                    EJBTransactionRolledbackException,
-                                                                        TransactionRolledbackLocalException{
+                                                                    EJBTransactionRolledbackException{
         EventPost eventPostEntity = getEventPostEntity(eventPost);
         Post postEntity = eventPostEntity.getPost();
         Set<CategoryJSON> categories = getPostCategories(new PostJSON(postEntity.getPost_Id(), null, null, 0, 0, null, null, null));
@@ -653,7 +653,7 @@ public class PostService implements PostOperations{
         return eventPost;
     }
 
-    public Set<PostJSON> searchPost(PostJSON post){
+    public Set<PostJSON> searchPost(PostJSON post) throws EJBException, NoResultException{
         List<Post> posts = null;
         if(post == null)
             posts = this.entityManager.createNamedQuery("Post.getAll", Post.class).getResultList();
@@ -661,11 +661,12 @@ public class PostService implements PostOperations{
             posts = this.entityManager.createNamedQuery("Post.searchByComment",Post.class)
                         .setParameter(1, post.getComment())
                         .getResultList();
-        else if(post.getComment() == null && post.getUser().getUserId() != 0)
+        else if(post.getUser().getUserId() != 0)
             posts = this.entityManager.createNamedQuery("Post.findByUserId", Post.class)
                         .setParameter(1, post.getUser().getUserId())
                         .getResultList();
-        else throw new NoResultException();
+        else
+            return Collections.singleton(getPostInfo(post));
         if(posts != null)
             return posts.stream().map(postInfo ->{
                 Set<CategoryJSON> categories = getPostCategories(new PostJSON(postInfo.getPost_Id(), null, null, 0, 0, null, null, null));

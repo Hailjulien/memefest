@@ -407,7 +407,7 @@ public class TopicService implements TopicOperations{
             throw new NoResultException("topic is null yo");
         Topic topicEntity = getTopicEntity(topic);
         if (topicEntity == null)
-            return null;
+            throw new NoResultException();
         TopicJSON topicJSON = null; 
 
         Set<TopicFollower> topicFollowers = topicEntity.getFollowedBy();

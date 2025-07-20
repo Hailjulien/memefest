@@ -316,7 +316,7 @@ public class UserService implements UserSecurityService, UserOperations{
 
 
 
-
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public UserJSON getUserInfo(UserJSON user) throws NoResultException{
         if(user==null)
             throw new NoResultException("User Not Found");
@@ -411,7 +411,7 @@ public class UserService implements UserSecurityService, UserOperations{
         return categJSONs;
     }
 
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
     public User getUserEntity(UserJSON user)throws NoResultException{
         if(user.getUserId() == 0 && user.getUsername() == null)
             throw new NoResultException("No User Found");
@@ -422,15 +422,14 @@ public class UserService implements UserSecurityService, UserOperations{
                 if(userEntity == null)
                     throw new NoResultException(); 
             } catch (NoResultException ex) {
-                Query query = entityManager.createNamedQuery("User.findUsersByUsername");
+                Query query = entityManager.createNamedQuery("User.findUsersByUsername", User.class);
                 query.setParameter("username", user.getUsername());
                 userEntity = (User) query.getSingleResult();
             }
         }
         else if(user.getUsername() != null){
-            Query query = entityManager.createNamedQuery("User.findUsersByUsername");
-            query.setParameter("username", user.getUsername());
-            userEntity = (User) query.getSingleResult();
+            userEntity =(User) entityManager.createNamedQuery("User.findUsersByUsername", User.class)
+            .setParameter("username", user.getUsername()).getSingleResult();
         }
         if(userEntity == null)
             throw new NoResultException("No User Found");

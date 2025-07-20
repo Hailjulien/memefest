@@ -105,7 +105,7 @@ public class Post {
     @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "post", optional = true)
     private TopicPost topic;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "UserId", referencedColumnName = "UserId")
     private User user;   
 

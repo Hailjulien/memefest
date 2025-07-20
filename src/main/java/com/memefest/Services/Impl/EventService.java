@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -281,11 +282,12 @@ public class EventService implements EventOperations{
         removeEvent(event);
     }
 
-    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
-    public EventJSON getEventInfo(EventJSON event){
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public EventJSON getEventInfo(EventJSON event)throws NoResultException{
         Event eventEntity = getEventEntity(event);
         Set<CategoryJSON> categories = getCategories(event);
-        UserJSON postedBy = new UserJSON(eventEntity.getPostedBy().getUsername());
+        User user = userOperations.getUserEntity(event.getPostedBy());
+        UserJSON postedBy = new UserJSON(user.getUserId(), user.getUsername());
         LocalDateTime eventDate = LocalDateTime.ofInstant(eventEntity.getEvent_Date().toInstant(), ZoneId.systemDefault());
         LocalDateTime datePosted = LocalDateTime.ofInstant(eventEntity.getDate_Posted().toInstant(), ZoneId.systemDefault());
         int eventId = eventEntity.getEvent_Id();
@@ -352,13 +354,13 @@ public class EventService implements EventOperations{
         else throw new NoResultException();
     }
 
-    //@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     //throw a custom exception to show object was not created
-    private void createEvent(EventJSON event) {    
+    private void createEvent(EventJSON event)
+     {
             User postedBy = userOperations.getUserEntity(event.getPostedBy());
-            
             Event eventEntity = new Event();
-            eventEntity.setPostedBy(postedBy);
+            eventEntity.setUser(postedBy);
             eventEntity.setEvent_Title(event.getEventTitle());
             eventEntity.setEvent_Description(event.getEventDescription());
             eventEntity.setEvent_Date(Date.from(event.getEventDate().atZone(ZoneId.systemDefault()).toInstant()));
@@ -395,38 +397,63 @@ public class EventService implements EventOperations{
         }
     }
 
-    public Set<EventJSON> searchEvents(EventJSON event){
+    public Set<EventJSON> searchEvents(EventJSON event)throws NoResultException, EJBException{
         List<Event> events = new ArrayList<Event>();
         Set<EventJSON> eventResults = new HashSet<EventJSON>();
-        if(event == null)
+
+        if(event == null){
             events = this.entityManager.createNamedQuery("Event.getAll", Event.class).getResultList();
-        else if(event.getEventTitle() != null && event.getEventVenue() == null && event.getPostedBy()== null)
+        }
+        else if(event.getEventTitle() != null && event.getEventVenue() == null && (event.getPostedBy()==null || (event.getPostedBy() != null && event.getPostedBy().getUsername() == null && event.getPostedBy().getUserId() == 0)))
             events = this.entityManager.createNamedQuery("Event.searchByTitle", Event.class).setParameter(1, event.getEventTitle())
                 .getResultList();
-        else if( event.getPostedBy() != null && event.getEventVenue() == null && event.getEventTitle() == null)
+        else if(event.getPostedBy() != null && event.getPostedBy().getUserId() != 0 && event.getEventVenue() == null && event.getEventTitle() == null)
             events = this.entityManager.createNamedQuery("Event.searchByPostedBy", Event.class).setParameter(1, event.getPostedBy().getUserId())
                 .getResultList();
-        else if(event.getEventVenue() != null && event.getPostedBy() == null && event.getEventTitle() == null)
+        else if(event.getPostedBy() != null && event.getPostedBy().getUserId() == 0 && event.getPostedBy().getUsername() != null && event.getEventVenue() == null){
+            User owner = userOperations.getUserEntity(new UserJSON(event.getPostedBy().getUsername()));
+            events = this.entityManager.createNamedQuery("Event.searchByPostedBy", Event.class).setParameter(1, owner.getUserId())
+                .getResultList();
+        }
+        else if(event.getEventVenue() != null && (event.getPostedBy()!= null && event.getPostedBy().getUsername() == null && event.getPostedBy().getUserId() == 0 || event.getPostedBy() == null) && event.getEventTitle() == null)
              events = this.entityManager.createNamedQuery("Event.searchByVenue", Event.class).setParameter(1, event.getEventVenue())
                 .getResultList();
-        else if(event.getEventVenue() != null && event.getEventTitle() != null && event.getPostedBy() == null)
+        else if(event.getEventVenue() != null && event.getEventTitle() != null && (event.getPostedBy() != null &&  event.getPostedBy().getUsername() == null && event.getPostedBy().getUserId()== 0|| event.getPostedBy() == null)) 
             events = this.entityManager.createNamedQuery("Event.searchByVenue&Title", Event.class)
                 .setParameter(1, event.getEventVenue())
                 .setParameter(2, event.getEventTitle())
                 .getResultList();
-        else if(event.getEventVenue() != null && event.getPostedBy() != null && event.getEventTitle() == null)
+        else if(event.getEventVenue() != null && (event.getPostedBy() != null && event.getPostedBy().getUserId() != 0) && event.getEventTitle() == null)
             events = this.entityManager.createNamedQuery("Event.searchByVenue&PostedBy", Event.class)
                 .setParameter(1, event.getEventVenue())
                 .setParameter(2, event.getPostedBy().getUserId())
                 .getResultList();
-        else if(event.getPostedBy() != null && event.getEventTitle() != null && event.getEventVenue() == null)
+        else if(event.getEventVenue() != null && event.getPostedBy() != null && event.getPostedBy().getUserId() == 0 && event.getPostedBy().getUsername() != null && event.getEventTitle() == null){
+            User owner = userOperations.getUserEntity(new UserJSON(event.getPostedBy().getUsername()));
+            events = this.entityManager.createNamedQuery("Event.searchByVenue&PostedBy", Event.class)
+                .setParameter(1, event.getEventVenue())
+                .setParameter(2, owner.getUserId())
+                .getResultList();
+        }
+        else if(event.getPostedBy()!= null && event.getPostedBy().getUserId() != 0 && event.getEventTitle() != null)
             events = this.entityManager.createNamedQuery("Event.searchByPostedBy&Title", Event.class)
                 .setParameter(1, event.getPostedBy().getUserId())
                 .setParameter(2, event.getEventTitle())
                 .getResultList();
+        else if(event.getPostedBy() != null && event.getPostedBy().getUserId() == 0 && event.getPostedBy().getUsername() != null && event.getEventTitle() != null){
+            User owner = userOperations.getUserEntity(new UserJSON(event.getPostedBy().getUsername()));
+            events = this.entityManager.createNamedQuery("Event.searchByPostedBy&Title", Event.class)
+                .setParameter(1, owner.getUserId())
+                .setParameter(2, event.getEventTitle())
+                .getResultList();
+        }
+        else
+            return Collections.singleton(getEventInfo(event));
         for(Event eventEntity : events) {
             Set<CategoryJSON> categories = getCategories(event);
-            UserJSON postedBy = new UserJSON(eventEntity.getPostedBy().getUsername());
+            
+            UserJSON postedBy = userOperations.getUserInfo(event.getPostedBy());
+            //UserJSON postedBy = new UserJSON(eventEntity.getPosted_By(), postedByEntity.getUsername());
             LocalDateTime eventDate = LocalDateTime.ofInstant(eventEntity.getEvent_Date().toInstant(), ZoneId.systemDefault());
             LocalDateTime datePosted = LocalDateTime.ofInstant(eventEntity.getDate_Posted().toInstant(), ZoneId.systemDefault());
             int eventId = eventEntity.getEvent_Id();

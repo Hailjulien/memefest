@@ -268,15 +268,17 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
             } 
             catch(EJBException | NoResultException ex){                    
                 notEditableTopic.setResultMessage(notEditableTopic.getResultMessage() + "," + ex.getMessage());
-                Set<TopicJSON> resCats = notEditableTopic.getTopics();
-                if(resCats == null)
-                    resCats = new HashSet<TopicJSON>();
+                Set<TopicJSON> resCats = new HashSet<TopicJSON>();
+                if(notEditableTopic.getTopics() != null){
+                    resCats.addAll(notEditableTopic.getTopics());
+                }
                 resCats.add(topic);
                 notEditableTopic.setTopics(resCats);
             }           
         }
         if(resultTopic.getTopics() != null)
             session.getAsyncRemote().sendObject(resultTopic);
+        
         if(notEditableTopic.getTopics() != null)
             session.getAsyncRemote().sendObject(notEditableTopic);                   
    }
@@ -450,6 +452,7 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
             }
             
         }
+
         if(successEdits.getEvents() != null)
             session.getAsyncRemote().sendObject(successEdits);
         if(failureEdits.getEvents() != null)
@@ -489,16 +492,23 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         Set<EventJSON> events = eventOps.searchEvents(searchCommand.getEvent());
         //add customisation filter according to users tastes here
         SearchResultEventJSON result = new SearchResultEventJSON(null, 0, null);
-        if(events.size() == 0){
-            result.setResultId(204);
+        try{
+            if(events.size() == 0){
+                result.setResultCode(204);
+                result.setResultMessage("No results");
+            }
+            else{    
+                result.setResultId(200);
+                result.setResultMessage("Success");
+                result.setEvents(events);
+            }
+            session.getAsyncRemote().sendObject(result);
+        }
+        catch (NoResultException | EJBException ex){
+            result.setResultCode(204);
             result.setResultMessage("No results");
+            session.getAsyncRemote().sendObject(result);
         }
-        else{
-            result.setResultId(200);
-            result.setResultMessage("Success");
-            result.setEvents(events);
-        }
-        session.getAsyncRemote().sendObject(result);
     }
 
     private void getTopics(GetTopicJSON getTopic){
@@ -510,6 +520,8 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     TopicJSON topicEntity = topicOps.getTopicInfo(topic);
                     if(topicEntity!= null){
                         Set<TopicJSON> topicCats = successEdits.getTopics();
+                        if(topicCats== null)
+                            topicCats = new HashSet<TopicJSON>();
                         topicCats.add(topicEntity);
                         successEdits.setTopics(topicCats);
                     }
@@ -690,16 +702,24 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         Set<PostJSON> posts = postOps.searchPost(searchCommand.getPost());
         //add customisation filter according to users tastes here
         SearchResultPostJSON result = new SearchResultPostJSON(null, 0, null);
-        if(posts.size() == 0){
+        try{
+            if(posts.size() == 0){
+                result.setResultId(204);
+                result.setResultMessage("No results");
+            }
+        
+            else{
+                result.setResultId(200);
+                result.setResultMessage("Success");
+                result.setPosts(posts);
+        }
+        }
+        catch(NoResultException | EJBException ex){
             result.setResultId(204);
             result.setResultMessage("No results");
+            session.getAsyncRemote().sendObject(result);
         }
-        else{
-            result.setResultId(200);
-            result.setResultMessage("Success");
-            result.setPosts(posts);
-        }
-        session.getAsyncRemote().sendObject(result);
+        
    }
 
    private void getTopicPost(GetTopicPostJSON getTopicPost){
