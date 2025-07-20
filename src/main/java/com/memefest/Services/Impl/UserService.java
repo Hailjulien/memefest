@@ -26,6 +26,7 @@ import com.memefest.Services.UserSecurityService;
 import com.memefest.Websockets.JSON.UserFollowNotificationJSON;
 
 import jakarta.ejb.EJB;
+import jakarta.ejb.EJBException;
 import jakarta.ejb.Stateless;
 import jakarta.ejb.TransactionAttribute;
 import jakarta.ejb.TransactionAttributeType;
@@ -317,7 +318,7 @@ public class UserService implements UserSecurityService, UserOperations{
 
 
     @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
-    public UserJSON getUserInfo(UserJSON user) throws NoResultException{
+    public UserJSON getUserInfo(UserJSON user) throws NoResultException, EJBException{
         if(user==null)
             throw new NoResultException("User Not Found");
         User userEntity = getUserEntity(user);

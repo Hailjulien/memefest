@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.NamedQueries;
 import jakarta.persistence.NamedQuery;
 import jakarta.persistence.OneToMany;
@@ -49,7 +50,7 @@ public class User {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "UserId")
-  private Integer userId;
+  private int userId;
   
   @Column(name = "F_name")
   private String firstName;
@@ -73,6 +74,7 @@ public class User {
   private UserSecurity securityDetails;
   
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}, mappedBy = "user")
+  @JoinColumn(referencedColumnName = "UserId")
   private Set<Post> posts;
   
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
@@ -94,6 +96,7 @@ public class User {
   private Set<Repost> reposts;
 
   @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.MERGE}, mappedBy = "user")
+  @JoinColumn(referencedColumnName = "Posted_By")
   private Set<Event> events;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "follower")
@@ -194,11 +197,11 @@ public class User {
   }
   
   public int getUserId() {
-    return this.userId.intValue();
+    return this.userId;
   }
   
   public void setUserId(int userId) {
-    this.userId = Integer.valueOf(userId);
+    this.userId = userId;
   }
   
   public Set<Post> getPosts() {
@@ -236,6 +239,11 @@ public class User {
   public Set<Event> getEvents(){
     return this.events;
   }
+
+    public void setEvents(Set<Event> events) {
+    this.events = events;
+  }
+
 
   public Set<PostNotification> getPostNotifications(){
     return this.postNotifications;

@@ -39,7 +39,7 @@ import jakarta.persistence.Table;
         resultSetMapping = "EventEntityMapping"),
     @NamedNativeQuery(
         name = "Event.searchByTitle", 
-        query = "SELECT E.Event_Id as event_Id, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
+        query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created , E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
             +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%')",
         resultSetMapping = "EventEntityMapping"),
@@ -75,7 +75,7 @@ import jakarta.persistence.Table;
         name = "Event.searchByPostedBy&Title",
         query =  "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
-            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%') AND E.Posted_By = ?",
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%') AND E.Event_Title = ?",
         resultSetMapping = "EventEntityMapping"
     )
 })
@@ -135,8 +135,8 @@ public class Event {
     @JoinColumn(name = "Event_Id")
     private Set<EventPost> posts;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "Posted_By", referencedColumnName =  "UserId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "Posted_By")
     private User user;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
@@ -253,7 +253,6 @@ public class Event {
     }
 /* */
     public void setUser(User user){
-        setPosted_By(user.getUserId());
         this.user = user;
     }
     public void setPosts(Set<EventPost> posts) {

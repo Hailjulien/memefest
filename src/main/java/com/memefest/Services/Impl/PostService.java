@@ -657,13 +657,21 @@ public class PostService implements PostOperations{
         List<Post> posts = null;
         if(post == null)
             posts = this.entityManager.createNamedQuery("Post.getAll", Post.class).getResultList();
-        else if(post.getComment() != null && post.getUser().getUserId() == 0)
+        else if(post.getComment() != null &&((post.getUser() != null && post.getUser().getUsername() == null
+                                                    && post.getUser().getUserId() == 0) || 
+                                                        post.getUser() == null))
             posts = this.entityManager.createNamedQuery("Post.searchByComment",Post.class)
                         .setParameter(1, post.getComment())
                         .getResultList();
-        else if(post.getUser().getUserId() != 0)
+        else if(post.getUser() != null && post.getUser().getUserId() == 0 && post.getUser().getUsername() != null ){
+            UserJSON postedBy = userOperations.getUserInfo(new UserJSON(post.getUser().getUsername()));
+            posts = this.entityManager.createNamedQuery("Post.findByUserId",Post.class)
+                        .setParameter("userId", postedBy.getUserId())
+                        .getResultList();
+        }
+        else if(post.getUser()!= null && post.getUser().getUserId() != 0 && post.getUser().getUsername() == null && post.getComment() == null)
             posts = this.entityManager.createNamedQuery("Post.findByUserId", Post.class)
-                        .setParameter(1, post.getUser().getUserId())
+                        .setParameter( "userId", post.getUser().getUserId())
                         .getResultList();
         else
             return Collections.singleton(getPostInfo(post));

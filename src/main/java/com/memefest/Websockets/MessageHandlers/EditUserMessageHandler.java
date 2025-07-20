@@ -706,13 +706,18 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
             if(posts.size() == 0){
                 result.setResultId(204);
                 result.setResultMessage("No results");
+                result.setResultId(200);
+                result.setResultMessage("Success");
+                result.setPosts(posts);
             }
         
             else{
                 result.setResultId(200);
                 result.setResultMessage("Success");
                 result.setPosts(posts);
-        }
+                
+            }
+            session.getAsyncRemote().sendObject(result);
         }
         catch(NoResultException | EJBException ex){
             result.setResultId(204);

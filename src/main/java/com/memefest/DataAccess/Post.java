@@ -106,7 +106,7 @@ public class Post {
     private TopicPost topic;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "UserId", referencedColumnName = "UserId")
+    @JoinColumn(name = "UserId")
     private User user;   
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
