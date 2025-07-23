@@ -648,17 +648,8 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     postCats.add(postWithReply);
                     success.setPostWithReplies(postCats);
                 }
-            } 
-            catch(NoResultException ex){    
-                if(postWithReply!= null){
-                    Set<PostWithReplyJSON> postCats = failed.getPostWithReplies();
-                    if(postCats == null)
-                        postCats = new HashSet<PostWithReplyJSON>();
-                    postCats.add(postWithReply);
-                    failed.setPostWithReplies(postCats);
-                }
             }
-            catch(EJBException ex){
+            catch(EJBException | NoResultException ex){
                 if(postWithReply!= null){
                     Set<PostWithReplyJSON> postCats = failed.getPostWithReplies();
                     if(postCats == null)

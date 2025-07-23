@@ -1,6 +1,7 @@
 package com.memefest.DataAccess.JSON;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -11,6 +12,7 @@ import java.util.Set;
 
 @JsonRootName("User")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "UserId")
+@JsonFilter("UserPublicView")
 public class UserJSON {
   @JsonProperty("UserId")
   private int userId;

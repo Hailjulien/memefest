@@ -167,6 +167,7 @@ J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\JSON\GetResultSched
 J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\Decoders\AdminDecoder.java
 J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\Encoders\SearchResultEncoder.java
 J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\JSON\GetEventJSON.java
+J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\Encoders\ContentEncoder.java
 J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\JSON\GetPostJSON.java
 J:\memefesrec\Memefest\src\main\java\com\memefest\Websockets\Encoders\GetResultScheduledEventEncoder.java
 J:\memefesrec\Memefest\src\main\java\com\memefest\DataAccess\JSON\TopicJSON.java

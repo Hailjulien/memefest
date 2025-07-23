@@ -1,6 +1,7 @@
 package com.memefest.Websockets.Decoders;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
@@ -9,7 +10,7 @@ import jakarta.websocket.Decoder;
 import jakarta.websocket.EndpointConfig;
 
 public class AdminDecoder implements Decoder.Text<AdminJSON> {
-  private ObjectMapper mapper = new ObjectMapper();
+  private ObjectMapper mapper = new ObjectMapper().setSerializationInclusion(Include.NON_NULL);
   
   public AdminJSON decode(String text) {
     try {

@@ -266,6 +266,7 @@ com\memefest\Websockets\Decoders\EditResultEventPostNotificationDecoder.class
 com\memefest\Websockets\Encoders\EditResultCategoryEncoder.class
 com\memefest\Websockets\JSON\EditResultTopicFollowNotificationJSON.class
 com\memefest\DataAccess\PostImageId.class
+com\memefest\Websockets\Encoders\ContentEncoder.class
 com\memefest\Websockets\JSON\EditResultJSON.class
 com\memefest\Websockets\Encoders\CategoryEncoder.class
 com\memefest\Jaxrs\Providers\CustomLoginFilter.class

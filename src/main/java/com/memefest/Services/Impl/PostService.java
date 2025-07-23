@@ -622,13 +622,25 @@ public class PostService implements PostOperations{
                                                                                             TransactionRolledbackLocalException,
                                                                                                 EJBException,
                                                                                                     EJBTransactionRolledbackException{
+        PostJSON postInfo = getPostInfo(postWithReply);
+        postWithReply.setComment(postInfo.getComment());
+        postWithReply.setDownvotes(postInfo.getDownvotes());
+        postWithReply.setCategories(postInfo.getCategories());
+        postWithReply.setCreated(postInfo.getCreated());
+        postWithReply.setPostId(postInfo.getPostId());
+        postWithReply.setUser(postInfo.getUser());
+        postWithReply.setUpvotes(postInfo.getUpvotes());                                                                                                
         Set<PostReply> postReplyEntities = getPostReplyEntities(postWithReply);
         if (postReplyEntities == null)
-            return null; 
-        Set<PostJSON> postReplys = (Set<PostJSON>)postReplyEntities.stream().map(candidate -> 
+            return null;
+        try{
+            Set<PostJSON> postReplys = (Set<PostJSON>)postReplyEntities.stream().map(candidate -> 
                                   new PostJSON(candidate.getPost_Id(), null, null, 0, 0, null, null, null))
                                     .collect(Collectors.toSet());
-        postWithReply.setPosts(postReplys);
+            postWithReply.setPosts(postReplys);
+        }catch (NoResultException e) {
+            
+        }
         return postWithReply;
     }
 

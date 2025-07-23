@@ -1,12 +1,14 @@
 package com.memefest.DataAccess.JSON;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import java.time.LocalDateTime;
 import java.util.Set;
 
 @JsonRootName("PostWithReplys")
+//@JsonFilter("PostWithReplyPublicView")
 public class PostWithReplyJSON extends PostJSON {
   @JsonProperty("Replys")
   private Set<PostJSON> posts;
