@@ -228,7 +228,11 @@ public class PostService implements PostOperations{
             throw new NoResultException("No Repost found ");
         return repost; 
     }
-
+/* 
+    public Set<RepostJSON> searchRepost(RepostJSON repost){
+        //if(repos)
+    }
+*/
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public RepostJSON getRepostInfo(RepostJSON repost){
         Post postEntity = null;
@@ -371,7 +375,7 @@ public class PostService implements PostOperations{
             }
     }
 
-    @TransactionAttribute(TransactionAttributeType.MANDATORY)
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     //add custom exception to show object was not created
     public void editPostReplies(PostWithReplyJSON post){
         try{

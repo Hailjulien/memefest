@@ -49,6 +49,9 @@ public class UserJSON {
   
   @JsonProperty("CategoriesFollowing")
   private Set<CategoryJSON> categoriesFollowing;
+
+  @JsonProperty("Reposts")
+  private Set<RepostJSON> reposts;
   
   public UserJSON() {}
   
@@ -279,5 +282,15 @@ public class UserJSON {
   @JsonProperty("Cancel")
   public void setCanceled(boolean canceled) {
     this.canceled = canceled;
+  }
+
+  @JsonProperty("Reposts")
+  public void setReposts(Set<RepostJSON> reposts){
+    this.reposts = reposts;
+  }
+
+  @JsonProperty("Reposts")
+  public Set<RepostJSON> getReposts(){
+    return this.reposts;
   }
 }

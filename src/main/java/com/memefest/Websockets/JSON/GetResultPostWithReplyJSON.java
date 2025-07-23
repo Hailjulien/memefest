@@ -21,10 +21,12 @@ public class GetResultPostWithReplyJSON extends GetResultJSON {
         this.postsWithReplies = postsWithReplies;
     }
 
+    @JsonProperty("PostWithReplies")
     public Set<PostWithReplyJSON> getPostWithReplies(){
         return this.postsWithReplies;
     }
 
+    @JsonProperty("PostWithReplies")
     public void setPostWithReplies(Set<PostWithReplyJSON> postsWithReplys){
         this.postsWithReplies = postsWithReplys;
     }
