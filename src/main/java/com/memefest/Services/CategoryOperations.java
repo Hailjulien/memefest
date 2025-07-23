@@ -29,7 +29,7 @@ public interface CategoryOperations {
 
     //ublic MainCategory getMainCategoryEntity(CategoryJSON category);
 
-    public SubCategory getSubCategoryEntity(CategoryJSON category, CategoryJSON parent);
+    public SubCategory getSubCategoryEntity (CategoryJSON category, CategoryJSON parent);
 
     //public CategoryJSON getMainCategoryInfo(CategoryJSON category);
 

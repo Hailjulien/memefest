@@ -451,8 +451,7 @@ public class EventService implements EventOperations{
         else
             return Collections.singleton(getEventInfo(event));
         for(Event eventEntity : events) {
-            Set<CategoryJSON> categories = getCategories(event);
-            
+            Set<CategoryJSON> categories = getCategories(new EventJSON(event.getEventID(), null, null, null, null, null, null, null, null, null, null, null, null, null, null));            
             UserJSON postedBy = userOperations.getUserInfo(new UserJSON(eventEntity.getPosted_By(),eventEntity.getUser().getUsername()));
             //UserJSON postedBy = new UserJSON(eventEntity.getPosted_By(), postedByEntity.getUsername());
             LocalDateTime eventDate = LocalDateTime.ofInstant(eventEntity.getEvent_Date().toInstant(), ZoneId.systemDefault());

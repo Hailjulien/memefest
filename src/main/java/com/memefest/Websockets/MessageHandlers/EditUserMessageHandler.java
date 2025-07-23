@@ -554,16 +554,23 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         Set<TopicJSON> topics = topicOps.searchTopic(topic);
         //add customisation filter according to users tastes here
         SearchResultTopicJSON result = new SearchResultTopicJSON(null, 0, null);
-        if(topics.size() == 0){
-            result.setResultId(204);
+        try{
+            if(topics.size() == 0){
+                result.setResultCode(204);
+                result.setResultMessage("No results");
+            }
+            else{    
+                result.setResultId(200);
+                result.setResultMessage("Success");
+                result.setTopics(topics);
+            }
+            session.getAsyncRemote().sendObject(result);
+        }
+        catch (NoResultException | EJBException ex){
+            result.setResultCode(204);
             result.setResultMessage("No results");
+            session.getAsyncRemote().sendObject(result);
         }
-        else{
-            result.setResultId(200);
-            result.setResultMessage("Success");
-            result.setTopics(topics);
-        }
-        session.getAsyncRemote().sendObject(result);
    }
    
    private void getCategory(GetCategoryJSON getCat){
@@ -608,16 +615,23 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         Set<CategoryJSON> categories = catOps.searchCategory(searchCommand.getCategory());
         //add customisation filter according to users tastes here
         SearchResultCategoryJSON result = new SearchResultCategoryJSON(null, 0, null);
-        if(categories.size() == 0){
-            result.setResultId(204);
+        try{
+            if(categories.size() == 0){
+                result.setResultCode(204);
+                result.setResultMessage("No results");
+            }
+            else{    
+                result.setResultId(200);
+                result.setResultMessage("Success");
+                result.setCategories(categories);
+            }
+            session.getAsyncRemote().sendObject(result);
+        }
+        catch (NoResultException | EJBException ex){
+            result.setResultCode(204);
             result.setResultMessage("No results");
+            session.getAsyncRemote().sendObject(result);
         }
-        else{
-            result.setResultId(200);
-            result.setResultMessage("Success");
-            result.setCategories(categories);
-        }
-        session.getAsyncRemote().sendObject(result);
    }
 
    private void getPostWithReply(GetPostReplysJSON repostEdit){
