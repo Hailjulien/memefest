@@ -46,7 +46,7 @@ public class CategoryService implements CategoryOperations{
   //throw a custom exception to show object was not created
   public void createCategory(CategoryJSON category) {
     try{
-      Category catEntity = getCategoryEntity(category); 
+      getCategoryEntity(category); 
     }
     catch(NoResultException ex){
       Category newCategory = new Category();

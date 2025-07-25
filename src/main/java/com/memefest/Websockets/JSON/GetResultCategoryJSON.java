@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.CategoryJSON;
 
 @JsonRootName("GetResultCategory")
-public class GetResultCategoryJSON extends ResultJSON{
+public class GetResultCategoryJSON extends GetResultJSON{
 
     @JsonProperty("Categories")
     private Set<CategoryJSON> categories;
@@ -16,7 +16,7 @@ public class GetResultCategoryJSON extends ResultJSON{
     @JsonCreator
     public GetResultCategoryJSON(@JsonProperty("ResultCode") int resultCode, @JsonProperty("ResultMessage") String resultMessage,
                                     @JsonProperty("Categories") Set<CategoryJSON> categories){
-        super(resultCode, resultMessage);
+        super(Getable.CATEGORY,resultCode, resultMessage);
         this.categories = categories;
     }
 

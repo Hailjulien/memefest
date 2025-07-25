@@ -9,16 +9,14 @@ import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 
 @JsonRootName("GetTopicResult")
-public class GetResultTopicPostJSON extends GetResultPostJSON{
+public class GetResultTopicPostJSON extends GetResultJSON{
     
     @JsonProperty("TopicPosts")
     private Set<TopicPostJSON> topicPosts;
 
     public GetResultTopicPostJSON(@JsonProperty("ResultCode") int resultCode, @JsonProperty("ResultMessage") String resultMessage,
                                     @JsonProperty("ResultPosts") Set<TopicPostJSON> topicPosts){
-        super(resultCode, resultMessage,topicPosts.stream().map(topicInst ->{
-                                            return (PostJSON)topicInst;
-                                        }).collect(Collectors.toSet()));
+        super(Getable.POST, resultCode, resultMessage);
         this.topicPosts = topicPosts;
     }
     public void setTopicPosts(Set<TopicPostJSON> topicPosts) {

@@ -24,11 +24,11 @@ public class EventPost{
   private EventPostId eventPostId = new EventPostId();
 
   @ManyToOne
-  @JoinColumn(name = "Post_Id", referencedColumnName = "Post_Id")
+  @JoinColumn(name = "Post_Id")
   private Post post;
 
-  @OneToOne(cascade = {CascadeType.MERGE})
-  @JoinColumn(name= "Event_Id", referencedColumnName ="Event_Id")
+  @ManyToOne
+  @JoinColumn(name ="Event_Id")
   private Event event;
   
   public int getPost_Id() {
@@ -57,7 +57,7 @@ public class EventPost{
   }
 
   public void setEvent(Event event){
-    this.eventPostId.setEvent_Id(event.getEvent_Id());
+    this.setEvent_Id(event.getEvent_Id());
     this.event = event;
   }
 }

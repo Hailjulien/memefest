@@ -11,16 +11,14 @@ import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 
 @JsonRootName("EditTopicPosts")
-public class EditTopicPostJSON extends EditPostJSON{
+public class EditTopicPostJSON extends EditJSON{
     
     @JsonProperty("TopicPosts")
     private Set<TopicPostJSON> topicPosts;  
 
     @JsonCreator
     public EditTopicPostJSON(@JsonProperty("TopicPosts") Set<TopicPostJSON> topicPosts){
-        super(topicPosts.stream().map(candidate -> {
-            return (PostJSON)candidate;
-        }).collect(Collectors.toSet()));
+        super(Editable.POST);
         this.topicPosts = topicPosts;
     }
 

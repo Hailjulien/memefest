@@ -3,6 +3,7 @@ package com.memefest.DataAccess.JSON;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 @JsonRootName("Category")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "CatId")
+@JsonFilter("CategoryPublicView")
 public class CategoryJSON {
     
     @JsonProperty("CatId")

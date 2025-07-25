@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import com.memefest.DataAccess.JSON.PostJSON;
 
 @JsonRootName("GetResultPost")
-public class GetResultPostJSON extends ResultJSON {
+public class GetResultPostJSON extends GetResultJSON {
 
     @JsonProperty("PostResult")
     private Set<PostJSON> postResults;
@@ -17,7 +17,7 @@ public class GetResultPostJSON extends ResultJSON {
     @JsonCreator
     public GetResultPostJSON(@JsonProperty("ResultCode") int resultCode, @JsonProperty("ResultMessage") String resultMessage, 
                                 @JsonProperty("PostResult") Set<PostJSON> postResults){
-        super(resultCode, resultMessage);
+        super(Getable.POST,resultCode, resultMessage);
         this.postResults = postResults;
     }
 

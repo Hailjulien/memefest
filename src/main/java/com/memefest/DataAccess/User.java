@@ -73,8 +73,8 @@ public class User {
   @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL}, mappedBy = "user", optional = false)
   private UserSecurity securityDetails;
   
-  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE}, mappedBy = "user")
-  @JoinColumn(referencedColumnName = "UserId")
+  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
+  //@JoinColumn(name = "UserId")
   private Set<Post> posts;
   
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
@@ -92,11 +92,13 @@ public class User {
   @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
   private Set<Video> videos;
 
-  @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "user")
+  @OneToMany(mappedBy = "user")
+  @JoinColumn(referencedColumnName = "UserId")
+  //@JoinColumn(referencedColumnName = "UserId")
   private Set<Repost> reposts;
 
-  @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.MERGE}, mappedBy = "user")
-  @JoinColumn(referencedColumnName = "Posted_By")
+  @OneToMany(fetch = FetchType.LAZY, cascade ={CascadeType.PERSIST}, mappedBy = "user")
+  @JoinColumn(referencedColumnName = "UserId")
   private Set<Event> events;
 
   @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "follower")

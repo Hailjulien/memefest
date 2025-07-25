@@ -19,6 +19,8 @@ public class GetResultPostWithReplysEncoder extends ContentEncoder implements En
         try{
             Map<String, SimpleBeanPropertyFilter> filterMap = new HashMap<String, SimpleBeanPropertyFilter> ();
             filterMap.put("UserPublicView", userPublicViewFilter());
+            filterMap.put("TopicPublicView", topicPublicView());
+            filterMap.put("CategoryPublicView", categoryPublicView());
             FilterProvider filterProvider = setFilters(filterMap); 
             return mapper.writer(filterProvider).writeValueAsString(category);            
         } catch (Exception e) {

@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityResult;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.FieldResult;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -78,7 +79,7 @@ public class Post {
     @Column(name = "Comment")
     private String comment;
     
-    @Column(name = "UserId", nullable = false, updatable = false, insertable = false)
+    @Column(name = "UserId", nullable = false, insertable =  false, updatable = false)
     private int userId;
 
     @Column(name = "Created")
@@ -113,6 +114,7 @@ public class Post {
     private Set<PostVideo> videos;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    @JoinColumn(referencedColumnName = "Post_Id")
     private Set<EventPost> eventPosts;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
@@ -124,7 +126,8 @@ public class Post {
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
     private Set<PostNotification> notifications;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")
+    @OneToMany(mappedBy = "post")
+    @JoinColumn(referencedColumnName = "Post_Id")    
     private Set<Repost> reposts;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "post")

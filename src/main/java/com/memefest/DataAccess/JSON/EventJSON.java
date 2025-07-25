@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -16,6 +17,7 @@ import com.memefest.DataAccess.JSON.Serialize.CustomLocalDateTimeSerializer;
 
 @JsonRootName("Event")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "EventID")
+@JsonFilter("EventPublicView")
 public class EventJSON implements Serializable{
     
     @JsonProperty("EventID")
@@ -136,10 +138,12 @@ public class EventJSON implements Serializable{
         return this.user;
     }
 
+    @JsonProperty("Posts")
     public Set<EventPostJSON> getPosts(){
         return this.posts;
     }
 
+    @JsonProperty("Posts")
     public void setPosts(Set<EventPostJSON> posts){
         this.posts = posts;
     }

@@ -47,7 +47,7 @@ import jakarta.persistence.Table;
         name = "Event.searchByPostedBy",
         query = "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
-            +"as venue FROM EVENT_INFO E WHERE E.Posted_By = ?",
+            +"as venue FROM EVENT_INFO E WHERE E.Posted_By = ?",    
         resultSetMapping =  "EventEntityMapping"),
     @NamedNativeQuery(
         name = "Event.searchByVenue",
@@ -75,7 +75,7 @@ import jakarta.persistence.Table;
         name = "Event.searchByPostedBy&Title",
         query =  "SELECT E.Event_Id as eventId, E.Event_Title as eventTitle, E.Date_Posted as created, E.Event_Description "
             +"as description, E.Event_Date as eventDate, E.Event_Pin as eventPin, E.Posted_By as postedBy, E.Event_Venue "
-            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%') AND E.Event_Title = ?",
+            +"as venue FROM EVENT_INFO E WHERE E.Event_Title LIKE CONCAT(CONCAT('%', ?), '%') AND E.Posted_By = ?",
         resultSetMapping = "EventEntityMapping"
     )
 })
@@ -117,7 +117,7 @@ public class Event {
     @Column(name = "Event_Pin")
     private String eventPin;
 
-    @Column(name = "Posted_By", nullable =  false, insertable = false, updatable = false)
+    @Column(name = "Posted_By", insertable =  false, updatable = false)
     private int userId;
 
     @Column(name = "Event_Venue")
@@ -132,7 +132,7 @@ public class Event {
     private Set<EventImage> images;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST}, mappedBy = "event")
-    @JoinColumn(name = "Event_Id")
+    @JoinColumn(referencedColumnName = "Event_Id")
     private Set<EventPost> posts;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -240,17 +240,18 @@ public class Event {
         return this.user;
     }
 
-    public Set<EventPost> getPosts() {
-        return this.posts;
+    public int getPosted_By(){
+        return this.userId;
     }
 
     public void setPosted_By(int postedBy){
         this.userId = postedBy;
     }
 
-    public int getPosted_By(){
-        return this.userId;
+    public Set<EventPost> getPosts() {
+        return this.posts;
     }
+
 /* */
     public void setUser(User user){
         this.user = user;

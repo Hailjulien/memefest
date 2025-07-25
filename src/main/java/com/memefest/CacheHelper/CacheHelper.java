@@ -15,7 +15,9 @@ public class CacheHelper {
   CacheManager cacheManager;
   
   public CacheHelper() {
-    this.cacheManager = CacheManagerBuilder.newCacheManagerBuilder().withCache("usernameCache", (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class, (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(15L)))).withCache("userIdCache", (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Integer.class, (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(15L)))).withCache("guestCache", (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class, (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(10L)))).build();
+    this.cacheManager = CacheManagerBuilder.newCacheManagerBuilder().withCache("usernameCache",
+     (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class,
+      (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(15L)))).withCache("userIdCache", (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, Integer.class, (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(15L)))).withCache("guestCache", (Builder)CacheConfigurationBuilder.newCacheConfigurationBuilder(String.class, String.class, (Builder)ResourcePoolsBuilder.heap(100L)).withExpiry(ExpiryPolicyBuilder.timeToIdleExpiration(Duration.ofMinutes(10L)))).build();
     this.cacheManager.init();
   }
   

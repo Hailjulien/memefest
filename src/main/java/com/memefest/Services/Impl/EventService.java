@@ -438,21 +438,23 @@ public class EventService implements EventOperations{
         }
         else if(event.getPostedBy()!= null && event.getPostedBy().getUserId() != 0 && event.getEventTitle() != null)
             events = this.entityManager.createNamedQuery("Event.searchByPostedBy&Title", Event.class)
-                .setParameter(1, event.getPostedBy().getUserId())
-                .setParameter(2, event.getEventTitle())
+                .setParameter(2, event.getPostedBy().getUserId())
+                .setParameter(1, event.getEventTitle())
                 .getResultList();
         else if(event.getPostedBy() != null && event.getPostedBy().getUserId() == 0 && event.getPostedBy().getUsername() != null && event.getEventTitle() != null){
             User owner = userOperations.getUserEntity(new UserJSON(event.getPostedBy().getUsername()));
             events = this.entityManager.createNamedQuery("Event.searchByPostedBy&Title", Event.class)
-                .setParameter(1, owner.getUserId())
-                .setParameter(2, event.getEventTitle())
+                .setParameter(2, owner.getUserId())
+                .setParameter(1, event.getEventTitle())
                 .getResultList();
         }
         else
             return Collections.singleton(getEventInfo(event));
-        for(Event eventEntity : events) {
-            Set<CategoryJSON> categories = getCategories(new EventJSON(event.getEventID(), null, null, null, null, null, null, null, null, null, null, null, null, null, null));            
-            UserJSON postedBy = userOperations.getUserInfo(new UserJSON(eventEntity.getPosted_By(),eventEntity.getUser().getUsername()));
+
+        return events.stream().map(eventEntity ->{
+            Set<CategoryJSON> categories = getCategories(new EventJSON(event.getEventID(), null, null, null, null, null, null, null, null, null, null, null, null, null, null));
+
+            UserJSON postedBy = userOperations.getUserInfo(new UserJSON(eventEntity.getPosted_By(),null));
             //UserJSON postedBy = new UserJSON(eventEntity.getPosted_By(), postedByEntity.getUsername());
             LocalDateTime eventDate = LocalDateTime.ofInstant(eventEntity.getEvent_Date().toInstant(), ZoneId.systemDefault());
             LocalDateTime datePosted = LocalDateTime.ofInstant(eventEntity.getDate_Posted().toInstant(), ZoneId.systemDefault());
@@ -481,11 +483,10 @@ public class EventService implements EventOperations{
                         return new VideoJSON(vidInst.getVid_Id(), vidInst.getVid_Path(), vidInst.getVid_Title());
             }).collect(Collectors.toSet());
         */
-        EventJSON eventJSON = new EventJSON(eventId, eventTitle, eventDesc, eventPin,eventDate,datePosted,eventVideo, eventImages,
-                                        posts,null, null, eventVenue,postedBy, categories, null); 
-        eventResults.add(eventJSON);
-        }
-        return eventResults;
+
+        return new EventJSON(eventId, eventTitle, eventDesc, eventPin,eventDate,datePosted,eventVideo, eventImages,
+                                        posts,null, null, eventVenue,postedBy, categories, null);
+        }).collect(Collectors.toSet());  
     }
 
     /*

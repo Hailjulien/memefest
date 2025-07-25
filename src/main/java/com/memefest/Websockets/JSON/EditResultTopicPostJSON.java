@@ -10,7 +10,7 @@ import com.memefest.DataAccess.JSON.PostJSON;
 import com.memefest.DataAccess.JSON.TopicPostJSON;
 
 @JsonRootName("EditResultTopicPost")
-public class EditResultTopicPostJSON extends EditResultPostJSON {
+public class EditResultTopicPostJSON extends EditResultJSON {
     
     @JsonProperty("TopicPosts")
     private Set<TopicPostJSON> topicPosts;
@@ -20,16 +20,12 @@ public class EditResultTopicPostJSON extends EditResultPostJSON {
             @JsonProperty("ResultCode") int resultCode,
             @JsonProperty("ResultMessage") String resultMessage,
             @JsonProperty("TopicPosts") Set<TopicPostJSON>topicPosts){
-        super(topicPosts.stream().map(candidate -> {
-            return (PostJSON) candidate;
-        }).collect(Collectors.toSet()), resultCode, resultMessage);
+        super(Editable.POST, resultCode, resultMessage);
+        this.topicPosts = topicPosts;
     }
 
     public void setTopicPosts(Set<TopicPostJSON> topicPosts){
         this.topicPosts = topicPosts;
-        super.setPosts(topicPosts.stream().map(candidate -> {
-            return (PostJSON) candidate;
-        }).collect(Collectors.toSet()));
     }
 
     public Set<TopicPostJSON> getTopicPosts(){

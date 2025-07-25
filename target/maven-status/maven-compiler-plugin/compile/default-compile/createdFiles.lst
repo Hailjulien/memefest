@@ -126,7 +126,6 @@ com\memefest\DataAccess\JSON\CategoryJSON.class
 com\memefest\Websockets\Encoders\EditRepostEncoder.class
 com\memefest\Websockets\Encoders\GetEventNotificationEncoder.class
 com\memefest\Websockets\Encoders\PostWithReplyEncoder.class
-com\memefest\Websockets\MessageHandlers\EditRepostMessageHandler.class
 com\memefest\Websockets\Encoders\EditEventPostEncoder.class
 com\memefest\DataAccess\JSON\RepostJSON.class
 com\memefest\Websockets\Encoders\SearchEventEncoder.class
@@ -240,6 +239,7 @@ com\memefest\Websockets\Encoders\UserEncoder.class
 com\memefest\Websockets\Encoders\SearchResultEventEncoder.class
 com\memefest\Websockets\JSON\GetResultScheduledTopicJSON.class
 com\memefest\Websockets\JSON\EditCategoryJSON.class
+com\memefest\Websockets\Encoders\SearchResultEventEncoder$PublicMixInForUser.class
 com\memefest\Websockets\MessageHandlers\EditUserMessageHandler.class
 com\memefest\DataAccess\JSON\Serialize\CustomLocalDateTimeSerializer.class
 com\memefest\Websockets\Decoders\GetCategoryDecoder.class

@@ -582,6 +582,8 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     CategoryJSON catEntity = catOps.getCategoryInfo(categ);
                     if(catEntity!= null){
                         Set<CategoryJSON> resCats = successEdits.getCategories();
+                        if(resCats == null)
+                            resCats = new HashSet<CategoryJSON>();
                         resCats.add(catEntity);
                         successEdits.setCategories(resCats);
                     }
@@ -741,20 +743,14 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     TopicPostJSON topicEntity = postOps.getTopicPostInfo(topicPost);
                     if(topicEntity!= null){
                         Set<TopicPostJSON> topicCats = successEdits.getTopicPosts();
+                        if(topicCats == null)
+                            topicCats = new HashSet<TopicPostJSON>();
                         topicCats.add(topicEntity);
                         successEdits.setTopicPosts(topicCats);
                     }
                 }      
-                catch(EJBException ex){
+                catch(EJBException | NoResultException                                           ex){
                     failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                    Set<TopicPostJSON> topicCats = failureEdits.getTopicPosts();
-                    if(topicCats == null)
-                        topicCats = new HashSet<TopicPostJSON>();
-                    topicCats.add(topicPost);
-                    failureEdits.setTopicPosts(topicCats);
-                } 
-                catch (NoResultException e) {
-                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + e.getMessage());
                     Set<TopicPostJSON> topicCats = failureEdits.getTopicPosts();
                     if(topicCats == null)
                         topicCats = new HashSet<TopicPostJSON>();
@@ -769,46 +765,26 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
     }
 
     private void editTopicPost(EditTopicPostJSON editTopic){
-        Set<TopicPostJSON> topicPosts = editTopic.getTopicPosts();
         EditResultTopicPostJSON successEdits = new EditResultTopicPostJSON(200, "Success", null);
         EditResultTopicPostJSON failureEdits = new EditResultTopicPostJSON(203, "Could not edit", null);
-        for(TopicPostJSON topicPost : topicPosts){
+        for(TopicPostJSON topicPost : editTopic.getTopicPosts()){
             try{
-                try{
-                    postOps.editTopicPost((TopicPostJSON)topicPost);
-                    TopicPostJSON topicPostEntity = postOps.getTopicPostInfo(topicPost);
-                    Set<TopicPostJSON> resCats = successEdits.getTopicPosts();
-                    if(resCats == null)
-                        resCats = new HashSet<TopicPostJSON>();
-                    resCats.add(topicPostEntity);
-                    successEdits.setTopicPosts(resCats);
-                } 
-                catch (NoResultException e) {
-                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + e.getMessage());
-                    Set<TopicPostJSON> resCats = failureEdits.getTopicPosts();
-                    if(resCats == null)
-                        resCats = new HashSet<TopicPostJSON>();
-                    resCats.add(topicPost);
-                    failureEdits.setTopicPosts(resCats);
-                }
-                catch (RollbackException ex) {
-                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                    Set<TopicPostJSON> resCats = failureEdits.getTopicPosts();
-                    if(resCats == null)
-                        resCats = new HashSet<TopicPostJSON>();
-                    resCats.add(topicPost);
-                    failureEdits.setTopicPosts(resCats);
-                }
+                postOps.editTopicPost((TopicPostJSON)topicPost);
+                TopicPostJSON topicPostEntity = postOps.getTopicPostInfo(topicPost);
+                Set<TopicPostJSON> resCats = successEdits.getTopicPosts();
+                if(resCats == null)
+                    resCats = new HashSet<TopicPostJSON>();
+                resCats.add(topicPostEntity);
+                successEdits.setTopicPosts(resCats);
             }
-            catch(EJBException ex){                    
+            catch(EJBException | NoResultException ex){                    
                 failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
                 Set<TopicPostJSON> resCats = failureEdits.getTopicPosts();
                 if(resCats == null)
                     resCats = new HashSet<TopicPostJSON>();
                 resCats.add(topicPost);
                 failureEdits.setTopicPosts(resCats);
-            }
-                    
+            }                    
         }
         if(successEdits.getTopicPosts() != null)
             session.getAsyncRemote().sendObject(successEdits);
@@ -861,11 +837,13 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     RepostJSON repostEntity = postOps.getRepostInfo(repost);
                     if(repostEntity!= null){
                         Set<RepostJSON> postCats = successEdits.getReposts();
+                        if(postCats == null)
+                            postCats = new HashSet<RepostJSON>();
                         postCats.add(repostEntity);
                         successEdits.setReposts(postCats);
                     }
                 }      
-                catch(EJBException ex){
+                catch(EJBException | NoResultException ex){
                     failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
                     Set<RepostJSON> postCats = failureEdits.getReposts();
                     if(postCats == null)
@@ -873,14 +851,6 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     postCats.add(repost);
                     failureEdits.setReposts(postCats);
                 } 
-                catch (NoResultException e) {
-                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + e.getMessage());
-                    Set<RepostJSON> postCats = failureEdits.getReposts();
-                    if(postCats == null)
-                        postCats = new HashSet<RepostJSON>();
-                    postCats.add(repost);
-                    failureEdits.setReposts(postCats);
-                }
         }
         if(successEdits.getReposts() != null)
             session.getAsyncRemote().sendObject(successEdits);
@@ -893,7 +863,6 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
         EditResultRepostJSON successEdits = new EditResultRepostJSON(null, "success" ,200);
         EditResultRepostJSON failureEdits = new EditResultRepostJSON(null, "Could not edit" ,203);
         for(RepostJSON post : reposts){
-            try{
                 try{
                     postOps.editRepost(post);
                     RepostJSON postEntity = postOps.getRepostInfo(post);
@@ -903,7 +872,7 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     resCats.add(postEntity);
                     successEdits.setReposts(resCats);
                 } 
-                catch (NoResultException e) {
+                catch (NoResultException | EJBException e) {
                     failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + e.getMessage());
                     Set<RepostJSON> resCats = failureEdits.getReposts();
                     if(resCats == null)
@@ -911,24 +880,6 @@ public class EditUserMessageHandler implements MessageHandler.Whole<Object>{
                     resCats.add(post);
                     failureEdits.setReposts(resCats);
                 }
-                catch (RollbackException ex) {
-                    failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                    Set<RepostJSON> resCats = failureEdits.getReposts();
-                    if(resCats == null)
-                        resCats = new HashSet<RepostJSON>();
-                    resCats.add(post);
-                    failureEdits.setReposts(resCats);
-                }
-            }
-            catch(EJBException ex){                    
-                failureEdits.setResultMessage(failureEdits.getResultMessage() + "," + ex.getMessage());
-                Set<RepostJSON> resCats = failureEdits.getReposts();
-                if(resCats == null)
-                    resCats = new HashSet<RepostJSON>();
-                resCats.add(post);
-                failureEdits.setReposts(resCats);
-            }
-                    
         }
         if(successEdits.getReposts() != null)
             session.getAsyncRemote().sendObject(successEdits);

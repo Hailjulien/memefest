@@ -5,10 +5,10 @@ import jakarta.persistence.Embeddable;
 
 @Embeddable
 public class RepostId {
-    @Column(name = "Post_Id", nullable = false, insertable = false, updatable= false)
+    @Column(name = "Post_Id")
     private int postId;
 
-    @Column(name = "UserId", nullable = false, insertable = false, updatable= false)
+    @Column(name = "UserId")
     private int userId;
 
     public int getPost_Id() {

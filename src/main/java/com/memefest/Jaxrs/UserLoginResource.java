@@ -3,6 +3,8 @@ package com.memefest.Jaxrs;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.memefest.CacheHelper.CacheHelper;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.UserSecurityJSON;
@@ -38,7 +40,19 @@ public class UserLoginResource {
   
   @Inject
   private SecurityContext securityContext;
-  
+
+  private ObjectMapper mapper;
+
+  protected UserLoginResource(){
+    this.mapper = new ObjectMapper();
+    SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAll();
+    SimpleFilterProvider provider = new SimpleFilterProvider();
+    provider.addFilter("UserPublicView", filter);
+    this.mapper.setFilterProvider(provider);
+    this.mapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
+  }
+
+
   @PermitAll
   @PUT
   @Path("Verify-email")
@@ -236,12 +250,11 @@ public class UserLoginResource {
   }
   
   private UserJSON getGuestContentFromCache(String username) {
-    ObjectMapper mapper = new ObjectMapper();
     CacheManager cacheManager = this.cacheHelper.getCacheManager();
     Cache<String, String> userCache = cacheManager.getCache("guestCache", String.class, String.class);
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
     try {
-      return (UserJSON)mapper.readValue((String)userCache.get(username), UserJSON.class);
+      return (UserJSON)this.mapper.readValue((String)userCache.get(username), UserJSON.class);
     } catch (JsonProcessingException ex) {
       ex.printStackTrace();
       return null;
@@ -257,11 +270,9 @@ public class UserLoginResource {
   
   private void cacheGuestContent(UserJSON user) {
     CacheManager cacheManager = this.cacheHelper.getCacheManager();
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     Cache<String, String> userCache = cacheManager.getCache("guestCache", String.class, String.class);
     try {
-      String userDetails = mapper.writeValueAsString(user);
+      String userDetails = this.mapper.writeValueAsString(user);
       if (userDetails == null)
         throw new IllegalStateException("user is null"); 
       userCache.put(user.getUsername(), userDetails);
@@ -272,11 +283,9 @@ public class UserLoginResource {
   
   private void cacheNewUserContent(UserJSON user) {
     CacheManager cacheManager = this.cacheHelper.getCacheManager();
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
     Cache<String, String> userCache = cacheManager.getCache("usernameCache", String.class, String.class);
     try {
-      userCache.put(user.getUsername(), mapper.writeValueAsString(user));
+      userCache.put(user.getUsername(), this.mapper.writeValueAsString(user));
     } catch (JsonProcessingException ex) {
       ex.printStackTrace();
     } 

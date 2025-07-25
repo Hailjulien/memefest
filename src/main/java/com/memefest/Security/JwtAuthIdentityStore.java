@@ -3,6 +3,8 @@ package com.memefest.Security;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import com.memefest.CacheHelper.CacheHelper;
 import com.memefest.DataAccess.JSON.UserJSON;
 import com.memefest.DataAccess.JSON.UserSecurityJSON;
@@ -49,7 +51,11 @@ public class JwtAuthIdentityStore implements IdentityStore {
   private static ObjectMapper mapper = new ObjectMapper();
   
   static {
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    SimpleBeanPropertyFilter filter = SimpleBeanPropertyFilter.serializeAll();
+    SimpleFilterProvider provider = new SimpleFilterProvider();
+    provider.addFilter("UserPublicView", filter);
+    mapper.setFilterProvider(provider);
+    mapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
   }
   
   public CredentialValidationResult validate(Credential credential) {
@@ -120,7 +126,13 @@ public class JwtAuthIdentityStore implements IdentityStore {
     try {
       KeyPair keyPair = CustomKeyLocator.loadFromJKS();
       String keyId = CustomKeyLocator.getThumbPrint(keyPair);
-      token = ((JwtBuilder)((JwtBuilder.BuilderHeader)((JwtBuilder.BuilderHeader)((JwtBuilder.BuilderHeader)Jwts.builder().header().add("exp", expiryDate.toString())).add("iat", allocatedDate.toString())).keyId(keyId)).and()).issuer("JiniceServer").expiration(Date.from(expiryDate.atZone(ZoneId.systemDefault()).toInstant())).issuedAt(Date.from(allocatedDate.atZone(ZoneId.systemDefault()).toInstant())).claim("user", userJSON).encodePayload(true).json((Serializer)new JacksonSerializer(mapper)).signWith(keyPair.getPrivate()).compact();
+      token = ((JwtBuilder)((JwtBuilder.BuilderHeader)((JwtBuilder.BuilderHeader)
+                  ((JwtBuilder.BuilderHeader)Jwts.builder().header().add("exp", expiryDate.toString()))
+                  .add("iat", allocatedDate.toString())).keyId(keyId)).and())
+                  .issuer("JiniceServer").expiration(Date.from(expiryDate.atZone(ZoneId.systemDefault())
+                  .toInstant())).issuedAt(Date.from(allocatedDate.atZone(ZoneId.systemDefault()).toInstant()))
+                  .claim("user", userJSON).encodePayload(true).json((Serializer)new JacksonSerializer<>(mapper))
+                  .signWith(keyPair.getPrivate()).compact();
     } catch (KeyStoreException ex) {
       ex.printStackTrace();
     } catch (NoSuchAlgorithmException ex) {
@@ -217,7 +229,9 @@ public class JwtAuthIdentityStore implements IdentityStore {
     CustomKeyLocator keyLocator = new CustomKeyLocator();
     UserJSON user = null;
     try {
-      user = (UserJSON)((Claims)Jwts.parser().json((Deserializer)new JacksonDeserializer(mapper)).keyLocator((Locator)keyLocator).build().parseSignedClaims(token).getPayload()).get("user", UserJSON.class);
+      user = (UserJSON)((Claims)Jwts.parser().json((Deserializer)new JacksonDeserializer(mapper))
+      .keyLocator((Locator)keyLocator).build().parseSignedClaims(token).getPayload())
+      .get("user", UserJSON.class);
     } catch (JwtException ex) {
       ex.printStackTrace();
     } 
@@ -230,7 +244,8 @@ public class JwtAuthIdentityStore implements IdentityStore {
     LinkedHashMap<String, Class<?>> objects = new LinkedHashMap<>();
     objects.put("user", UserJSON.class);
     try {
-      LinkedHashMap<?, ?> userDetails = (LinkedHashMap<?, ?>)((Claims)Jwts.parser().keyLocator((Locator)keyLocator).json((Deserializer)new JacksonDeserializer()).build().parseSignedClaims(token).getPayload()).get("user", LinkedHashMap.class);
+      LinkedHashMap<?, ?> userDetails = (LinkedHashMap<?, ?>)((Claims)Jwts.parser().keyLocator((Locator)keyLocator).
+                            json((Deserializer)new JacksonDeserializer(mapper)).build().parseSignedClaims(token).getPayload()).get("user", LinkedHashMap.class);
       int userId = 0;
       String username = null;
       String email = null;

@@ -69,7 +69,17 @@ public class UserJSON {
   }
   
   @JsonCreator
-  public UserJSON(@JsonProperty("UserId") int userId, @JsonProperty("Email") String email, @JsonProperty("Username") String username, @JsonProperty("Contacts") int contacts, @JsonProperty("Verified") boolean verified, @JsonProperty("FirstName") String firstName, @JsonProperty("LastName") String lastName, @JsonProperty("UserSecurity") UserSecurityJSON userSecurity, @JsonProperty("Posts") Set<PostJSON> posts, @JsonProperty("CategoriesFollowing") Set<CategoryJSON> categoriesFollowing, @JsonProperty("TopicsFollowing") Set<TopicJSON> topicsFollowing) {
+  public UserJSON(@JsonProperty("UserId") int userId,
+                          @JsonProperty("Email") String email,
+                           @JsonProperty("Username") String username,
+                           @JsonProperty("Contacts") int contacts,
+                            @JsonProperty("Verified") boolean verified, 
+                            @JsonProperty("FirstName") String firstName, 
+                            @JsonProperty("LastName") String lastName, 
+                            @JsonProperty("UserSecurity") UserSecurityJSON userSecurity, 
+                            @JsonProperty("Posts") Set<PostJSON> posts, 
+                            @JsonProperty("CategoriesFollowing") Set<CategoryJSON> categoriesFollowing, 
+                            @JsonProperty("TopicsFollowing") Set<TopicJSON> topicsFollowing) {
     this.email = email;
     this.email = email;
     this.username = username;
@@ -236,12 +246,10 @@ public class UserJSON {
     this.verified = verified;
   }
   
-  @JsonProperty("FirstName")
   public String getFirstName() {
     return this.firstName;
   }
-  
-  @JsonProperty("FirstName")
+
   public void setFirstName(String firstName) {
     this.firstName = firstName;
   }

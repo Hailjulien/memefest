@@ -1,6 +1,7 @@
 package com.memefest.DataAccess.JSON;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 @JsonRootName("Topic")
 @JsonIdentityInfo(generator = ObjectIdGenerators.None.class, property = "TopicId")
+@JsonFilter("TopicPublicView")
 public class TopicJSON implements Serializable{
   @JsonProperty("TopicId")
   private int topicId;

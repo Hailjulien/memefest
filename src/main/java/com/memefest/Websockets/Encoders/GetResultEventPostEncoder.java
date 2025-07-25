@@ -1,20 +1,27 @@
 package com.memefest.Websockets.Encoders;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.memefest.Websockets.JSON.GetResultEventPostJSON;
 
 import jakarta.websocket.Encoder;
 import jakarta.websocket.EndpointConfig;
     
 
-public class GetResultEventPostEncoder implements Encoder.Text<GetResultEventPostJSON>{
+public class GetResultEventPostEncoder extends ContentEncoder implements Encoder.Text<GetResultEventPostJSON>{
         
-    private ObjectMapper mapper = new ObjectMapper();
-    
     @Override
     public String encode(GetResultEventPostJSON category) {
+        Map<String,SimpleBeanPropertyFilter> filters = new HashMap<String, SimpleBeanPropertyFilter>();
+        filters.put("UserPublicView", userPublicViewFilter());
+        filters.put("EventPublicView", eventPublicView());
+        FilterProvider filtersProvider = setFilters(filters);
         try{
-            return mapper.writeValueAsString(category);            
+            return mapper.writer(filtersProvider).writeValueAsString(category);            
         } catch (Exception e) {
             e.printStackTrace();
             return null;
