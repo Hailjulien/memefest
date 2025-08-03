@@ -24,11 +24,11 @@ public class UserFollower {
   private UserFollowerId id = new UserFollowerId();
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
-  @JoinColumn(name = "UserId")
+  @JoinColumn(name = "UserId", referencedColumnName = "UserId")
   private User user;
   
   @ManyToOne(cascade = {CascadeType.PERSIST})
-  @JoinColumn(name = "Follower_Id")
+  @JoinColumn(name = "Follower_Id", referencedColumnName= "UserId")
   private User follower;
   
   public User getUser() {
